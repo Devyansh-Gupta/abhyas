@@ -7,7 +7,7 @@
  *  - non-qualifying day → missed+1; 2 consecutive misses ⇒ streak=0 + broke flag
  *  - day boundary is DEVICE time (owner decision 2026-08-22) — engine takes dates, caller owns clocks
  */
-import { STREAK_RULE_MIN_MINUTES } from './types.js';
+import { STREAK_RULE_MIN_MINUTES } from './types';
 
 export interface DayActivity {
   blocksDone: number;

@@ -8,8 +8,8 @@
  *  - excluded topics (carried today) never double-booked
  *  - stable item uid = `t_<topicId>` (planDone survives re-solves — F21)
  */
-import { type Topic, type PlanItem, type Exam, type Slot } from './types.js';
-import { revMinutes } from './srs.js';
+import { type Topic, type PlanItem, type Exam, type Slot } from './types';
+import { revMinutes } from './srs';
 
 export type BusyPeriod = [startMin: number, endMin: number];
 

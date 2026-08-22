@@ -1,71 +1,90 @@
-import { View, Text, ScrollView } from 'react-native';
-import { buildDayPlan, type Topic, type Exam } from '@abhyas/engine';
-
-// P1 placeholder state — replaced by SQLite repo layer (issue #8)
-const TOPICS: Topic[] = [
-  { id: 'quadratic', subjectId: '📐', name: 'Quadratic Equations', box: 1, dueIn: 0, weight: 10, coverage: 'in_progress', backlog: false },
-  { id: 'life', subjectId: '⚗️', name: 'Life Processes', box: 2, dueIn: 0, weight: 8, coverage: 'covered', backlog: true },
-  { id: 'trig', subjectId: '📐', name: 'Trigonometry', box: 0, dueIn: -1, weight: 12, coverage: 'unstarted', backlog: false },
-];
-const EXAMS: Exam[] = [
-  { id: 'ut1', name: 'Unit Test — Maths', kind: 'school', windowStart: '2026-08-27', subjectIds: ['📐'], datesheetConfirmed: false },
-];
+import { View, Text, ScrollView, Pressable } from 'react-native';
+import { useApp } from '../../src/store';
 
 export default function TodayScreen() {
-  const plan = buildDayPlan(TOPICS, EXAMS, 0);
+  const { plan, doneUids, streak, topics, exams } = useApp();
+  const checkItem = useApp(s => s.checkItem);
+
+  // live derive from store (plan rebuilt when topics/exams change)
   const revs = plan.filter(p => p.kind === 'rev');
-  const news = plan.filter(p => p.kind === 'new');
+  const news = plan.filter(p => p.kind !== 'rev');
+  const pct = plan.length ? Math.round((doneUids.size / plan.length) * 100) : 0;
 
   return (
     <ScrollView className="flex-1 bg-bg px-5 pt-14">
-      <Text className="text-text text-2xl font-extrabold tracking-tight">
-        Abhyas<span className="text-accent text-sm font-bold"> · by StudySync</span>
+      <View className="flex-row items-center justify-between">
+        <View>
+          <Text className="text-text text-2xl font-extrabold tracking-tight">Abhyas</Text>
+          <Text className="text-dim mt-1 text-[13px]">Thu, 21 Aug · CBSE Class 10</Text>
+        </View>
+        <View className="items-end">
+          <Text className="text-done font-extrabold">🔥 {streak.current}</Text>
+          <Text className="text-dim text-[11px]">{pct}% today</Text>
+        </View>
+      </View>
+
+      <Text className="text-dim mt-2 text-xs">
+        {plan.length} blocks · derived from timetable, revisions & exams
       </Text>
-      <Text className="text-dim mt-1 text-[13px]">Thu, 21 Aug · CBSE Class 10 · Term 1</Text>
 
       {revs.length > 0 && (
-        <Section title={`Revision due · ${revs.length} topic${revs.length > 1 ? 's' : ''}`} />
+        <Text className="mt-6 mb-3 text-[13px] font-extrabold uppercase tracking-wider" style={{ color: '#F87171' }}>
+          Revision due · {revs.length}
+        </Text>
       )}
-      {revs.map(item => <PlanCard key={item.uid} item={item} />)}
+      {revs.map(item => <PlanCard key={item.uid} uid={item.uid} />)}
 
-      <Section title="Today's plan" sub="derived from your day" />
-      {news.map(item => <PlanCard key={item.uid} item={item} />)}
+      <Text className="mt-6 mb-3 text-[13px] font-extrabold uppercase tracking-wider text-text">
+        Today's plan <Text className="text-dim font-normal normal-case">· derived</Text>
+      </Text>
+      {news.map(item => <PlanCard key={item.uid} uid={item.uid} />)}
+
+      {plan.length === 0 && (
+        <Text className="text-dim mt-10 text-center text-sm">
+          No topics yet — onboarding seeds your syllabus.
+          {'\n'}Topics in store: {topics.length} · Exams: {exams.length}
+        </Text>
+      )}
     </ScrollView>
   );
 }
 
-function Section({ title, sub }: { title: string; sub?: string }) {
-  return (
-    <View className="mt-6 mb-3 flex-row items-baseline justify-between">
-      <Text className="text-text text-[13px] font-extrabold uppercase tracking-wider">{title}</Text>
-      {sub && <Text className="text-dim text-[11px]">{sub}</Text>}
-    </View>
-  );
-}
+function PlanCard({ uid }: { uid: string }) {
+  const item = useApp(s => s.plan.find(p => p.uid === uid));
+  const done = useApp(s => s.doneUids.has(uid));
+  const checkItem = useApp(s => s.checkItem);
+  if (!item) return null;
 
-function PlanCard({ item }: { item: ReturnType<typeof buildDayPlan>[number] }) {
-  const time =
-    item.startMin == null
-      ? 'anytime'
-      : `${fmt(item.startMin)}–${fmt(item.startMin + item.durationMin)}`;
-  const tag = item.kind === 'rev' ? 'DUE' : 'NEW';
+  const time = item.startMin == null
+    ? 'anytime'
+    : `${fmt(item.startMin)}–${fmt(item.startMin + item.durationMin)}`;
+  const tagColor = item.carried ? '#FBBF24' : item.kind === 'rev' ? '#F87171' : '#8B7CF6';
+
   return (
-    <View className="mb-3 rounded-3xl bg-surface p-4 border border-line">
+    <Pressable
+      onPress={() => checkItem(uid)}
+      className="mb-3 rounded-3xl border border-line bg-surface p-4 active:opacity-80"
+    >
       <View className="flex-row items-center">
         <View className="h-11 w-11 items-center justify-center rounded-2xl bg-surface-2">
           <Text className="text-xl">{item.topic.subjectId}</Text>
         </View>
         <View className="ml-3 flex-1">
-          <Text className="text-text font-bold">{item.topic.name} — {item.kind === 'rev' ? 'revise' : 'focus'}</Text>
-          <Text className="text-dim mt-0.5 text-xs">
-            {time} · {tag}
+          <Text className={`font-bold ${done ? 'line-through opacity-50' : ''}`} style={{ color: '#E7EBF2' }}>
+            {item.topic.name} — {item.carried ? 'catch-up' : item.kind === 'rev' ? 'revise' : 'focus'}
+          </Text>
+          <Text className="mt-0.5 text-xs" style={{ color: tagColor }}>
+            {time} · {item.carried ? 'CARRIED' : item.kind === 'rev' ? 'DUE' : 'NEW'}
           </Text>
         </View>
+        <View className={`h-7 w-7 items-center justify-center rounded-full border ${done ? 'border-done bg-done/20' : 'border-line'}`}>
+          {done && <Text style={{ color: '#4ADE80' }}>✓</Text>}
+        </View>
       </View>
-      {item.why && (
-        <Text className="mt-2 rounded-xl bg-surface-2/60 p-2 text-dim text-xs">📌 Why: {item.why}</Text>
+      {item.why && !done && (
+        <Text className="mt-2 rounded-xl bg-surface-2/60 p-2 text-xs text-dim">📌 Why: {item.why}</Text>
       )}
-    </View>
+    </Pressable>
   );
 }
 

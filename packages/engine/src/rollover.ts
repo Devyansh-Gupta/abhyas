@@ -6,7 +6,7 @@
  *  - revise-kind NEVER carried (SRS already owns their rescheduling)
  *  - carried items lose their time slot ("anytime")
  */
-import { CARRY_MAX, type PlanItem } from './types.js';
+import { CARRY_MAX, type PlanItem } from './types';
 
 export interface CarryResult {
   carried: PlanItem[];

@@ -8,7 +8,7 @@
  *  - rating 3 (Solid): box +1, capped at 5
  *  - dueIn always rescheduled via intervals[box]; box 5 ⇒ graduated (dueIn 99)
  */
-import { BASE_INTERVALS, BOX_MINUTES, type Topic, type LearningStyle, intervalsFor } from './types.js';
+import { BASE_INTERVALS, BOX_MINUTES, type Topic, type LearningStyle, intervalsFor } from './types';
 
 export type Rating = 1 | 2 | 3;
 

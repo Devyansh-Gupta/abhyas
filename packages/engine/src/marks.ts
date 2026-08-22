@@ -7,8 +7,8 @@
  *  - only that subject's topics, box>0, box<5 are touched
  *  - returns NEW topic array (pure); caller persists
  */
-import { type Topic } from './types.js';
-import { intervalsFor, type LearningStyle } from './types.js';
+import { type Topic } from './types';
+import { intervalsFor, type LearningStyle } from './types';
 
 export function recalibrate(topics: readonly Topic[], subjectId: string, pct: number, style: LearningStyle = 'average'): Topic[] {
   const iv = intervalsFor(style);
