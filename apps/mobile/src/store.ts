@@ -26,6 +26,8 @@ interface AppState {
   checkItem(uid: string): void;
   rateTopic(uid: string, rating: 1 | 2 | 3): void;
   logSession(topicId: string, minutes: number): void;
+  /** Focus-timer finish path: log minutes + optional confidence rating on any topic. */
+  finishFocus(opts: { topicId: string | null; minutes: number; rating?: 1 | 2 | 3 }): void;
   addExam(exam: Exam): void;
   advanceDay(): { carried: number; droppedRevisions: number; droppedForward: number; broke: boolean };
 }
@@ -76,6 +78,23 @@ export const useApp = create<AppState>((set, get) => ({
         t.id === item.topic.id ? { ...t, ...applyRating({ box: t.box, dueIn: t.dueIn }, rating, learningStyle) } : t
       ),
       sessions: [...sessions, { day: dayIndex, min: 25 }],
+    });
+  },
+
+  finishFocus({ topicId, minutes, rating }) {
+    const { topics, learningStyle } = get();
+    set({
+      sessions: [...get().sessions, { day: get().dayIndex, min: minutes }],
+      streak: bumpToday(get().streak, {
+        blocksDone: 0,
+        focusMinutes: minutes,
+      }),
+      // rating applies the SRS transition; new topics (box 0) start their ladder
+      topics: topics.map(t =>
+        t.id === topicId && rating
+          ? { ...t, ...applyRating({ box: t.box, dueIn: t.dueIn }, rating, learningStyle) }
+          : t
+      ),
     });
   },
 
