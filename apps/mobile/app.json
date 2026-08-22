@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Abhyas",
+    "slug": "abhyas",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "abhyas",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "backgroundColor": "#0E1116",
+    "ios": { "supportsTablet": true },
+    "android": {
+      "package": "com.studysync.abhyas",
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0E1116"
+      }
+    },
+    "web": { "bundler": "metro", "output": "single" },
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}
