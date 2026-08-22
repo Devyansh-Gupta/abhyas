@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abhyas — Concept Prototype</title>
+<style>
+  :root{
+    --bg:#0E1116; --surface:#161B22; --surface-2:#1D242E; --border:#2A313C;
+    --text:#E8ECF1; --dim:#9AA4B2;
+    --accent:#7C5CFC; --accent-soft:rgba(124,92,252,.14);
+    --done:#4ADE80; --due:#FBBF24; --alert:#F87171;
+    --s-math:#60A5FA; --s-sci:#34D399; --s-eng:#F472B6; --s-sst:#F59E0B; --s-hin:#A78BFA;
+    --r-card:24px; --r-in:16px; --spring:cubic-bezier(.34,1.56,.64,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:#05070a; color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    display:flex; justify-content:center; align-items:center; min-height:100vh; padding:16px;
+  }
+  .phone{
+    width:100%; max-width:412px; height:min(880px,94vh);
+    background:var(--bg); border-radius:36px; border:1px solid #1c232d;
+    overflow:hidden; display:flex; flex-direction:column; position:relative;
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
+  }
+  /* ---------- header ---------- */
+  .hdr{padding:22px 20px 6px; flex:none}
+  .hdr-row{display:flex; justify-content:space-between; align-items:center}
+  .hdr h1{font-size:22px; font-weight:800; letter-spacing:-.02em}
+  .hdr h1 span{color:var(--accent)}
+  .hdr .sub{color:var(--dim); font-size:12.5px; margin-top:2px}
+  .streak{
+    display:flex; align-items:center; gap:6px; background:var(--surface);
+    border:1px solid var(--border); border-radius:999px; padding:7px 12px;
+    font-weight:800; font-size:14px;
+  }
+  .streak .fl{font-size:16px}
+  /* ---------- views ---------- */
+  .views{flex:1; overflow:hidden; position:relative}
+  .view{
+    position:absolute; inset:0; overflow-y:auto; padding:12px 16px 96px;
+    opacity:0; transform:translateY(10px) scale(.99); pointer-events:none;
+    transition:opacity .28s var(--spring), transform .28s var(--spring);
+    scrollbar-width:none;
+  }
+  .view::-webkit-scrollbar{display:none}
+  .view.active{opacity:1; transform:none; pointer-events:auto}
+  /* ---------- cards & bits ---------- */
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); padding:16px; margin-bottom:12px}
+  .sec-title{font-size:12px; font-weight:800; letter-spacing:.09em; color:var(--dim); text-transform:uppercase; margin:16px 2px 10px; display:flex; justify-content:space-between; align-items:center}
+  .sec-title .link{color:var(--accent); text-transform:none; letter-spacing:0; font-size:12.5px; cursor:pointer}
+  .chip{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:var(--surface); color:var(--dim); border-radius:999px; padding:7px 13px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s var(--spring)}
+  .chip.on{background:var(--accent-soft); border-color:var(--accent); color:var(--text)}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    background:var(--accent); color:#fff; border:none; border-radius:var(--r-in);
+    padding:15px; font-size:15.5px; font-weight:800; cursor:pointer; font-family:inherit;
+    transition:transform .2s var(--spring), filter .2s;
+  }
+  .btn:active{transform:scale(.96)}
+  .btn.ghost{background:var(--surface-2); color:var(--text); border:1px solid var(--border)}
+  .why{display:flex; gap:8px; align-items:flex-start; margin-top:10px; padding:10px 12px; background:var(--accent-soft); border-radius:12px; font-size:12.5px; color:#cfc6ff; line-height:1.45}
+  .why b{color:#fff}
+  /* ---------- today ring ---------- */
+  .ring-card{display:flex; align-items:center; gap:18px}
+  .ring{width:92px; height:92px; flex:none; position:relative}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .val{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; font-size:20px}
+  .ring .val small{font-size:9.5px; color:var(--dim); font-weight:700; letter-spacing:.06em}
+  .ring-card h2{font-size:17px; font-weight:800; letter-spacing:-.01em}
+  .ring-card p{color:var(--dim); font-size:12.5px; margin-top:3px; line-height:1.45}
+  /* ---------- plan item ---------- */
+  .item{
+    display:flex; align-items:center; gap:13px; background:var(--surface);
+    border:1px solid var(--border); border-radius:var(--r-card); padding:14px 16px; margin-bottom:10px;
+    transition:border-color .25s, transform .25s var(--spring), opacity .3s;
+  }
+  .item:active{transform:scale(.985)}
+  .item.done{opacity:.5}
+  .item.done .t{text-decoration:line-through}
+  .item .ic{width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:20px; flex:none}
+  .item .mid{flex:1; min-width:0}
+  .item .t{font-weight:700; font-size:14.5px; letter-spacing:-.01em}
+  .item .m{color:var(--dim); font-size:12px; margin-top:3px; display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+  .tag{font-size:10px; font-weight:800; letter-spacing:.05em; padding:2.5px 8px; border-radius:999px}
+  .tag.rev{background:rgba(251,191,36,.13); color:var(--due)}
+  .tag.new{background:rgba(96,165,250,.13); color:var(--s-math)}
+  .tag.cls{background:rgba(232,236,241,.08); color:var(--dim)}
+  .check{
+    width:30px; height:30px; border-radius:50%; border:2px solid var(--border); flex:none;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:transparent;
+    transition:all .25s var(--spring); font-size:14px;
+  }
+  .item.done .check{background:var(--done); border-color:var(--done); color:#052e12; transform:scale(1.08)}
+  /* ---------- week ---------- */
+  .week{display:flex; gap:8px; margin-bottom:14px}
+  .day{flex:1; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-in); padding:10px 4px; text-align:center; cursor:pointer; transition:all .2s var(--spring)}
+  .day.on{background:var(--accent-soft); border-color:var(--accent)}
+  .day .d{font-size:10.5px; color:var(--dim); font-weight:700}
+  .day .n{font-size:16px; font-weight:800; margin-top:3px}
+  .day .p{font-size:9.5px; margin-top:5px; color:var(--dim)}
+  .bar{height:4px; border-radius:2px; background:var(--surface-2); overflow:hidden; margin-top:8px}
+  .bar i{display:block; height:100%; border-radius:2px; background:var(--accent); transition:width .6s var(--spring)}
+  /* ---------- plan sub-tabs ---------- */
+  .subtabs{display:flex; gap:6px; background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:4px; margin-bottom:14px}
+  .stab{flex:1; background:none; border:none; color:var(--dim); font-family:inherit; font-size:13px; font-weight:700; padding:10px; border-radius:999px; cursor:pointer; transition:all .25s var(--spring)}
+  .stab.on{background:var(--accent-soft); color:var(--text)}
+  .period{display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:13px 15px; margin-bottom:9px}
+  .period .tm{font-variant-numeric:tabular-nums; font-weight:800; font-size:12.5px; color:var(--dim); width:74px; flex:none}
+  .period .nm{flex:1; font-weight:700; font-size:13.5px}
+  .period .rm{font-size:11px; color:var(--dim)}
+  .period.moved{border-color:rgba(251,191,36,.45); background:rgba(251,191,36,.06)}
+  .movedtag{font-size:10px; font-weight:800; color:var(--due); background:rgba(251,191,36,.13); padding:3px 8px; border-radius:999px}
+  .daychips{display:flex; gap:7px; overflow-x:auto; padding-bottom:4px; margin-bottom:12px; scrollbar-width:none}
+  .daychips::-webkit-scrollbar{display:none}
+  /* ---------- subject rows ---------- */
+  .subj{display:flex; align-items:center; gap:12px; margin-bottom:14px}
+  .subj .ic{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+  .subj .mid{flex:1}
+  .subj .t{font-weight:700; font-size:14px; display:flex; justify-content:space-between}
+  .subj .t b{font-variant-numeric:tabular-nums}
+  .subj .lv{font-size:11px; margin-top:2px; font-weight:700}
+  .topics{margin:6px 0 0 4px}
+  .topic{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:12px; font-size:13px; cursor:default}
+  .topic:hover{background:var(--surface)}
+  .topic .nm{flex:1}
+  .topic .st{font-size:10.5px; font-weight:800; padding:3px 9px; border-radius:999px}
+  .st.mastered{background:rgba(74,222,128,.13); color:var(--done)}
+  .st.solid{background:rgba(96,165,250,.13); color:var(--s-math)}
+  .st.shaky{background:rgba(248,113,113,.13); color:var(--alert)}
+  .st.learning{background:rgba(251,191,36,.13); color:var(--due)}
+  .st.new{background:rgba(232,236,241,.08); color:var(--dim)}
+  /* ---------- timer ---------- */
+  .timer-wrap{text-align:center; padding-top:8px}
+  .presets{display:flex; gap:8px; justify-content:center; margin-bottom:20px}
+  .tbig{position:relative; width:250px; height:250px; margin:6px auto 20px}
+  .tbig svg{transform:rotate(-90deg)}
+  .tbig .mid{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
+  .tbig .time{font-size:52px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+  .tbig .lbl{font-size:12px; color:var(--dim); font-weight:800; letter-spacing:.14em; margin-top:2px}
+  .tbig .topic-lbl{font-size:13.5px; color:var(--text); font-weight:700; margin-top:10px; background:var(--surface); border:1px solid var(--border); padding:7px 14px; border-radius:999px; cursor:pointer}
+  .tctrl{display:flex; gap:10px; justify-content:center; margin-bottom:8px}
+  .tctrl .btn{width:auto; padding:14px 34px}
+  /* ---------- progress ---------- */
+  .stat3{display:flex; gap:10px; margin-bottom:12px}
+  .stat{flex:1; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-in); padding:13px; text-align:center}
+  .stat b{font-size:21px; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+  .stat span{display:block; font-size:10.5px; color:var(--dim); font-weight:700; margin-top:3px; letter-spacing:.04em}
+  .heat{display:grid; grid-template-columns:repeat(7,1fr); gap:6px}
+  .heat .h{aspect-ratio:1; border-radius:7px; background:var(--surface-2)}
+  .heat .h.l1{background:rgba(124,92,252,.28)} .heat .h.l2{background:rgba(124,92,252,.5)}
+  .heat .h.l3{background:rgba(124,92,252,.75)} .heat .h.l4{background:var(--accent)}
+  .trend{display:flex; align-items:baseline; gap:8px; font-size:12px; color:var(--dim)}
+  .trend b{color:var(--done); font-size:13px}
+  /* ---------- confetti ---------- */
+  .burst{position:fixed; inset:0; pointer-events:none; z-index:60; display:flex; align-items:center; justify-content:center}
+  .burst .msg{
+    background:var(--surface-2); border:1px solid var(--accent); color:#fff; font-weight:800;
+    padding:14px 26px; border-radius:999px; font-size:15px; box-shadow:0 12px 40px rgba(124,92,252,.35);
+    animation:pop .5s var(--spring);
+  }
+  @keyframes pop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
+  /* ---------- nav ---------- */
+  .nav{
+    position:absolute; left:12px; right:12px; bottom:12px; display:flex;
+    background:rgba(22,27,34,.92); backdrop-filter:blur(14px);
+    border:1px solid var(--border); border-radius:26px; padding:8px; z-index:40;
+  }
+  .nav button{
+    flex:1; background:none; border:none; color:var(--dim); font-family:inherit;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    font-size:10px; font-weight:700; padding:8px 2px; border-radius:18px; cursor:pointer;
+    transition:all .2s var(--spring); letter-spacing:.02em;
+  }
+  .nav button .i{font-size:19px; line-height:1}
+  .nav button.on{color:var(--text); background:var(--accent-soft)}
+  .nav button.go{color:#fff}
+  .nav button.go .i{
+    width:46px; height:46px; margin-top:-20px; background:var(--accent); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:21px;
+    box-shadow:0 8px 24px rgba(124,92,252,.45); border:4px solid var(--bg);
+  }
+  /* mastery meter in subject rows */
+  .meter{height:5px; background:var(--surface-2); border-radius:3px; overflow:hidden; margin-top:6px}
+  .meter i{display:block; height:100%; border-radius:3px; transition:width .6s var(--spring)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="hdr">
+    <div class="hdr-row">
+      <div>
+        <h1>Abhyas<span style="font-size:12px; font-weight:600; color:var(--dim)"> · by StudySync</span></h1>
+        <div class="sub" id="hdrSub">Wed, 21 Aug · Class 10 CBSE · Term 1</div>
+      </div>
+      <div class="streak"><span class="fl">🔥</span><span id="streakN">12</span></div>
+    </div>
+  </div>
+
+  <div class="views">
+    <!-- ============ TODAY (fully derived from state) ============ -->
+    <section class="view active" id="v-today">
+      <div class="card ring-card">
+        <div class="ring">
+          <svg width="92" height="92" viewBox="0 0 92 92">
+            <circle cx="46" cy="46" r="40" fill="none" stroke="var(--surface-2)" stroke-width="8"/>
+            <circle id="ringArc" cx="46" cy="46" r="40" fill="none" stroke="var(--accent)" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="251.3"
+              style="transition:stroke-dashoffset .8s var(--spring)"/>
+          </svg>
+          <div class="val"><span id="ringPct">0%</span><small>TODAY</small></div>
+        </div>
+        <div>
+          <h2 id="ringMsg">Building your plan…</h2>
+          <p id="ringSub">—</p>
+        </div>
+      </div>
+      <div id="revSection"></div>
+      <div id="planSection"></div>
+      <div style="display:flex; gap:8px">
+        <button class="btn ghost" style="flex:1" onclick="openExamSheet()">＋ Add exam</button>
+        <button class="btn ghost" style="flex:1" onclick="regenDemo()">↻ Regenerate</button>
+      </div>
+      <button class="btn ghost" id="nextDayBtn" style="margin-top:8px" onclick="advanceDay()">🌙 Next day →</button>
+      <p style="color:var(--dim); font-size:11px; text-align:center; margin-top:10px">This plan is computed from your timetable, revisions, topics &amp; exams.<br>Change anything → it re-solves.</p>
+    </section>
+
+    <!-- ============ PLAN ============ -->
+    <section class="view" id="v-plan">
+      <div class="subtabs">
+        <button class="stab on" onclick="planTab('tab-plan',this)">Study Plan</button>
+        <button class="stab" onclick="planTab('tab-tt',this)">Class Timetable</button>
+      </div>
+      <div id="tab-plan">
+      <div class="week" id="weekStrip"></div>
+      <div id="weekPlanBody"></div>
+      </div>
+      <div id="tab-tt" style="display:none">
+        <div id="ttSummary" style="display:none" class="card" ></div>
+        <div class="daychips">
+          <div class="chip" onclick="setDay('Mon 18',this)">Mon 18</div><div class="chip" onclick="setDay('Tue 19',this)">Tue 19</div><div class="chip" onclick="setDay('Wed 20',this)">Wed 20</div>
+          <div class="chip on" onclick="setDay('Thu 21',this)">Thu 21</div><div class="chip" onclick="setDay('Fri 22',this)">Fri 22</div><div class="chip" onclick="setDay('Sat 23',this)">Sat 23</div><div class="chip" onclick="setDay('Sun 24',this)">Sun 24</div>
+        </div>
+        <div id="ttList"></div>
+        <button class="btn ghost" style="margin-top:4px" onclick="openSheet(null)">＋ Add a period</button>
+        <div style="color:var(--dim); font-size:11.5px; margin-top:14px; text-align:center">Tap a period to move, cancel or edit it.<br>Abhyas doesn't know your school's changes — you tell it.</div>
+      </div>
+    </section>
+
+    <!-- ============ SUBJECTS (derived) ============ -->
+    <section class="view" id="v-subj">
+      <div class="card" style="display:flex; justify-content:space-between; align-items:center">
+        <div>
+          <div style="font-weight:800; font-size:15px">Syllabus coverage</div>
+          <div style="color:var(--dim); font-size:12px; margin-top:2px" id="covSub">Term 1</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:26px; font-weight:800; font-variant-numeric:tabular-nums" id="covPct">—</div>
+          <div style="font-size:10.5px; color:var(--dim); font-weight:700">MASTERY AVG</div>
+        </div>
+      </div>
+      <div id="subjBody"></div>
+    </section>
+
+    <!-- ============ PARENT VIEW (read-only concept preview) ============ -->
+    <section class="view" id="v-parent">
+      <div class="card" style="display:flex; justify-content:space-between; align-items:center">
+        <div>
+          <div style="font-weight:800; font-size:15px">👪 Parent view</div>
+          <div style="color:var(--dim); font-size:12px">Read-only · shared by the student</div>
+        </div>
+        <span class="chip" onclick="exitParent()">← Student</span>
+      </div>
+      <div class="stat3">
+        <div class="stat"><b id="pvStreak" style="color:var(--done)">—</b><span>DAY STREAK</span></div>
+        <div class="stat"><b id="pvHours">—</b><span>FOCUS THIS WEEK</span></div>
+        <div class="stat"><b id="pvMastery" style="color:var(--accent)">—</b><span>MASTERY AVG</span></div>
+      </div>
+      <div class="sec-title">Today's plan</div>
+      <div id="pvPlan"></div>
+      <div class="sec-title">Test scores</div>
+      <div class="card" id="pvTests"></div>
+      <div style="color:var(--dim); font-size:11px; text-align:center; margin-top:6px">Concept preview — the real parent link arrives with accounts (P2).<br>Timers and notes are never shared.</div>
+    </section>
+
+    <!-- ============ TIMER ============ -->
+    <section class="view" id="v-timer">
+      <div class="timer-wrap">
+        <div class="presets">
+          <button class="chip on" onclick="setPreset(this,25)">Focus 25</button>
+          <button class="chip" onclick="setPreset(this,50)">Deep 50</button>
+          <button class="chip" onclick="setPreset(this,90)">Sprint 90</button>
+        </div>
+        <div class="tbig">
+          <svg width="250" height="250" viewBox="0 0 250 250">
+            <circle cx="125" cy="125" r="112" fill="none" stroke="var(--surface-2)" stroke-width="10"/>
+            <circle id="tArc" cx="125" cy="125" r="112" fill="none" stroke="var(--accent)" stroke-width="10"
+              stroke-linecap="round" stroke-dasharray="703.7" stroke-dashoffset="0"
+              style="transition:stroke-dashoffset 1s linear"/>
+          </svg>
+          <div class="mid">
+            <div class="time" id="tTime">25:00</div>
+            <div class="lbl" id="tLbl">READY</div>
+            <div class="topic-lbl" onclick="cycleTopic()" id="tTopic">📐 Quadratic Equations — revise</div>
+          </div>
+        </div>
+        <div class="tctrl">
+          <button class="btn" id="tStart" onclick="timerToggle()" style="width:auto;padding:14px 40px">▶ Start</button>
+          <button class="btn ghost" onclick="timerReset()" style="width:auto;padding:14px 28px">Reset</button>
+        </div>
+        <div style="margin-top:2px"><span class="chip" style="font-size:11px;padding:6px 12px" onclick="skipToEnd()">⏩ Skip to end (demo)</span></div>
+        <div style="color:var(--dim); font-size:11.5px; margin-top:14px">Session logs to the topic automatically when done —<br>then rate how solid it feels. One tap each.</div>
+      </div>
+    </section>
+
+    <!-- ============ PROGRESS ============ -->
+    <section class="view" id="v-prog">
+      <div class="stat3">
+        <div class="stat"><b id="stStreak" style="color:var(--done)">12</b><span>DAY STREAK</span></div>
+        <div class="stat"><b id="stFocus">0m</b><span>FOCUS TODAY</span></div>
+        <div class="stat"><b id="stDue" style="color:var(--due)">—</b><span>DUE NOW</span></div>
+      </div>
+      <div class="card">
+        <div style="font-weight:800; font-size:13.5px; margin-bottom:10px">Daily focus — this week</div>
+        <div class="heat" id="heat"></div>
+        <div style="color:var(--dim); font-size:10px; margin-top:8px">Lights up as you complete sessions</div>
+      </div>
+      <div class="card">
+        <div style="font-weight:800; font-size:13.5px; margin-bottom:10px">Hours per day</div>
+        <div style="display:flex; align-items:flex-end; gap:9px; height:110px; padding:0 4px" id="bars"></div>
+        <div style="display:flex; gap:9px; padding:0 4px; margin-top:6px" class="trend" id="barLbls"></div>
+      </div>
+      <div class="card" id="testCard">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+          <div style="font-weight:800; font-size:13.5px">Tests &amp; marks</div>
+          <span class="chip" style="font-size:11px; padding:6px 12px" onclick="openTestSheet()">＋ Add test</span>
+        </div>
+        <div id="trendBody"></div>
+        <div style="color:var(--dim); font-size:10.5px; margin-top:10px">Low scores drop the topic's revision box — it resurfaces sooner. Reality > vibes.</div>
+      </div>
+      <div class="card" style="border-color:rgba(74,222,128,.35)">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">
+          <div style="font-weight:800; font-size:13.5px">👪 Shared with Mom</div>
+          <span class="chip" style="font-size:11px; padding:5px 11px" onclick="openParent()">Preview what she sees</span>
+        </div>
+        <div style="color:var(--dim); font-size:12.5px; line-height:1.5">She sees your progress, plan and test scores — never your timers or notes. You can pause anytime.</div>
+      </div>
+      <button class="btn ghost" onclick="resetDemo(this)" style="font-size:12px">↺ Reset demo data</button>
+    </section>
+  </div>
+
+  <!-- ============ NAV ============ -->
+  <nav class="nav">
+    <button class="on" data-v="v-today" onclick="go('v-today',this)"><span class="i">☀️</span>Today</button>
+    <button data-v="v-plan" onclick="go('v-plan',this)"><span class="i">🗓️</span>Plan</button>
+    <button class="go" data-v="v-timer" onclick="go('v-timer',this)"><span class="i">▶</span>Focus</button>
+    <button data-v="v-subj" onclick="go('v-subj',this)"><span class="i">📚</span>Subjects</button>
+    <button data-v="v-prog" onclick="go('v-prog',this)"><span class="i">📊</span>Progress</button>
+  </nav>
+
+  <div class="burst" id="burst" style="display:none"><div class="msg" id="burstMsg">Nice! 🎉</div></div>
+
+  <!-- bottom sheet: period editor -->
+  <div id="sheetWrap" style="display:none; position:absolute; inset:0; z-index:50">
+    <div style="position:absolute; inset:0; background:rgba(5,7,10,.6)" onclick="closeSheet()"></div>
+    <div id="sheet" style="position:absolute; left:10px; right:10px; bottom:90px; background:var(--surface-2); border:1px solid var(--border); border-radius:22px; padding:18px; animation:sheetUp .3s var(--spring)">
+      <div id="sheetTitle" style="font-weight:800; font-size:15px; margin-bottom:4px"></div>
+      <div id="sheetSub" style="color:var(--dim); font-size:12px; margin-bottom:14px"></div>
+      <div id="sheetBody"></div>
+      <button class="btn ghost" style="margin-top:12px" onclick="closeSheet()">Close</button>
+    </div>
+  </div>
+  <style>@keyframes sheetUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}</style>
+</div>
+
+<script>
+/* ---------- navigation ---------- */
+function go(id, btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));
+  if(btn && !btn.classList.contains('go')) btn.classList.add('on');
+}
+function planTab(tabId, btn){
+  document.getElementById('tab-plan').style.display = tabId==='tab-plan' ? 'block':'none';
+  document.getElementById('tab-tt').style.display  = tabId==='tab-tt' ? 'block':'none';
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function celebrate(msg){
+  const b=document.getElementById('burst'), m=document.getElementById('burstMsg');
+  m.textContent=msg; b.style.display='flex';
+  m.style.animation='none'; m.offsetHeight; m.style.animation='pop .5s cubic-bezier(.34,1.56,.64,1)';
+  setTimeout(()=>b.style.display='none',1400);
+}
+/* ---------- week strip (rendered by renderWeekStrip — state-derived) ---------- */
+/* ---------- timer ---------- */
+let preset=25, left=preset*60, running=false, tick=null;
+// timer topics DERIVE from TOPICS state — no duplicate list to drift
+function topicLabel(t){ const act=(t.box>0&&t.dueIn<=0)?'revise':(t.box===0?'start':'focus'); return `${t.s} ${t.name} — ${act}`; }
+let ti=0;
+function cycleTopic(){ if(!running){ ti=(ti+1)%TOPICS.length; document.getElementById('tTopic').textContent=topicLabel(TOPICS[ti]); } }
+function setPreset(el,min){
+  document.querySelectorAll('.presets .chip').forEach(c=>c.classList.remove('on')); el.classList.add('on');
+  preset=min; timerReset();
+}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function renderT(){
+  document.getElementById('tTime').textContent=fmt(left);
+  document.getElementById('tArc').style.strokeDashoffset=703.7*(1-left/(preset*60));
+}
+function timerToggle(){
+  running=!running;
+  document.getElementById('tStart').innerHTML=running?'⏸ Pause':'▶ Start';
+  document.getElementById('tLbl').textContent=running?'FOCUSING':'PAUSED';
+  if(running){
+    document.getElementById('tLbl').style.color='var(--accent)';
+    tick=setInterval(()=>{ left--; renderT();
+      if(left<=0){ clearInterval(tick); running=false;
+        document.getElementById('tStart').innerHTML='▶ Start'; document.getElementById('tLbl').textContent='DONE';
+        document.getElementById('tLbl').style.color='var(--done)';
+        celebrate('Session logged! 🎉');
+        setTimeout(confidenceSheet,600);
+      }},1000);
+  } else clearInterval(tick);
+}
+function timerReset(){ clearInterval(tick); running=false; left=preset*60;
+  document.getElementById('tStart').innerHTML='▶ Start';
+  document.getElementById('tLbl').textContent='READY'; document.getElementById('tLbl').style.color='var(--dim)';
+  renderT();
+}
+/* confidence sheet — replaces browser prompt(); mutates SRS state */
+const INTERVALS=[0,1,3,7,16,35];                       // box n → next due in INTERVALS[n] days
+function confidenceSheet(){
+  const topic=document.getElementById('tTopic').textContent;
+  document.getElementById('sheetTitle').textContent='How solid is it?';
+  document.getElementById('sheetSub').textContent=topic+' · '+preset+' min logged';
+  document.getElementById('sheetBody').innerHTML=`
+    <div style="display:flex; flex-direction:column; gap:8px">
+      <button class="btn ghost" style="border-color:rgba(248,113,113,.4)" onclick="rateConf(1)">😵 Shaky — show it again soon</button>
+      <button class="btn ghost" onclick="rateConf(2)">🤔 Getting there — keep pace</button>
+      <button class="btn ghost" style="border-color:rgba(74,222,128,.4)" onclick="rateConf(3)">💪 Solid — mastery up</button>
+    </div>`;
+  document.getElementById('sheetWrap').style.display='block';
+}
+function rateConf(n){
+  const t=TOPICS[ti];                                     // direct state reference — no string parsing
+  if(rateConf._busy) return;                              // double-tap guard: one rating per session
+  rateConf._busy=true; setTimeout(()=>rateConf._busy=false, 800);
+  sessionLog.push({day:todayIdx, min:preset});            // real history: timer path logs minutes
+  if(typeof renderHeat==='function') renderHeat();
+  if(typeof renderProgStats==='function') renderProgStats();
+  todayStats.focusMin+=preset;                             // full preset counted on completed session
+  bumpStreakCheck();
+  let msg='Steady progress 📈';
+  if(t){
+    if(n===1){ t.box=Math.max(1,t.box-1); msg=`Back to box ${t.box} — sooner revisit 🔁`; }
+    else if(n===3){ t.box=Math.min(5,t.box+1); msg=`Box ${t.box}/5 — mastery up! ⬆️`; }
+    else { msg='Holding pace 📈'; }
+    t.dueIn=t.box>=5?99:(INTERVALS[t.box]||1);
+  }
+  closeSheet(); timerReset();
+  celebrate(msg);
+  renderPlan();
+}
+function skipToEnd(){ if(!running){ timerToggle(); } left=3; renderT(); }
+/* ---------- streak: OR-rule (≥1 block done OR ≥10 focus min today) ---------- */
+const STREAK_RULE_MIN=10;
+let todayStats={blocks:0, focusMin:0}, streakCounted=false;
+function bumpStreakCheck(){
+  if(streakCounted) return;
+  if(todayStats.blocks>=1 || todayStats.focusMin>=STREAK_RULE_MIN){
+    streakCounted=true;
+    const el=document.getElementById('streakN');
+    el.textContent=(parseInt(el.textContent)||0)+1;
+    celebrate('Streak extended 🔥');
+  }
+}
+/* ---------- progress: real history where it exists, sample data labeled ---------- */
+let sessionLog=[];                                        // {day, min} — every completed block/session
+function renderHeat(){
+  const host=document.getElementById('heat'); if(!host) return;
+  const perDay={};
+  sessionLog.forEach(s=>{ perDay[s.day]=(perDay[s.day]||0)+s.min; });
+  const cells=[];
+  for(let d=0; d<WEEK_DAYS.length; d++){
+    const m=perDay[d]||0;
+    const lvl=m===0?(d<todayIdx?0:null):(m>=60?4:m>=40?3:m>=20?2:1);
+    cells.push(lvl===null?'':(lvl?('l'+lvl):''));
+  }
+  for(let i=WEEK_DAYS.length;i<35;i++) cells.push('');
+  host.innerHTML=cells.map(c=>`<div class="h ${c}"></div>`).join('');
+}
+function renderBars(){
+  const host=document.getElementById('bars'), lbls=document.getElementById('barLbls');
+  if(!host) return;
+  const perDay={};
+  sessionLog.forEach(s=>{ perDay[s.day]=(perDay[s.day]||0)+s.min; });
+  const data=WEEK_DAYS.map((d,i)=>[DAY_LABELS[d].split(',')[0], Math.round((perDay[i]||0)/6)/10]);
+  host.innerHTML=data.map(([l,h])=>
+    `<div style="flex:1;background:${h>0?'linear-gradient(180deg,var(--accent),rgba(124,92,252,.35))':'var(--surface-2)'};border-radius:8px 8px 3px 3px;height:${Math.max(3,(h/2)*100)}%"></div>`).join('');
+  lbls.innerHTML=data.map(([l])=>`<span style="flex:1;text-align:center;font-size:10px">${l.slice(0,3)}</span>`).join('');
+}
+function renderProgStats(){
+  const todayMin=sessionLog.filter(s=>s.day===todayIdx).reduce((a,s)=>a+s.min,0);
+  document.getElementById('stStreak').textContent=(document.getElementById('streakN').textContent);
+  document.getElementById('stFocus').textContent=todayMin>=60?Math.floor(todayMin/60)+'h'+(todayMin%60?' '+(todayMin%60)+'m':''):todayMin+'m';
+  const due=TOPICS.filter(t=>t.box>0&&t.box<5&&t.dueIn<=0).length;
+  document.getElementById('stDue').textContent=due;
+}
+/* ---------- parent view: read-only rendering of real state ---------- */
+let _prevView=null, _prevNavBtn=null;
+function openParent(){
+  _prevView=document.querySelector('.view.active');
+  _prevNavBtn=document.querySelector('.nav button.on');   // restore nav highlight on exit
+  document.getElementById('pvStreak').textContent=document.getElementById('streakN').textContent;
+  const weekMin=sessionLog.filter(s=>s.day<=todayIdx).reduce((a,s)=>a+s.min,0);
+  document.getElementById('pvHours').textContent=weekMin>=60?Math.floor(weekMin/60)+'h'+(weekMin%60?' '+(weekMin%60)+'m':''):weekMin+'m';
+  const BOX_P=[0,20,40,60,80,100];
+  const avg=Math.round(TOPICS.reduce((a,t)=>a+BOX_P[t.box],0)/TOPICS.length);
+  document.getElementById('pvMastery').textContent=avg+'%';
+  const all=[...carriedItems,...planItems];
+  document.getElementById('pvPlan').innerHTML=all.length?all.map(it=>{
+    const sub=SUBJ[it.t.s];
+    return `<div class="item" style="padding:10px 12px; margin-bottom:7px">
+      <div class="ic" style="width:36px;height:36px;border-radius:11px;font-size:16px;background:${sub.bg}">${it.t.s}</div>
+      <div class="mid"><div class="t" style="font-size:13px">${it.t.name} — ${it.carried?'catch-up':(it.kind==='rev'?'revision':'focus')}</div>
+      <div class="m" style="font-size:11px"><span class="dot" style="background:${sub.c}"></span>${it.dur||20} min ${planDone.has(it.uid)?'<span class="tag rev" style="background:rgba(74,222,128,.13);color:var(--done)">DONE</span>':''}</div></div>
+    </div>`;
+  }).join(''):'<div class="card" style="color:var(--dim);font-size:12.5px">No plan for today yet.</div>';
+  const bySub={};
+  tests.forEach(t=>{ (bySub[t.s]=bySub[t.s]||[]).push(t.pct); });
+  document.getElementById('pvTests').innerHTML=Object.keys(bySub).map(s=>{
+    const arr=bySub[s];
+    return `<div style="display:flex; justify-content:space-between; padding:7px 0; font-size:13px">
+      <span style="font-weight:700">${s} ${SUBJ[s]?SUBJ[s].name:'Subject'}</span>
+      <span style="font-weight:800; color:${SUBJ[s]?SUBJ[s].c:'var(--text)'}">${arr[arr.length-1]}% <span style="color:var(--dim); font-weight:600; font-size:11px">(${arr.length} test${arr.length>1?'s':''})</span></span>
+    </div>`;
+  }).join('')||'<div style="color:var(--dim); font-size:12.5px">No tests recorded yet.</div>';
+  go('v-parent',null);
+}
+function exitParent(){
+  if(!_prevView) return;
+  go(_prevView.id,null);
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));
+  if(_prevNavBtn) _prevNavBtn.classList.add('on');
+}
+/* ---------- timetable: user-owned data, real editor ---------- */
+const TT={
+  'Mon 18':[{s:'08:00',e:'08:45',n:'📐 Mathematics',r:'R-204'},{s:'09:30',e:'10:15',n:'⚗️ Science',r:'Lab 2'},{s:'13:30',e:'14:15',n:'🇮🇳 Social Science',r:'R-108'}],
+  'Tue 19':[{s:'08:00',e:'08:45',n:'📖 English Literature',r:'R-105'},{s:'10:30',e:'11:15',n:'🗣️ Hindi',r:'R-301'}],
+  'Wed 20':[{s:'08:00',e:'08:45',n:'📐 Mathematics',r:'R-204'},{s:'11:00',e:'11:45',n:'⚗️ Science',r:'Lab 2'}],
+  'Thu 21':[{s:'08:00',e:'08:45',n:'📐 Mathematics',r:'R-204'},{s:'09:30',e:'10:15',n:'⚗️ Science',r:'Lab 2'},{s:'10:30',e:'11:15',n:'📖 English Literature',r:'R-105'},{s:'13:30',e:'14:15',n:'🇮🇳 Social Science',r:'R-108'},{s:'14:15',e:'15:00',n:'🗣️ Hindi',r:'R-301'}],
+  'Fri 22':[{s:'08:00',e:'08:45',n:'⚗️ Science',r:'Lab 2'},{s:'09:30',e:'10:15',n:'📐 Mathematics',r:'R-204'}],
+  'Sat 23':[], 'Sun 24':[]
+};
+let ttDay='Thu 21', ttEdits=[], sheetIdx=null;
+function setDay(d,el){ ttDay=d;
+  document.querySelectorAll('.daychips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on'); renderTT();
+}
+function renderTT(){
+  const mins=t=>{const [h,m]=t.split(':').map(Number); return h*60+m};
+  const list=(TT[ttDay]||[]).slice().sort((a,b)=>mins(a.s)-mins(b.s));
+  document.getElementById('ttList').innerHTML=list.length
+    ? list.map((p,i)=>`<div class="period" onclick="openSheet(${i})"><div class="tm">${p.s}–${p.e}</div><div class="nm">${p.n}</div><div class="rm">${p.r||''}</div></div>`).join('')
+    : `<div class="card" style="text-align:center;color:var(--dim);font-size:13px">No periods on ${ttDay} yet.</div>`;
+  const dayEdits=ttEdits.filter(e=>e.day===ttDay), sum=document.getElementById('ttSummary');
+  if(dayEdits.length){
+    sum.style.display='block'; sum.style.borderColor='rgba(251,191,36,.35)';
+    sum.innerHTML=`<div style="font-weight:800; font-size:13px; margin-bottom:6px">⚡ ${ttDay} — ${dayEdits.length} change${dayEdits.length>1?'s':''} you made</div>`
+      + dayEdits.map(e=>`<div style="color:var(--dim); font-size:12.5px; line-height:1.5">• ${e.txt}</div>`).join('')
+      + `<div style="color:var(--text); font-size:12px; margin-top:8px; font-weight:700">Study plan re-solved around this.</div>`;
+  } else sum.style.display='none';
+}
+function openSheet(i){ sheetIdx=i; sheetRender('menu');
+  document.getElementById('sheetWrap').style.display='block'; }
+function closeSheet(){ document.getElementById('sheetWrap').style.display='none'; }
+const TIN=(id,v)=>`<input type="time" id="${id}" value="${v}" style="background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:10px; font-family:inherit; font-size:14px; width:100%; color-scheme:dark">`;
+function scopeChips(){ return `<div style="display:flex; gap:8px; margin-top:12px">
+  <span class="chip on" onclick="scopeSel(this)">This day only</span>
+  <span class="chip" onclick="scopeSel(this)">Every week</span></div>`; }
+function scopeSel(el){ el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); }
+function scopeVal(){ const c=document.querySelector('#sheetBody .chip.on'); return c?c.textContent:'This day only'; }
+function sheetRender(mode){
+  const T=document.getElementById('sheetTitle'), S=document.getElementById('sheetSub'), B=document.getElementById('sheetBody');
+  const list=(TT[ttDay]||[]).slice().sort((a,b)=>a.s<b.s?-1:1);
+  if(sheetIdx===null){
+    T.textContent='Add period · '+ttDay; S.textContent='Tell Abhyas what your school added — one date, or every week.';
+    B.innerHTML=`<input id="shSub" list="subjList" placeholder="Subject" style="background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:12px; font-family:inherit; font-size:14px; width:100%">
+      <datalist id="subjList"><option>📐 Mathematics</option><option>⚗️ Science</option><option>📖 English Literature</option><option>🇮🇳 Social Science</option><option>🗣️ Hindi</option></datalist>
+      <div style="display:flex; gap:8px; margin-top:8px"><div style="flex:1">${TIN('shS','09:00')}</div><div style="flex:1">${TIN('shE','09:45')}</div></div>
+      <input id="shR" placeholder="Room (optional)" style="background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:12px; font-family:inherit; font-size:14px; width:100%; margin-top:8px">
+      ${scopeChips()}
+      <button class="btn" style="margin-top:12px" onclick="addPeriod()">Add period</button>`;
+  } else {
+    const p=list[sheetIdx], ref=TT[ttDay].find(x=>x===p);
+    if(mode==='menu'){
+      T.textContent=p.n; S.textContent=p.s+'–'+p.e+(p.r?' · '+p.r:'');
+      B.innerHTML=`<button class="btn ghost" onclick="sheetRender('move')">↔&nbsp; Move this period</button>
+        <button class="btn ghost" style="margin-top:8px" onclick="sheetRender('cancel')">✕&nbsp; Cancel this period</button>
+        <button class="btn ghost" style="margin-top:8px" onclick="sheetRender('edit')">✎&nbsp; Edit details</button>`;
+    } else if(mode==='move'){
+      T.textContent='Move '+p.n; S.textContent='Where does it go instead?';
+      B.innerHTML=`<div style="display:flex; gap:8px">${TIN('shS',p.s)}${TIN('shE',p.e)}</div>${scopeChips()}
+        <button class="btn" style="margin-top:12px" onclick="doMove('${TT[ttDay].indexOf(ref)}')">Save move</button>`;
+    } else if(mode==='cancel'){
+      T.textContent='Cancel '+p.n+'?'; S.textContent='Freed time gets offered to your revision queue.';
+      B.innerHTML=`${scopeChips()}
+        <button class="btn" style="margin-top:12px; background:var(--alert)" onclick="doCancel('${TT[ttDay].indexOf(ref)}')">Cancel period</button>`;
+    } else if(mode==='edit'){
+      T.textContent='Edit '+p.n; S.textContent='Fix subject, time or room.';
+      B.innerHTML=`<input id="shSub" value="${p.n}" style="background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:12px; font-family:inherit; font-size:14px; width:100%">
+        <div style="display:flex; gap:8px; margin-top:8px">${TIN('shS',p.s)}${TIN('shE',p.e)}</div>
+        <input id="shR" value="${p.r||''}" placeholder="Room (optional)" style="background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:12px; font-family:inherit; font-size:14px; width:100%; margin-top:8px">
+        ${scopeChips()}
+        <button class="btn" style="margin-top:12px" onclick="doEdit('${TT[ttDay].indexOf(ref)}')">Save changes</button>`;
+    }
+  }
+}
+function addPeriod(){
+  const n=document.getElementById('shSub').value.trim(); if(!n) return;
+  TT[ttDay].push({s:document.getElementById('shS').value.slice(0,5), e:document.getElementById('shE').value.slice(0,5), n, r:document.getElementById('shR').value.trim()});
+  ttEdits.push({day:ttDay, txt:`Added ${n} ${document.getElementById('shS').value.slice(0,5)} · ${scopeVal()}`});
+  renderTT(); renderPlan(); renderWeek(); renderSubjects(); closeSheet();
+}
+function doMove(i){
+  const p=TT[ttDay][i], os=p.s;
+  const mins=t=>{const [h,m]=t.split(':').map(Number); return h*60+m};
+  const dur=mins(p.e)-mins(p.s);
+  const ns=document.getElementById('shS').value.slice(0,5);
+  const ne=String(Math.floor((mins(ns)+dur)/60)).padStart(2,'0')+':'+String((mins(ns)+dur)%60).padStart(2,'0');
+  p.s=ns; p.e=ne;
+  ttEdits.push({day:ttDay, txt:`Moved ${p.n} ${os} → ${p.s} · ${scopeVal()}`});
+  renderTT(); renderPlan(); renderWeek(); renderSubjects(); closeSheet();
+}
+function doCancel(i){
+  const p=TT[ttDay][i];
+  TT[ttDay].splice(i,1);
+  ttEdits.push({day:ttDay, txt:`Cancelled ${p.n} ${p.s} · ${scopeVal()}`});
+  renderTT(); renderPlan(); renderWeek(); renderSubjects(); closeSheet();
+}
+function doEdit(i){
+  const p=TT[ttDay][i], on=p.n;
+  p.n=document.getElementById('shSub').value.trim()||p.n;
+  p.s=document.getElementById('shS').value.slice(0,5); p.e=document.getElementById('shE').value.slice(0,5);
+  p.r=document.getElementById('shR').value.trim();
+  ttEdits.push({day:ttDay, txt:`Edited ${on} → ${p.n} ${p.s} · ${scopeVal()}`});
+  renderTT(); renderPlan(); renderWeek(); renderSubjects(); closeSheet();
+}
+/* ---------- derived planning engine (demo) ---------- */
+const SUBJ={ '📐':{name:'Mathematics',c:'var(--s-math)',bg:'rgba(96,165,250,.13)'}, '⚗️':{name:'Science',c:'var(--s-sci)',bg:'rgba(52,211,153,.13)'}, '📖':{name:'English',c:'var(--s-eng)',bg:'rgba(244,114,182,.13)'} };
+const TOPICS=[
+  {id:'quadratic', s:'📐', name:'Quadratic Equations', box:1, dueIn:0,  weight:10},
+  {id:'life',      s:'⚗️', name:'Life Processes',     box:2, dueIn:0,  weight:8},
+  {id:'trig',      s:'📐', name:'Trigonometry',       box:0, dueIn:-1, weight:12},
+  {id:'chem',      s:'⚗️', name:'Chemical Reactions', box:1, dueIn:2,  weight:9},
+  {id:'letter',    s:'📖', name:'A Letter to God',    box:3, dueIn:4,  weight:6}
+];
+let exams=[{s:'📐', name:'Unit Test — Maths', dateOffset:6, scope:['Quadratic Equations','Trigonometry']}];
+const BOX_MIN=[15,20,30,40], REV_CAP=5;
+const minsOf=t=>{const [h,m]=t.split(':').map(Number); return h*60+m};
+const fmtMin=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+function freeSlots(dayStr){
+  const busy=(TT[dayStr]||[]).map(p=>[minsOf(p.s),minsOf(p.e)]).sort((a,b)=>a[0]-b[0]);
+  const slots=[]; let cur=16*60; const end=22*60+30;         // study window 16:00–22:30
+  for(const [bs,be] of busy){ if(bs>cur) slots.push([cur,Math.min(bs,end)]); cur=Math.max(cur,be); }
+  if(cur<end) slots.push([cur,end]);
+  return slots.filter(([a,b])=>b-a>=20);
+}
+/* per-day revision schedule: topic due when dueIn <= daysAhead (0 = today) */
+const WEEK_DAYS=['Thu 21','Fri 22','Sat 23','Sun 24'];
+let dayOffset={ 'Thu 21':0,'Fri 22':1,'Sat 23':2,'Sun 24':3 };
+function buildPlanFor(dayStr, excludeNames){
+  const ahead=dayOffset[dayStr];
+  const due=TOPICS.filter(t=>t.dueIn<=ahead && t.dueIn>=-1 && t.box>0).slice(0,REV_CAP);
+  return buildPlan(dayStr, due, excludeNames);
+}
+function buildPlan(dayStr, dueOverride, excludeNames){
+  const day=dayStr||WEEK_DAYS[todayIdx]||'Thu 21';
+  const ahead=dayOffset[day]??0;
+  const excl=excludeNames||[];
+  const due=dueOverride!==undefined?dueOverride:TOPICS.filter(t=>t.dueIn<=0 && t.box>0).slice(0,REV_CAP);
+  // 2. forward work ranked: exam proximity (relative to this day) + low box + weight
+  const daysTo=e=>Math.max(0,e.dateOffset-ahead);
+  const fwd=TOPICS.filter(t=>!due.includes(t)&&!excl.includes(t.name))
+    .map(t=>{
+      let score=t.weight;
+      const ex=exams.find(e=>e.s===t.s && e.scope.includes(t.name));
+      if(ex) score+=Math.max(0,40-daysTo(ex)*6);            // closer exam → hotter
+      if(t.box===0) score+=15;                              // unstarted bias
+      return {t,score};
+    }).sort((a,b)=>b.score-a.score).map(x=>x.t);
+  // 3. place into free slots — hop to next slot when one fills up
+  const items=[];
+  const slots=freeSlots(day);
+  let si=0, cursor=null;
+  const place=(dur)=>{                       // returns start minute or null
+    for(; si<slots.length; si++){
+      const s=slots[si];
+      if(cursor===null||cursor<s[0]) cursor=s[0];
+      if(cursor+dur<=s[1]){ const st=cursor; cursor=st+dur+10; return st; }
+      cursor=null;                            // slot exhausted → try next
+    }
+    return null;
+  };
+  for(const t of due){
+    const dur=Math.min(BOX_MIN[t.box]||20, 45);
+    const st=place(dur); if(st===null) break;
+    items.push({uid:'t_'+t.id, kind:'rev',t,dur,start:st,why:`Revision due · box ${t.box}/5`});
+  }
+  for(const t of fwd){
+    if(items.length>=6) break;
+    const st=place(40); if(st===null) break;
+    const ex=exams.find(e=>e.s===t.s&&e.scope.includes(t.name));
+    items.push({uid:'t_'+t.id, kind:'new',t,dur:40,start:st, examLinked:!!(ex&&ex.dateOffset>ahead), why: ex?`Exam in ${daysTo(ex)}d covers this` : (t.box===0?'Not started yet':'Weak topic')});
+  }
+  return items;
+}
+let planItems=[], planDone=new Set();
+/* ---------- day state & midnight rollover (decision-proposals #3 defaults) ---------- */
+let todayIdx=0;
+const CARRY_MAX=2;                       // owner-confirmable constant
+let carriedItems=[], dayHistory=[];      // undone forward-work items · recorded completion per past day
+let missedDays=0;                        // consecutive closed days with no qualifying activity
+let lastRolloverNote=null;               // shown once, then cleared on next advance
+function rolloverMidnight(){
+  const todayStr=WEEK_DAYS[todayIdx];
+  const done=planItems.filter(i=>planDone.has(i.uid));
+  const undone=planItems.filter(i=>!planDone.has(i.uid));
+  // revise-kind NEVER carried: SRS already reschedules them (drop = return to queue)
+  let carry=undone.filter(i=>i.kind!=='rev');
+  carry.sort((a,b)=>((b.examLinked?1:0)-(a.examLinked?1:0)));   // exam-linked prioritised
+  carriedItems=carry.slice(0,CARRY_MAX).map(i=>({...i, carried:true, start:null}));
+  const droppedRev=undone.filter(i=>i.kind==='rev').length;
+  const droppedFwd=Math.max(0,carry.length-CARRY_MAX);
+  // record the closing day honestly: what was planned vs what got done
+  // minutes come from sessionLog alone (block-checks AND timer both log there)
+  dayHistory[todayIdx]={planned:planItems.length+carriedItems.length,
+    done:done.length,
+    min:sessionLog.filter(s=>s.day===todayIdx).reduce((a,s)=>a+s.min,0)};
+  lastRolloverNote={carried:carriedItems.length,
+    dropped:(droppedRev+droppedFwd)||null};
+  planDone.clear(); planItems=[]; carriedItems.forEach(i=>{i.carried=true;});
+  // streak break semantics (decision-proposals #2): a closed day with no qualifying
+  // activity counts as missed; 2 consecutive missed days reset the streak.
+  const earned=(todayStats.blocks>=1||todayStats.focusMin>=STREAK_RULE_MIN);
+  if(!earned){ missedDays++;
+    if(missedDays>=2){
+      document.getElementById('streakN').textContent='0';
+      lastRolloverNote.broke=true;
+      missedDays=0;
+    }
+  } else { missedDays=0; }
+  todayStats={blocks:0, focusMin:0};      // new day → stats re-arm
+  streakCounted=false;                    // streak can be earned again today
+  todayIdx++;
+}
+function renderPlan(){
+  // topics already carried as catch-ups must not be double-booked as fresh blocks
+  const carriedNames=carriedItems.map(i=>i.t.name);
+  planItems=buildPlanFor(WEEK_DAYS[todayIdx], carriedNames);
+  // merge carried items from yesterday's rollover (forward-work only, capped)
+  carriedItems.forEach((it,i)=>{ it.uid='c'+i+'_'+it.t.id; });
+  const all=[...carriedItems,...planItems];
+  const revEl=document.getElementById('revSection'), plEl=document.getElementById('planSection');
+  const revs=all.filter(i=>i.kind==='rev'&&!i.carried), news=all.filter(i=>i.kind!=='rev');
+  revEl.innerHTML=revs.length?`<div class="sec-title">Revision due <span style="color:var(--due);font-weight:800">${revs.length} topic${revs.length>1?'s':''}</span></div>`+
+    revs.map(it=>itemHTML(it,it.uid)).join(''):'';
+  plEl.innerHTML=`<div class="sec-title">Today's plan <span style="color:var(--dim);font-weight:700;font-size:11px">derived from your day</span></div>`+
+    (lastRolloverNote?`<div class="why" style="margin-bottom:10px">🌅 <span><b>${lastRolloverNote.carried} carried</b> from yesterday${lastRolloverNote.dropped?` · ${lastRolloverNote.dropped} returned to revision — they'll resurface by schedule`:''}</span></div>`:'')+
+    (lastRolloverNote&&lastRolloverNote.broke?`<div class="why" style="margin-bottom:10px; border-color:rgba(248,113,113,.4)"><span>💔 <b>Streak reset</b> — two days passed without a session. Today's a fresh start.</span></div>`:'')+
+    news.map(it=>itemHTML(it,it.uid)).join('');
+  document.querySelectorAll('#v-today .check').forEach(c=>{
+    c.onclick=()=>toggleItem(c);
+  });
+  updateRing();
+}
+function itemHTML(it,id){
+  const sub=SUBJ[it.t.s];
+  const why=it.carried?'<div class="why">📦 <span><b>Carried</b> from yesterday</span></div>':(it.kind==='new'?`<div class="why">📌 <span><b>Why:</b> ${it.why||'weak topic'}</span></div>`:'');
+  const time=it.start===null||it.start===undefined?'anytime':fmtMin(it.start)+'–'+fmtMin(it.start+it.dur);
+  return `<div class="item" data-id="${id}">
+    <div class="ic" style="background:${sub.bg}">${it.t.s}</div>
+    <div class="mid"><div class="t">${it.t.name} — ${it.carried?'catch-up':(it.kind==='rev'?'revise':'focus')}</div>
+    <div class="m"><span class="dot" style="background:${sub.c}"></span>${sub.name} · ${time} ${it.carried?'<span class="tag rev">CARRIED</span>':(it.kind==='rev'?'<span class="tag rev">DUE</span>':'<span class="tag new">NEW</span>')}</div>${why}</div>
+    <div class="check">✓</div></div>`;
+}
+function toggleItem(chk){
+  const it=chk.closest('.item'); const id=it.dataset.id;
+  const nowDone=!planDone.has(id);
+  nowDone?planDone.add(id):planDone.delete(id);
+  it.classList.toggle('done',nowDone);
+  if(nowDone){
+    todayStats.blocks++;
+    sessionLog.push({day:todayIdx, min:it.dur||25});      // block-check path logs history too
+    if(typeof renderHeat==='function') renderHeat();
+    if(typeof renderProgStats==='function') renderProgStats();
+  }
+  updateRing();
+  bumpStreakCheck();
+  if(nowDone){
+    const msgs=['Nice! 🎉','Momentum! ⚡',"That's progress 💪",'Streak safe 🔥','Ring filling up ⭕'];
+    celebrate(msgs[Math.floor(Math.random()*msgs.length)]);
+  }
+  if(planDone.size===planItems.length) setTimeout(()=>celebrate('Day complete! Ring closed 🏆'),350);
+}
+function updateRing(){
+  const total=planItems.length||1, pct=Math.round(planDone.size/total*100);
+  document.getElementById('ringPct').textContent=pct+'%';
+  document.getElementById('ringArc').style.strokeDashoffset=251.3*(1-pct/100);
+  const dayStr=WEEK_DAYS[todayIdx];
+  const freeAfter=freeSlots(dayStr).reduce((a,[x,y])=>a+(y-x),0)-planItems.reduce((a,i)=>a+i.dur+10,0);
+  document.getElementById('ringMsg').textContent=planItems.length?`${planItems.length} blocks · ${Math.round(freeAfter/60*10)/10}h still free`:'Nothing planned — add a period or regenerate';
+  document.getElementById('ringSub').textContent='Computed from timetable free slots, revision queue, topics & exams.';
+  if(typeof renderWeekStrip==='function') renderWeekStrip();
+}
+/* exam sheet */
+function openExamSheet(){
+  sheetIdx=null;
+  document.getElementById('sheetTitle').textContent='Add exam / test';
+  document.getElementById('sheetSub').textContent='Drives urgency in the planner. You can remove it anytime.';
+  document.getElementById('sheetBody').innerHTML=`
+    <input id="exName" placeholder="Name — e.g. Unit Test" style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;font-family:inherit;font-size:14px;width:100%">
+    <input id="exDate" type="date" style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;font-family:inherit;font-size:14px;width:100%;margin-top:8px;color-scheme:dark">
+    <div style="display:flex;gap:8px;margin-top:8px">
+      ${Object.keys(SUBJ).map(s=>`<span class="chip" onclick="scopeSel(this)" data-s="${s}">${s} ${SUBJ[s].name}</span>`).join('')}
+    </div>
+    <button class="btn" style="margin-top:12px" onclick="saveExam()">Save exam</button>`;
+  document.getElementById('sheetWrap').style.display='block';
+}
+function saveExam(){
+  const n=document.getElementById('exName').value.trim();
+  const d=document.getElementById('exDate').value;
+  const sel=document.querySelector('#sheetBody .chip.on');
+  if(!n) return;
+  if(!d){ celebrate('Pick a date first 📅'); return; }
+  if(!sel){ celebrate('Pick a subject 📐'); return; }
+  const off=Math.round((new Date(d)-new Date('2026-08-21'))/86400000);
+  if(off<0){ celebrate("That date's already past"); return; }
+  exams.push({s:sel.dataset.s, name:n, dateOffset:off, scope:Object.values(TOPICS).filter(t=>t.s===sel.dataset.s).map(t=>t.name)});
+  ttEdits.push({day:WEEK_DAYS[todayIdx], txt:`Added exam "${n}" (${off}d)`});
+  renderTT(); renderPlan(); renderWeek(); renderSubjects(); closeSheet(); celebrate('Planner updated 📅');
+}
+function advanceDay(){
+  if(todayIdx>=WEEK_DAYS.length-1){ celebrate('End of planned week 🌙'); return; }
+  rolloverMidnight();
+  document.getElementById('hdrSub').textContent=DAY_LABELS[WEEK_DAYS[todayIdx]].replace(/^\w+/,m=>m.slice(0,3));
+  renderPlan(); renderWeek(); renderSubjects(); renderWeekStrip(); renderTests();
+  celebrate('Good morning — new plan ready ☀️');
+}
+function regenDemo(){ carriedItems=[]; lastRolloverNote=null; planDone.clear(); renderPlan(); celebrate('Re-solved ↻'); }
+/* ---------- week view: FORWARD SIMULATION ----------
+   Each day's assumed-done revisions push the topic's next due date out,
+   so a topic revised Thursday doesn't absurdly reappear Friday.        */
+const DAY_LABELS={'Thu 21':'Thursday, 21 Aug','Fri 22':'Friday, 22 Aug','Sat 23':'Saturday, 23 Aug','Sun 24':'Sunday, 24 Aug'};
+function buildWeek(){
+  const proj=TOPICS.map(t=>({...t, pDue:t.dueIn, cool:0}));
+  const out=[];
+  for(let d=0; d<WEEK_DAYS.length; d++){
+    const dayStr=WEEK_DAYS[d];
+    // 1. revisions due today in the projection
+    const due=proj.filter(t=>t.box>0 && t.box<5 && t.pDue<=0).slice(0,REV_CAP);
+    // 2. forward work: ranked, excluding topics focused recently (cooldown 2d)
+    const daysTo=e=>Math.max(0,e.dateOffset-d);
+    const fwd=proj.filter(t=>!due.includes(t)&&t.cool<=0)
+      .map(t=>{
+        let score=t.weight;
+        const ex=exams.find(e=>e.s===t.s&&e.scope.includes(t.name));
+        if(ex&&ex.dateOffset>d) score+=Math.max(0,40-(ex.dateOffset-d)*6);
+        if(t.box===0) score+=15;
+        return {t,score};
+      }).sort((a,b)=>b.score-a.score).map(x=>x.t);
+    // 3. place into free slots of THIS day
+    const items=[];
+    const slots=freeSlots(dayStr);
+    let si=0, cursor=null;
+    const place=dur=>{
+      for(; si<slots.length; si++){
+        const s=slots[si];
+        if(cursor===null||cursor<s[0]) cursor=s[0];
+        if(cursor+dur<=s[1]){ const st=cursor; cursor=st+dur+10; return st; }
+        cursor=null;
+      }
+      return null;
+    };
+    for(const t of due){
+      const dur=Math.min(BOX_MIN[t.box]||20,45);
+      const st=place(dur); if(st===null) break;
+      items.push({kind:'rev',t,dur,start:st});
+    }
+    for(const t of fwd){
+      if(items.length>=5) break;
+      const st=place(40); if(st===null) break;
+      items.push({kind:'new',t,dur:40,start:st});
+    }
+    out.push({day:dayStr, items});
+    // 4. project state forward: revisions land, cooldowns tick, clocks advance
+    for(const t of proj){
+      const didRev=items.some(i=>i.kind==='rev'&&i.t===t);
+      const didFoc=items.some(i=>i.kind==='new'&&i.t===t);
+      if(didRev){ t.box=Math.min(5,t.box+1); t.pDue=t.box>=5?99:(INTERVALS[t.box]??3); }
+      else t.pDue-=1;
+      if(didFoc) t.cool=2; else if(t.cool>0) t.cool-=1;
+    }
+  }
+  return out;
+}
+function renderWeek(){
+  const host=document.getElementById('weekPlanBody');
+  if(!host) return;
+  const week=buildWeek();
+  host.innerHTML=week.map(({day,items})=>{
+    const totalMin=items.reduce((a,i)=>a+i.dur,0);
+    const examToday=exams.find(e=>e.dateOffset===dayOffset[day]);
+    return `<div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">
+        <div style="font-weight:800">${DAY_LABELS[day]}</div>
+        <div style="font-size:11.5px; color:var(--dim)">${items.length?`${Math.floor(totalMin/60)}h ${totalMin%60}m planned`:'rest day'}</div>
+      </div>
+      ${examToday?`<div style="font-size:12px; font-weight:800; color:var(--due); margin-bottom:8px">⚠ ${examToday.name}</div>`:''}
+      ${items.length?items.map(i=>{
+        const sub=SUBJ[i.t.s];
+        return `<div class="item" style="padding:10px 12px; margin-bottom:7px">
+          <div class="ic" style="width:36px;height:36px;border-radius:11px;font-size:16px;background:${sub.bg}">${i.t.s}</div>
+          <div class="mid"><div class="t" style="font-size:13px">${i.t.name} — ${i.kind==='rev'?'revise':'focus'}</div>
+          <div class="m" style="font-size:11px"><span class="dot" style="background:${sub.c}"></span>${fmtMin(i.start)} · ${i.dur} min ${i.kind==='rev'?'<span class="tag rev">DUE</span>':''}</div></div>
+        </div>`;
+      }).join('')
+      :`<div style="color:var(--dim); font-size:12.5px">Nothing scheduled — free evening.</div>`}
+    </div>`;
+  }).join('');
+}
+/* ---------- subjects tab: derived from TOPICS state ---------- */
+const BOX_PCT=[0,20,40,60,80,100];
+function topicStatus(t){
+  if(t.box===0) return {lbl:'NEW', cls:'new'};
+  if(t.box>=5) return {lbl:'MASTERED', cls:'mastered'};
+  if(t.dueIn<=0) return {lbl:(t.box===1?'SHAKY · due now':'DUE NOW'), cls:t.box===1?'shaky':'learning'};
+  return {lbl:(t.box<=2?'LEARNING':'SOLID'), cls:t.box<=2?'learning':'solid'};
+}
+function renderSubjects(){
+  const host=document.getElementById('subjBody');
+  if(!host) return;
+  const bySub={};
+  TOPICS.forEach(t=>{ (bySub[t.s]=bySub[t.s]||[]).push(t); });
+  let all=0, n=0;
+  let html='';
+  for(const s of Object.keys(bySub)){
+    const ts=bySub[s], sub=SUBJ[s]||{name:'Subject',c:'var(--text)',bg:'var(--surface-2)'};
+    const pct=Math.round(ts.reduce((a,t)=>a+BOX_PCT[t.box],0)/ts.length);
+    all+=pct; n++;
+    const dueCount=ts.filter(t=>t.box>0&&t.box<5&&t.dueIn<=0).length;
+    const trend=dueCount>0?`<span style="color:var(--due)">${dueCount} due now</span>`:'<span style="color:var(--done)">on schedule</span>';
+    html+=`<div class="card">
+      <div class="subj">
+        <div class="ic" style="background:${sub.bg}">${s}</div>
+        <div class="mid">
+          <div class="t">${sub.name} <b style="color:${sub.c}">${pct}%</b></div>
+          <div class="lv" style="color:${sub.c}">${trend}</div>
+          <div class="meter"><i style="width:${pct}%; background:${sub.c}"></i></div>
+        </div>
+      </div>
+      <div class="topics">
+        ${ts.map(t=>{const st=topicStatus(t);
+          return `<div class="topic"><span class="nm">${t.name}</span><span class="st ${st.cls}">${st.lbl}</span></div>`;}).join('')}
+      </div>
+    </div>`;
+  }
+  host.innerHTML=html;
+  document.getElementById('covPct').textContent=n?Math.round(all/n)+'%':'—';
+  document.getElementById('covSub').textContent=`Term 1 · ${n} subject${n!==1?'s':''} tracked`;
+}
+/* ---------- week strip: honest — past days from planDone, future blank ---------- */
+function renderWeekStrip(){
+  const host=document.getElementById('weekStrip');
+  if(!host) return;
+  const pct=planItems.length?Math.round(planDone.size/planItems.length*100):0;
+  host.innerHTML=WEEK_DAYS.map((d,i)=>{
+    const isToday=i===todayIdx, isPast=i<todayIdx;
+    const p=isToday?pct:0;
+    if(isPast){
+      const h=dayHistory[i];
+      return `<div class="day" style="opacity:.45"><div class="d">${d.split(' ')[0].slice(0,3).toUpperCase()}</div>
+        <div class="n">${d.split(' ')[1]}</div><div class="p">${h?h.done+'/'+h.planned:'—'}</div>
+        <div class="bar"><i style="width:${h&&h.planned?Math.round(h.done/h.planned*100):0}%; background:var(--done)"></i></div></div>`;
+    }
+    return `<div class="day ${isToday?'on':''}"><div class="d">${d.split(' ')[0].slice(0,3).toUpperCase()}</div>
+      <div class="n">${d.split(' ')[1]}</div><div class="p">${isToday?p+'%':'—'}</div>
+      <div class="bar"><i style="width:${p}%; background:${p>=80?'var(--done)':'var(--accent)'}"></i></div></div>`;
+  }).join('');
+}
+/* ---------- tests & marks: user-entered, feeds mastery ---------- */
+let tests=[{name:'Algebra Unit Test', s:'📐', pct:71, daysAgo:9}];
+function renderTests(){
+  const bySub={};
+  tests.forEach(t=>{ (bySub[t.s]=bySub[t.s]||[]).push(t.pct); });
+  document.getElementById('trendBody').innerHTML=tests.length?Object.keys(bySub).map(s=>{
+    const arr=bySub[s], latest=arr[arr.length-1], first=arr[0];
+    const delta=arr.length>1?latest-first:null;
+    const col=SUBJ[s]?SUBJ[s].c:'var(--text)';
+    return `<div style="display:flex; justify-content:space-between; align-items:center; padding:7px 0">
+      <span style="font-size:13px; font-weight:700">${s} ${SUBJ[s]?SUBJ[s].name:'Subject'}</span>
+      <span style="font-size:13px; font-weight:800; color:${col}">${latest}% ${delta===null?'':(delta>=0?`<b style="color:var(--done)">↑${delta}</b>`:`<b style="color:var(--alert)">↓${Math.abs(delta)}</b>`)}</span>
+    </div>`;
+  }).join(''):'<div style="color:var(--dim); font-size:12.5px">No tests yet — add your first score.</div>';
+}
+function openTestSheet(){
+  sheetIdx=null;
+  document.getElementById('sheetTitle').textContent='Add test result';
+  document.getElementById('sheetSub').textContent='Marks recalibrate mastery for that subject\u2019s topics.';
+  document.getElementById('sheetBody').innerHTML=`
+    <input id="tsName" placeholder="Test name" style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;font-family:inherit;font-size:14px;width:100%">
+    <div style="display:flex; gap:8px; margin-top:8px">
+      ${Object.keys(SUBJ).map(s=>`<span class="chip" onclick="scopeSel(this)" data-s="${s}">${s} ${SUBJ[s].name}</span>`).join('')}
+    </div>
+    <input id="tsPct" type="number" min="0" max="100" placeholder="Score % (0\u2013100)" style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;font-family:inherit;font-size:14px;width:100%;margin-top:8px;color-scheme:dark">
+    <button class="btn" style="margin-top:12px" onclick="saveTest()">Save test</button>`;
+  document.getElementById('sheetWrap').style.display='block';
+}
+function saveTest(){
+  const n=document.getElementById('tsName').value.trim();
+  const p=document.getElementById('tsPct').value;
+  if(!n||p==='') return;
+  const sel=document.querySelector('#sheetBody .chip.on');
+  if(!sel){ celebrate('Pick a subject 📐'); return; }
+  const s=sel.dataset.s;
+  const pct=Math.max(0,Math.min(100,parseInt(p)));
+  tests.push({name:n, s, pct, daysAgo:0});
+  // mastery recalibration: low score drops boxes of that subject's topics, high promotes
+  let touched=0;
+  TOPICS.filter(t=>t.s===s && t.box>0 && t.box<5).forEach(t=>{
+    if(pct<40){ t.box=Math.max(1,t.box-1); t.dueIn=0; touched++; }
+    else if(pct>=80){ t.box=Math.min(5,t.box+1); t.dueIn=t.box>=5?99:(INTERVALS[t.box]||3); touched++; }
+  });
+  closeSheet(); renderTests(); renderPlan(); renderWeek(); renderSubjects();
+  celebrate(touched?`Saved · ${touched} topic${touched>1?'s':''} recalibrated 📉📈`:'Test saved ✓');
+}
+/* ---------- persistence: local-first in miniature (localStorage) ---------- */
+const STORE_KEY='abhyas_proto_v1';
+let _noSave=false;                        // suppress autosave during demo-reset teardown
+function persist(){
+  if(_noSave) return;
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      v:1, TOPICS, TT, exams, tests, sessionLog, todayIdx, carriedItems, dayHistory,
+      lastRolloverNote, streak:parseInt(document.getElementById('streakN').textContent)||0,
+      todayStats, streakCounted, missedDays, planDone:[...planDone]
+    }));
+  }catch(e){/* storage unavailable — prototype still works, just forgets */}
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(!raw) return false;
+    const s=JSON.parse(raw);
+    if(!s||s.v!==1) return false;
+    TOPICS.length=0; TOPICS.push(...s.TOPICS);
+    Object.keys(TT).forEach(k=>delete TT[k]); Object.assign(TT, s.TT);
+    exams=s.exams||exams; tests=s.tests||tests; sessionLog=s.sessionLog||[];
+    todayIdx=s.todayIdx||0; carriedItems=s.carriedItems||[]; dayHistory=s.dayHistory||[];
+    lastRolloverNote=s.lastRolloverNote||null;
+    if(s.todayStats){ todayStats.blocks=s.todayStats.blocks||0; todayStats.focusMin=s.todayStats.focusMin||0; }
+    streakCounted=!!s.streakCounted;
+    missedDays=s.missedDays||0;
+    document.getElementById('streakN').textContent=s.streak!=null?s.streak:12;
+    planDone.clear(); (s.planDone||[]).forEach(u=>planDone.add(u));
+    return true;
+  }catch(e){ return false; }
+}
+function resetDemo(el){
+  if(el.dataset.arm){
+    softReset();
+    el.dataset.arm=''; el.textContent='↺ Demo reset ✓';
+    setTimeout(()=>{ delete el.dataset.arm; el.textContent='↺ Reset demo data'; },1800);
+    return;
+  }
+  el.dataset.arm='1'; el.textContent='Tap again to confirm'; el.style.color='var(--alert)';
+}
+/* in-page reset: location.reload() is unreliable in embedded previews,
+   so restore the captured seed snapshot directly */
+const SEED_SNAPSHOT=JSON.parse(JSON.stringify({TOPICS,TT,exams,tests}));
+function softReset(){
+  try{localStorage.removeItem(STORE_KEY);}catch(e){}
+  TOPICS.length=0; TOPICS.push(...SEED_SNAPSHOT.TOPICS);
+  Object.keys(TT).forEach(k=>delete TT[k]); Object.assign(TT, SEED_SNAPSHOT.TT);
+  exams=JSON.parse(JSON.stringify(SEED_SNAPSHOT.exams));
+  tests=JSON.parse(JSON.stringify(SEED_SNAPSHOT.tests));
+  sessionLog=[]; carriedItems=[]; dayHistory=[]; lastRolloverNote=null;
+  todayIdx=0; missedDays=0; planDone.clear();
+  todayStats={blocks:0, focusMin:0}; streakCounted=false;
+  document.getElementById('streakN').textContent='12';
+  document.getElementById('hdrSub').textContent='Wed, 21 Aug · Class 10 CBSE · Term 1';
+  renderTT(); renderPlan(); renderWeek(); renderSubjects(); renderWeekStrip();
+  renderTests(); renderHeat(); renderBars(); renderProgStats(); renderT();
+  celebrate('Demo reset ✓');
+}
+/* ---------- boot: load saved state, render everything, arm autosave ---------- */
+const _loaded=loadState();
+// onboarding handoff: personalize header from ?fresh=1 profile (first-run only)
+try{
+  const ob=JSON.parse(localStorage.getItem('abhyas_onboarding_v1')||'null');
+  if(ob){
+    const hs=document.getElementById('hdrSub');
+    if(new URLSearchParams(location.search).get('fresh')==='1'){
+      hs.textContent=`${ob.board} · Class ${ob.cls} · set up just now`;
+      history.replaceState(null,'','studysync-concept.html');   // strip ?fresh so it sticks as default
+    } else {
+      hs.textContent=`${DAY_LABELS[WEEK_DAYS[todayIdx]]} · ${ob.board} · Class ${ob.cls}`;
+    }
+  }
+}catch(e){}
+renderTT(); renderPlan(); renderWeek(); renderSubjects(); renderWeekStrip();
+renderTests(); renderHeat(); renderBars(); renderProgStats();
+document.getElementById('tTopic').textContent=topicLabel(TOPICS[0]);
+renderT();
+if(_loaded){ celebrate('Welcome back — your state was saved ✓'); }
+['click','change'].forEach(evt=>document.addEventListener(evt,()=>persist(),{passive:true}));
+</script>
+</body>
+</html>
