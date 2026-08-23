@@ -11,7 +11,7 @@ import {
   type OnboardingState, type ScreenRole, type SubjectPick,
 } from '@abhyas/engine';
 import { presetsFor, topicsFromPreset } from '@abhyas/presets';
-import { useApp } from '../src/store';
+import { useApp, persist } from '../src/store';
 
 const BOARDS = ['CBSE', 'ICSE', 'State board'];
 const CLASSES = [9, 10, 11, 12];
@@ -90,6 +90,9 @@ export default function Onboarding() {
       learningStyle: s.learningStyle,
       exams: useApp.getState().exams,
     });
+    // setState() bypasses the store's action wrappers, so persist() must be
+    // invoked explicitly — otherwise onboarding results never reach SQLite (#8).
+    persist();
     router.replace('/');
   };
 

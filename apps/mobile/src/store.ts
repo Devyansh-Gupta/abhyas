@@ -97,7 +97,7 @@ const toSnapshot = (s: AppState): Snapshot => ({
 });
 
 /** Fire-and-forget save of the current state; no-op without a configured adapter. */
-function persist(): void {
+export function persist(): void {
   if (!adapter) return;
   adapter.save(toSnapshot(useApp.getState()));
 }
