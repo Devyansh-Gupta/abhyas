@@ -1,0 +1,28 @@
+{
+  "$schema": "./preset.schema.json",
+  "id": "cbse·class10·mathematics@2026-27",
+  "board": "CBSE",
+  "class": 10,
+  "subject": "Mathematics",
+  "emoji": "📐",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 12,
+  "topics": [
+    { "id": "math10-real-numbers", "name": "Real Numbers", "weight": 6 },
+    { "id": "math10-polynomials", "name": "Polynomials", "weight": 6 },
+    { "id": "math10-linear-pair", "name": "Pair of Linear Equations in Two Variables", "weight": 8 },
+    { "id": "math10-quadratic", "name": "Quadratic Equations", "weight": 9 },
+    { "id": "math10-ap", "name": "Arithmetic Progressions", "weight": 8 },
+    { "id": "math10-triangles", "name": "Triangles", "weight": 9 },
+    { "id": "math10-coordinate", "name": "Coordinate Geometry", "weight": 7 },
+    { "id": "math10-trigonometry", "name": "Introduction to Trigonometry", "weight": 10 },
+    { "id": "math10-trig-applications", "name": "Some Applications of Trigonometry", "weight": 7 },
+    { "id": "math10-circles", "name": "Circles", "weight": 8 },
+    { "id": "math10-areas", "name": "Areas Related to Circles", "weight": 6 },
+    { "id": "math10-surface-volumes", "name": "Surface Areas and Volumes", "weight": 8 },
+    { "id": "math10-statistics", "name": "Statistics", "weight": 7 },
+    { "id": "math10-probability", "name": "Probability", "weight": 7 }
+  ]
+}

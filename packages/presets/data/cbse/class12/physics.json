@@ -1,0 +1,29 @@
+{
+  "$schema": "../preset.schema.json",
+  "id": "cbse·class12·physics@2026-27",
+  "board": "CBSE",
+  "class": 12,
+  "subject": "Physics",
+  "emoji": "🧲",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "_note": "Rationalised NCERT: cyclotron & Communication Systems removed per 2025-26 circular — do not reintroduce without diff review.",
+  "topics": [
+    { "id": "phy12-electrostatics", "name": "Electric Charges and Fields", "weight": 8 },
+    { "id": "phy12-potential", "name": "Electrostatic Potential and Capacitance", "weight": 8 },
+    { "id": "phy12-current", "name": "Current Electricity", "weight": 9 },
+    { "id": "phy12-moving-charges", "name": "Moving Charges and Magnetism", "weight": 9 },
+    { "id": "phy12-magnetism-matter", "name": "Magnetism and Matter", "weight": 6 },
+    { "id": "phy12-emi", "name": "Electromagnetic Induction", "weight": 7 },
+    { "id": "phy12-ac", "name": "Alternating Current", "weight": 7 },
+    { "id": "phy12-em-waves", "name": "Electromagnetic Waves", "weight": 5 },
+    { "id": "phy12-ray-optics", "name": "Ray Optics and Optical Instruments", "weight": 9 },
+    { "id": "phy12-wave-optics", "name": "Wave Optics", "weight": 8 },
+    { "id": "phy12-dual-nature", "name": "Dual Nature of Radiation and Matter", "weight": 7 },
+    { "id": "phy12-atoms", "name": "Atoms", "weight": 6 },
+    { "id": "phy12-nuclei", "name": "Nuclei", "weight": 6 },
+    { "id": "phy12-semiconductors", "name": "Semiconductor Electronics", "weight": 8 }
+  ]
+}

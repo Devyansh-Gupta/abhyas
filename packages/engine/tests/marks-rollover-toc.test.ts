@@ -25,6 +25,14 @@ describe('marks recalibration (F11/F24 contract)', () => {
   it('mid-band changes nothing', () => {
     expect(recalibrate(topics, '📐', 60)).toEqual(topics);
   });
+  it('baseline ≥80% STARTS a never-studied topic on the ladder (M1c)', () => {
+    const after = recalibrate(topics, '📐', 85);
+    expect(after[2]).toMatchObject({ box: 1 }); // new topic box0 → box1
+  });
+  it('baseline <40% leaves never-studied topics untouched', () => {
+    const after = recalibrate(topics, '📐', 35);
+    expect(after[2]).toMatchObject({ box: 0, dueIn: 5 }); // exactly as seeded
+  });
 });
 
 describe('rollover carry (decision #3 contract)', () => {

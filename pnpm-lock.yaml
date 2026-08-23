@@ -20,6 +20,9 @@ importers:
       '@abhyas/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@abhyas/presets':
+        specifier: workspace:^
+        version: link:../../packages/presets
       '@expo/metro-runtime':
         specifier: ^57.0.12
         version: 57.0.12(@expo/log-box@57.0.3)(expo@57.0.15)(react-dom@19.2.3(react@19.2.3))(react-native@0.86.2(@babel/core@7.29.7)(@react-native/metro-config@0.87.0(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)
@@ -133,6 +136,18 @@ importers:
     devDependencies:
       typescript:
         specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@26.2.0)(lightningcss@1.33.0)(terser@5.50.0)
+
+  packages/presets:
+    devDependencies:
+      '@abhyas/engine':
+        specifier: workspace:^
+        version: link:../engine
+      typescript:
+        specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^2.1.9

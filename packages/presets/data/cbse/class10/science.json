@@ -1,0 +1,27 @@
+{
+  "$schema": "./preset.schema.json",
+  "id": "cbse·class10·science@2026-27",
+  "board": "CBSE",
+  "class": 10,
+  "subject": "Science",
+  "emoji": "⚗️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "topics": [
+    { "id": "sci10-chem-reactions", "name": "Chemical Reactions and Equations", "weight": 8 },
+    { "id": "sci10-acids-bases", "name": "Acids, Bases and Salts", "weight": 8 },
+    { "id": "sci10-metals-nonmetals", "name": "Metals and Non-metals", "weight": 8 },
+    { "id": "sci10-carbon", "name": "Carbon and its Compounds", "weight": 9 },
+    { "id": "sci10-life-processes", "name": "Life Processes", "weight": 10 },
+    { "id": "sci10-control-coordinate", "name": "Control and Coordination", "weight": 8 },
+    { "id": "sci10-reproduction", "name": "How do Organisms Reproduce?", "weight": 8 },
+    { "id": "sci10-heredity", "name": "Heredity", "weight": 6 },
+    { "id": "sci10-light", "name": "Light — Reflection and Refraction", "weight": 10 },
+    { "id": "sci10-human-eye", "name": "The Human Eye and the Colourful World", "weight": 8 },
+    { "id": "sci10-electricity", "name": "Electricity", "weight": 10 },
+    { "id": "sci10-magnetism", "name": "Magnetic Effects of Electric Current", "weight": 9 },
+    { "id": "sci10-environment", "name": "Our Environment", "weight": 5 }
+  ]
+}

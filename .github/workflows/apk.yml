@@ -1,0 +1,51 @@
+name: APK Build
+
+# Every push to main produces an installable debug APK.
+# Download: Actions tab → latest "APK Build" run → Artifacts → abhyas-apk
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # engine is TS source consumed via workspace path — ensure it's present
+      - name: Generate native android project (expo prebuild)
+        run: |
+          cd apps/mobile
+          pnpm exec expo prebuild --platform android --no-install
+
+      - name: Assemble debug APK
+        run: |
+          cd apps/mobile/android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: abhyas-apk
+          path: apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
