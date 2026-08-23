@@ -60,13 +60,11 @@ export const useApp = create<AppState>((set, get) => ({
   },
 
   logSession(topicId, minutes) {
-    const { sessions, streak, learningStyle, topics } = get();
+    const { sessions, streak } = get();
     set({
       sessions: [...sessions, { day: get().dayIndex, min: minutes }],
       streak: bumpToday(streak, todayActivity([...sessions, { day: 0, min: minutes }], [], new Set())),
-      topics: topics.map(t => (t.id === topicId ? t : t)), // placeholder until rating path
     });
-    void learningStyle;
   },
 
   rateTopic(uid, rating) {
