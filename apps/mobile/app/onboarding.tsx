@@ -7,6 +7,7 @@ import { View, Text, Pressable, ScrollView, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import {
   initOnboarding, reduce, canAdvance, stepCount, screenFor, recalibrate,
+  buildDayPlan,
   type OnboardingState, type ScreenRole, type SubjectPick,
 } from '@abhyas/engine';
 import { presetsFor, topicsFromPreset } from '@abhyas/presets';
@@ -82,6 +83,10 @@ export default function Onboarding() {
     }
     setState({
       topics: seeded as any,
+      // F29 (#4): seed TODAY's plan too — store.plan starts [] and only
+      // advanceDay() rebuilds it, so finishing onboarding previously landed
+      // on an empty Today ("0 blocks") despite topics being in the store.
+      plan: buildDayPlan(seeded as any, useApp.getState().exams, 0),
       learningStyle: s.learningStyle,
       exams: useApp.getState().exams,
     });
