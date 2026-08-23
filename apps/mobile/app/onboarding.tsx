@@ -150,7 +150,17 @@ export default function Onboarding() {
               onChangeText={setCustomName}
               placeholder="e.g. Sanskrit, IT, Kannada…"
               placeholderTextColor="#5A6473"
-              className="flex-1 rounded-xl border border-line bg-surface px-3 py-2 text-sm text-text"
+              style={{
+                flex: 1,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: '#1C232D',
+                backgroundColor: '#151B23',
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                fontSize: 14,
+                color: '#E7EBF2',
+              }}
             />
             <Pressable
               onPress={() => { dispatch({ t: 'addCustom', name: customName }); setCustomName(''); }}
@@ -203,7 +213,17 @@ export default function Onboarding() {
                 placeholder="%"
                 placeholderTextColor="#5A6473"
                 onChangeText={txt => dispatch({ t: 'setBaseline', emoji: sub.emoji, pct: parseInt(txt || '0', 10) || 0 })}
-                className="w-20 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-right text-text"
+                style={{
+                  width: 80,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: '#1C232D',
+                  backgroundColor: '#1B2330',
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  textAlign: 'right',
+                  color: '#E7EBF2',
+                }}
               />
             </View>
           ))}
