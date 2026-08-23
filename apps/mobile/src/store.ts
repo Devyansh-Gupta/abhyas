@@ -26,6 +26,9 @@ interface AppState {
   // actions
   checkItem(uid: string): void;
   rateTopic(uid: string, rating: 1 | 2 | 3): void;
+  /** Subjects-tab rating path (#7): SRS move on any non-graduated topic, no session logged.
+   *  Returns false when nothing applied (unknown or graduated topic) — UI must surface it. */
+  rateByTopic(topicId: string, rating: 1 | 2 | 3): boolean;
   logSession(topicId: string, minutes: number): void;
   /** Focus-timer finish path: log minutes + optional confidence rating on any topic. */
   finishFocus(opts: { topicId: string | null; minutes: number; rating?: 1 | 2 | 3 }): void;
@@ -125,6 +128,19 @@ export const useApp = create<AppState>((set, get) => ({
       sessions: [...sessions, { day: dayIndex, min: 25 }],
     });
     persist();
+  },
+
+  rateByTopic(topicId, rating) {
+    const { topics, learningStyle } = get();
+    const t = topics.find(x => x.id === topicId);
+    if (!t || t.box >= 5) return false;
+    set({
+      topics: topics.map(x =>
+        x.id === topicId ? { ...x, ...applyRating({ box: x.box, dueIn: x.dueIn }, rating, learningStyle) } : x
+      ),
+    });
+    persist();
+    return true;
   },
 
   finishFocus({ topicId, minutes, rating }) {

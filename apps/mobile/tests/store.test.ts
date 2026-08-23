@@ -81,3 +81,23 @@ describe('store · advanceDay rollover (#5/#14 contract)', () => {
     expect(s.doneUids.size).toBe(0);
   });
 });
+
+describe('store · rateByTopic (Subjects tab, #7)', () => {
+  beforeEach(fresh);
+
+  it('moves the SRS ladder without logging a session', () => {
+    expect(useApp.getState().rateByTopic('quadratic', 3)).toBe(true);
+    const s = useApp.getState();
+    const t = s.topics.find(x => x.id === 'quadratic')!;
+    expect(t.box).toBe(2);
+    expect(t.dueIn).toBe(3);
+    expect(s.sessions).toEqual([]); // no phantom minutes
+  });
+
+  it('returns false on unknown or graduated topics (no silent no-op)', () => {
+    expect(useApp.getState().rateByTopic('ghost', 3)).toBe(false);
+    useApp.setState({ topics: [{ ...seedTopics[0]!, box: 5, dueIn: 99 }] });
+    expect(useApp.getState().rateByTopic('quadratic', 1)).toBe(false);
+    expect(useApp.getState().topics[0]!.box).toBe(5); // mastered never move
+  });
+});

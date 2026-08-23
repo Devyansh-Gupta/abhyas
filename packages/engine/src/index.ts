@@ -3,6 +3,7 @@ export * from './srs';
 export * from './planner';
 export * from './streak';
 export * from './marks';
+export * from './mastery';
 export * from './rollover';
 export * from './toc';
 export * from './onboarding';
