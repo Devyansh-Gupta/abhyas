@@ -114,6 +114,9 @@ describe('store persistence seam (#8 prep)', () => {
     expect(s.doneUids).toEqual(new Set(['t_quadratic']));
     expect(s.topics.find(t => t.id === 'quadratic')).toMatchObject({ box: 3, dueIn: 7 });
     expect(s.streak.current).toBe(4);
+    // plan is re-derived from restored state (kill/reopen contract — #8):
+    // topics with dueIn 7 are not due today but new-topic seeding still yields blocks
+    expect(s.plan.length).toBeGreaterThan(0);
     // hydrate must not write back
     expect(adapter.saves).toEqual([]);
   });

@@ -110,6 +110,15 @@ export async function hydrate(): Promise<boolean> {
   if (!adapter) return false;
   const snap = await adapter.load();
   if (!snap) return false;
+  // Rebuild today's plan from restored state (F29 parity): the snapshot does not
+  // carry the derived plan — same contract as onboarding's finish path.
+  const plan = resolveCurrentPlan(
+    snap.topics,
+    snap.exams,
+    snap.classSessions ?? [],
+    [],
+    snap.dayIndex
+  );
   useApp.setState({
     topics: snap.topics,
     exams: snap.exams,
@@ -120,6 +129,7 @@ export async function hydrate(): Promise<boolean> {
     streak: snap.streak,
     examSeasonDial: snap.examSeasonDial ?? 1,
     classSessions: snap.classSessions ?? [],
+    plan,
   });
   return true;
 }
