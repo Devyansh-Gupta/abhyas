@@ -1,4 +1,5 @@
 import { View, Text, ScrollView, Pressable } from 'react-native';
+import { router } from 'expo-router';
 import { useApp } from '../../src/store';
 
 export default function TodayScreen() {
@@ -40,10 +41,23 @@ export default function TodayScreen() {
       {news.map(item => <PlanCard key={item.uid} uid={item.uid} />)}
 
       {plan.length === 0 && (
-        <Text className="text-dim mt-10 text-center text-sm">
-          No topics yet — onboarding seeds your syllabus.
-          {'\n'}Topics in store: {topics.length} · Exams: {exams.length}
-        </Text>
+        <View className="mt-10 items-center">
+          <Text className="text-dim text-center text-sm">
+            {topics.length === 0
+              ? 'Welcome! Set up your syllabus to get your first plan.'
+              : 'Topics loaded but no blocks today.'}
+          </Text>
+          {topics.length === 0 && (
+            <Pressable
+              onPress={() => router.push('/onboarding')}
+              className="mt-4 rounded-2xl bg-accent px-6 py-3"
+            >
+              <Text className="text-[15px] font-extrabold" style={{ color: '#0E1116' }}>
+                Start setup →
+              </Text>
+            </Pressable>
+          )}
+        </View>
       )}
     </ScrollView>
   );
