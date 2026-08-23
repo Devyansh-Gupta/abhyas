@@ -39,6 +39,15 @@ describe('store · focus finish path (#6)', () => {
     expect(t.dueIn).toBe(3);
   });
 
+  it('rating-only finishFocus (0 min) moves SRS without logging a zero-minute session', () => {
+    useApp.getState().finishFocus({ topicId: 'quadratic', minutes: 0, rating: 2 });
+    const s = useApp.getState();
+    expect(s.sessions).toEqual([]);              // no {min:0} pollution
+    expect(s.streak.countedToday).toBe(false);   // no streak bump either
+    const t = s.topics.find(x => x.id === 'quadratic')!;
+    expect(t.box).toBe(1);                       // SRS move still applied
+  });
+
   it('Solid on a NEW topic starts its ladder at box 1', () => {
     useApp.getState().finishFocus({ topicId: 'trig', minutes: 25, rating: 3 });
     const t = useApp.getState().topics.find(x => x.id === 'trig')!;

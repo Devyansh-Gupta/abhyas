@@ -186,12 +186,17 @@ export const useApp = create<AppState>((set, get) => ({
 
   finishFocus({ topicId, minutes, rating }) {
     const { topics, learningStyle } = get();
+    // minutes > 0 → log a session + streak bump; rating-only calls (min 0)
+    // apply the SRS move without polluting focus-minute totals
+    const logged = minutes > 0;
     set({
-      sessions: [...get().sessions, { day: get().dayIndex, min: minutes }],
-      streak: bumpToday(get().streak, {
-        blocksDone: 0,
-        focusMinutes: minutes,
-      }),
+      sessions: logged ? [...get().sessions, { day: get().dayIndex, min: minutes }] : get().sessions,
+      streak: logged
+        ? bumpToday(get().streak, {
+            blocksDone: 0,
+            focusMinutes: minutes,
+          })
+        : get().streak,
       // rating applies the SRS transition; new topics (box 0) start their ladder
       topics: topics.map(t =>
         t.id === topicId && rating
