@@ -31,6 +31,15 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
+      # Ubuntu runners fill their ~14 GB disk during RN Gradle builds.
+      # Remove toolchains an Expo debug build never touches + prune docker.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup || true
+          sudo rm -rf /usr/local/lib/android/sdk/ndk-bundle || true
+          sudo docker image prune --all --force > /dev/null 2>&1 || true
+          df -h /
+
       # engine is TS source consumed via workspace path — ensure it's present
       - name: Generate native android project (expo prebuild)
         run: |
@@ -38,6 +47,8 @@ jobs:
           pnpm exec expo prebuild --platform android --no-install
 
       - name: Assemble debug APK
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.workers.max=2
         run: |
           cd apps/mobile/android
           chmod +x gradlew
