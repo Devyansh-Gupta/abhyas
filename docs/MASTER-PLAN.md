@@ -29,10 +29,10 @@ Priority order below reflects dependency + risk (adapter seam BEFORE UI expansio
 
 | # | Task | Role | Status | Acceptance criteria (testable) | Verification command / method |
 |---|---|---|---|---|---|
-| #4 | Onboarding v2 wizard | app-builder + verifier | 🔄 code done; F29 verifying | Headless walk completes persona→CBSE10→pre-ticked subjects→coverage→style→Today seeded with preset topics | expo export web → serve -sl 8085 → playwright walk script PASS |
-| — | **Store persistence adapter seam** (prerequisite slice of #8) | data-layer | prepared | `useApp` accepts injectable persistence; existing actions route through it; all current tests pass unchanged | turbo suite green + new seam unit test |
-| #8 | SQLite persistence (repo layer) | data-layer | ⏳ | Kill app → reopen → topics/plan/streak intact; Drizzle migrations run on device DB; live queries feed Today | schema tests + device kill/reopen manual proof + turbo green |
-| #7 | Subjects / Progress / Parent tabs | app-builder | ⏳ | Bars render from store mastery; rating a topic moves its bar; Progress reflects sessionLog counts | headless walk asserting bar delta after rateTopic |
+| #4 | Onboarding v2 wizard | app-builder + verifier | ✅ F29 walk 8/8 PASS | Headless walk completes persona→CBSE10→pre-ticked subjects→coverage→style→Today seeded with preset topics | expo export web → serve -sl 8085 → playwright walk script PASS (d7ae4b6: fixed empty Today handoff; e2e-onboarding.cjs reusable) |
+| — | **Store persistence adapter seam** (prerequisite slice of #8) | data-layer | ✅ merged 0ae06b7 | `useApp` accepts injectable persistence; existing actions route through it; all current tests pass unchanged | turbo suite green + new seam unit test |
+| #8 | SQLite persistence (repo layer) | data-layer | 🔄 code merged, on-device proof pending | Kill app → reopen → topics/plan/streak intact; Drizzle migrations run on device DB; live queries feed Today | schema tests + device kill/reopen manual proof + turbo green (9 repo tests in gate) |
+| #7 | Subjects / Progress tabs (parent view → P2 link flow) | app-builder | ✅ b39775e | Bars render from store mastery; rating a topic moves its bar; Progress reflects sessionLog counts | headless walk asserting bar delta after rateTopic (gate green; mastery helper golden-tested) |
 | — | Plan tab: week strip + timetable editor | app-builder | ⏳ | Move/cancel a period → derived plan re-solves within same frame | headless walk + planner golden tests still green |
 | #9 | Exam Season mode + gap-day engine | engine-builder | ⏳ | Exam window input → capacity slider → dated revision plan respects gaps | new engine golden tests + UI smoke |
 

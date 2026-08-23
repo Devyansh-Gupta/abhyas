@@ -25,3 +25,5 @@ Thumbs.db
 *.log
 npm-debug.log*
 dist-v5/
+e2e-artifacts/
+apps/mobile/e2e-artifacts/
