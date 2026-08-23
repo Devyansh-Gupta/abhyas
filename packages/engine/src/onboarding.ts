@@ -69,21 +69,30 @@ export function isStreamStep(s: OnboardingState): boolean {
   return s.step === 2 && s.cls !== null && s.cls >= 11;
 }
 
+/** What the current step SHOWS — single source of truth for the wizard UI.
+ *  9–10:  persona, board, subjects, coverage, baseline, exams, style
+ *  11–12: persona, board, stream, subjects, coverage, baseline, exams, style */
+export type ScreenRole =
+  | 'persona' | 'board' | 'stream' | 'subjects'
+  | 'coverage' | 'baseline' | 'exams' | 'style';
+
+export function screenFor(s: OnboardingState): ScreenRole {
+  const senior = s.cls !== null && s.cls >= 11;
+  const seq: ScreenRole[] = senior
+    ? ['persona', 'board', 'stream', 'subjects', 'coverage', 'baseline', 'exams', 'style']
+    : ['persona', 'board', 'subjects', 'coverage', 'baseline', 'exams', 'style'];
+  return seq[Math.min(s.step, seq.length - 1)]!;
+}
+
 export function canAdvance(s: OnboardingState): boolean {
-  if (s.step === 2 && !isStreamStep(s)) {
-    // step 2 IS subjects for 9–10
-    const active = s.subjects.filter(x => !x.removed);
-    return active.length >= 1 && active.length <= MAX_SUBJECTS;
-  }
-  switch (s.step) {
-    case 0: return true;                       // persona fixed in v1
-    case 1: return !!s.board && s.cls !== null;
-    case 2: return !!s.stream;                 // stream gate (11–12 only)
-    case 3: {
+  switch (screenFor(s)) {
+    case 'board': return !!s.board && s.cls !== null;
+    case 'stream': return !!s.stream;
+    case 'subjects': {
       const active = s.subjects.filter(x => !x.removed);
       return active.length >= 1 && active.length <= MAX_SUBJECTS;
     }
-    default: return true;                      // 4-6 skippable by design
+    default: return true; // coverage/baseline/exams/style skippable by design
   }
 }
 

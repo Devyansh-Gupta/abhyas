@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { initOnboarding, reduce, canAdvance, MAX_SUBJECTS, type OnboardingState, type SubjectPick } from '../src/onboarding.js';
+import { initOnboarding, reduce, canAdvance, screenFor, stepCount, MAX_SUBJECTS, type OnboardingState, type SubjectPick } from '../src/onboarding.js';
 
 const pick = (emoji: string, name = emoji): SubjectPick => ({ emoji, name, kind: 'core' });
 const withState = (over: Partial<OnboardingState>): OnboardingState =>

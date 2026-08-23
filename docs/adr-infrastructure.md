@@ -149,6 +149,41 @@ Cost profile: typical usage ≈ free (steps 1–2 pennies at scale). Pro quota f
 
 ---
 
+# Upstream review — 2026-08-23
+
+External validation of every major decision against current official/upstream guidance
+(Expo changelog, NativeWind docs, Drizzle/expo-sqlite guides, local-first sync practitioner
+write-ups). Full evidence trail in session transcript; summary below.
+
+## Verdict table
+
+| Decision | Verdict | Evidence basis |
+|---|---|---|
+| Expo SDK 57 + RN 0.86.2 | ✅ Current | Official Expo changelog: SDK 57 (Jun 2026) = RN 0.86, React 19.2, non-breaking release; ≥57.0.9 fixes Hermes V1 memory regression affecting reanimated/worklets apps — our pin is safe |
+| pnpm + Turborepo monorepo | ✅ Optimal for shape | Shared pure-TS engine tested identically across apps is the canonical use case; Nx overkill at 2 apps (ADR A1 reasoning confirmed) |
+| expo-sqlite + Drizzle (#8) | ✅ Consensus default | 2026 local-first RN guides converge on this pair; enable `enableChangeListener` for reactive live queries; **gotcha**: Metro can't import Drizzle's `.sql` migrations without a metro.config asset-ext entry |
+| Hand-rolled op-log sync vs PowerSync/ElectricSQL | ✅ Right at our scale — highest-risk area | Solo-dev practitioners with single-user data report record-level LWW suffices and sync libraries add unwanted server infra; but hand-rolled sync is where offline apps fail silently — see hard requirements below |
+| Zustand (+ TanStack Query per C2) | ⚠️ Gap: TanStack Query not installed | Documented pattern post-#8: SQLite = truth via live queries; store shrinks to ephemeral state. Decide before #8 whether store becomes a projection or is dissolved |
+| NativeWind v4 / Tailwind 3 | ⚠️ One major behind | v5 shipped (Tailwind v4 engine; requires RN 0.81+ ✓); migration reported mostly compatible. Scheduled for early migration — see follow-ups |
+| Supabase free→vertical-scale posture | ✅ Matches best practice | No microservices/K8s until metrics demand; Google+email OTP low-friction defaults |
+
+## Hard requirements added to sync work (P2 gate)
+
+Practitioner consensus on what hand-rolled sync must have to be trustworthy:
+
+1. **Idempotent ops** — retries after network failure must never double-apply (`op_id` keyed)
+2. **Compaction** — create→update before first sync merges into a single create op
+3. **Two-device convergence test** — simulated devices A/B interleave writes, both must converge identical
+4. **Backfill on sync-enable** — records created while sync was off must queue on first enable
+
+## Follow-ups recorded
+
+- Migrate NativeWind v4 → v5 before adding more styling surface (scheduled 2026-08-23)
+- Install @tanstack/react-query when #8 lands; define store-as-projection boundary then
+- ESLint/Prettier/husky (A2) still absent — either schedule or mark deferred in ADR to keep doc trustworthy
+
+---
+
 # RESOLVED — Owner rulings 2026-08-22 (session 2)
 
 ## R1. Preset curator → **agent watchdog + owner approval**

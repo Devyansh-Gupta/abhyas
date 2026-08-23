@@ -1,11 +1,15 @@
 /**
- * Onboarding wizard (issue #4) — M1a–M1d per design-onboarding-v2.md.
- * Route: /onboarding · commits to store at the end, then routes to / (Today).
+ * Onboarding wizard (issue #4) — UI is a thin renderer over engine screenFor().
+ * All gates/sequence live in the engine (golden-tested); this file only draws.
  */
 import { useState, useReducer } from 'react';
 import { View, Text, Pressable, ScrollView, TextInput } from 'react-native';
 import { router } from 'expo-router';
-import { initOnboarding, reduce, canAdvance, stepCount, isStreamStep, type SubjectPick } from '@abhyas/engine/src/onboarding';
+import {
+  initOnboarding, reduce, canAdvance, stepCount, screenFor,
+  type OnboardingState, type ScreenRole, type SubjectPick,
+} from '@abhyas/engine/src/onboarding';
+import { recalibrate } from '@abhyas/engine/src/marks';
 import { presetsFor, topicsFromPreset } from '@abhyas/presets';
 import { useApp } from '../src/store';
 
@@ -21,36 +25,6 @@ const ELECTIVES: SubjectPick[] = [
   { emoji: '💻', name: 'Computer Science', kind: 'elective' },
   { emoji: '📊', name: 'Economics', kind: 'elective' },
 ];
-const CORE_BY_STREAM: Record<string, SubjectPick[]> = {
-  Science: [
-    { emoji: '📐', name: 'Mathematics', kind: 'core' },
-    { emoji: '⚛️', name: 'Physics', kind: 'core' },
-    { emoji: '⚗️', name: 'Chemistry', kind: 'core' },
-    { emoji: '🧬', name: 'Biology', kind: 'core' },
-    { emoji: '📖', name: 'English Core', kind: 'core' },
-  ],
-  Commerce: [
-    { emoji: '📒', name: 'Accountancy', kind: 'core' },
-    { emoji: '🏢', name: 'Business Studies', kind: 'core' },
-    { emoji: '📊', name: 'Economics', kind: 'core' },
-    { emoji: '📐', name: 'Mathematics', kind: 'core' },
-    { emoji: '📖', name: 'English Core', kind: 'core' },
-  ],
-  Humanities: [
-    { emoji: '🏛️', name: 'History', kind: 'core' },
-    { emoji: '🗺️', name: 'Geography', kind: 'core' },
-    { emoji: '⚖️', name: 'Political Science', kind: 'core' },
-    { emoji: '🧠', name: 'Psychology', kind: 'core' },
-    { emoji: '📖', name: 'English Core', kind: 'core' },
-  ],
-  Vocational: [{ emoji: '📖', name: 'English Core', kind: 'core' }],
-};
-const CLASS_9_10_CORE: SubjectPick[] = [
-  { emoji: '📐', name: 'Mathematics', kind: 'core' },
-  { emoji: '⚗️', name: 'Science', kind: 'core' },
-  { emoji: '📖', name: 'English', kind: 'core' },
-  { emoji: '🌏', name: 'Social Science', kind: 'core' },
-];
 const COVERAGE_CHIPS: Array<{ label: string; frac: number }> = [
   { label: 'Not started', frac: 0 },
   { label: '¼ done', frac: 0.25 },
@@ -60,29 +34,57 @@ const COVERAGE_CHIPS: Array<{ label: string; frac: number }> = [
 ];
 
 export default function Onboarding() {
-  const [s, dispatch] = useReducer(reduce, undefined, initOnboarding) as [ReturnType<typeof initOnboarding>, React.Dispatch<any>];
+  const [s, dispatch] = useReducer(reduce, undefined, initOnboarding) as [OnboardingState, React.Dispatch<any>];
   const [customName, setCustomName] = useState('');
-  
-  
+  const setState = useApp.setState;
 
   const total = stepCount(s);
+  const role: ScreenRole = screenFor(s);
   const active: SubjectPick[] = s.subjects.filter((x: SubjectPick) => !x.removed);
   const ok = canAdvance(s);
   const presets = s.board && s.cls ? presetsFor(s.board, s.cls) : [];
 
+  /** map a picked subject to a library preset when one exists */
+  const presetForPick = (p: SubjectPick) => {
+    if (s.board !== 'CBSE') return undefined;
+    if (s.cls === 10 && p.name === 'Science') return presets.find(x => x.subject === 'Science');
+    if (s.cls === 10 && p.name === 'Mathematics') return presets.find(x => x.subject === 'Mathematics');
+    if (s.cls === 12 && p.name === 'Physics') return presets.find(x => x.subject === 'Physics');
+    return undefined;
+  };
+
   const finish = () => {
-    // seed store from picks + coverage + baseline
     const topics = [];
     for (const sub of active) {
-      const preset = sub.presetId ? presets.find(p => p.id === sub.presetId) : null;
+      const preset = presetForPick(sub);
       if (preset) {
         const cov = s.coverage[sub.emoji] ?? 0;
         topics.push(...topicsFromPreset(preset, cov === 0 ? 'unstarted' : cov >= 0.75 ? 'covered' : 'in_progress').topics);
       }
+      // subjects without a library preset (custom/electives) enter as bare topics
+      else {
+        topics.push({
+          id: `custom-${sub.name.toLowerCase().replace(/\W+/g, '-')}`,
+          subjectId: sub.emoji,
+          name: sub.name,
+          box: 0,
+          dueIn: -1,
+          weight: 5,
+          coverage: (s.coverage[sub.emoji] ?? 0) === 0 ? 'unstarted' : (s.coverage[sub.emoji] ?? 0) >= 0.75 ? 'covered' : 'in_progress',
+          backlog: false,
+        });
+      }
     }
-    useApp.setState({
-      topics,
+    // baseline marks seed the ladder through the same engine path as tests
+    let seeded = topics;
+    for (const [emoji, pct] of Object.entries(s.baseline)) {
+      if (!pct) continue;
+      seeded = recalibrate(seeded as any, emoji, pct, s.learningStyle);
+    }
+    setState({
+      topics: seeded as any,
       learningStyle: s.learningStyle,
+      exams: useApp.getState().exams,
     });
     router.replace('/');
   };
@@ -92,85 +94,50 @@ export default function Onboarding() {
       <Text className="text-dim text-xs font-bold tracking-widest">STEP {Math.min(s.step + 1, total)} / {total}</Text>
       <Bar n={s.step} total={total} />
 
-      {/* STEP 0 · persona */}
-      {s.step === 0 && (
+      {/* persona */}
+      {role === 'persona' && (
         <>
           <H>Who's studying?</H>
-          <Card selected><Text className="text-text font-bold">🎓 Class 9–12 student</Text></Card>
-          <Card><Text className="text-dim line-through">🎒 Class 5–8 — soon</Text></Card>
-          <Card><Text className="text-dim line-through">🎓 UG/PG — soon</Text></Card>
+          <Card selected><Text className="font-bold text-text">🎓 Class 9–12 student</Text></Card>
+          <Card><Text className="line-through text-dim">🎒 Class 5–8 — soon</Text></Card>
+          <Card><Text className="line-through text-dim">🎓 UG/PG — soon</Text></Card>
         </>
       )}
 
-      {/* STEP 1 · board & class */}
-      {s.step === 1 && (
+      {/* board & class */}
+      {role === 'board' && (
         <>
           <H>Your board & class</H>
-          <Row>
-            {BOARDS.map(b => (
-              <Chip key={b} label={b} on={s.board === b} onPress={() => dispatch({ t: 'setBoard', board: b })} />
-            ))}
-          </Row>
-          <Row>
-            {CLASSES.map(c => (
-              <Chip key={c} label={`Class ${c}`} on={s.cls === c} onPress={() => dispatch({ t: 'setClass', cls: c })} />
-            ))}
-          </Row>
+          <Row>{BOARDS.map(b => <Chip key={b} label={b} on={s.board === b} onPress={() => dispatch({ t: 'setBoard', board: b })} />)}</Row>
+          <Row>{CLASSES.map(c => <Chip key={c} label={`Class ${c}`} on={s.cls === c} onPress={() => dispatch({ t: 'setClass', cls: c })} />)}</Row>
         </>
       )}
 
-      {/* STEP 2 · stream (11–12 only) OR subjects (9–10) */}
-      {s.step === 2 && isStreamStep(s) && (
+      {/* stream (11–12) */}
+      {role === 'stream' && (
         <>
           <H>Your stream</H>
-          <Row>
-            {STREAMS.map(st => (
-              <Chip key={st} label={st} on={s.stream === st} onPress={() => dispatch({ t: 'setStream', s: st })} />
-            ))}
-          </Row>
-        </>
-      )}
-      {s.step === 2 && !isStreamStep(s) && (
-        <>
-          <H>Your subjects</H>
-          <Text className="-mt-3 mb-3 text-xs text-dim">
-            Pre-ticked from your board — remove what you don't have, add what you do.
-          </Text>
-          {CLASS_9_10_CORE.map(p => <SubjToggle key={p.name} pick={p} s={s} dispatch={dispatch} />)}
-          <Text className="mb-2 mt-4 text-[13px] font-extrabold uppercase tracking-wider text-text">Electives</Text>
-          <Row>
-            {ELECTIVES.map(p => (
-              <Chip
-                key={p.name}
-                label={`${p.emoji} ${p.name}`}
-                on={s.subjects.some((x: SubjectPick) => x.emoji === p.emoji && !(x as SubjectPick).removed)}
-                onPress={() => dispatch({ t: 'toggleSubject', pick: p })}
-              />
-            ))}
-          </Row>
+          <Row>{STREAMS.map(st => <Chip key={st} label={st} on={s.stream === st} onPress={() => dispatch({ t: 'setStream', s: st })} />)}</Row>
         </>
       )}
 
-      {/* STEP 3 · subject review as EDITABLE DRAFT (M1a) — 11–12 only */}
-      {s.step === 3 && (
+      {/* subject review — EDITABLE DRAFT (M1a) */}
+      {role === 'subjects' && (
         <>
           <H>Your subjects</H>
-          <Text className="-mt-3 mb-3 text-xs text-dim">
-            Pre-ticked from your board — remove what you don't have, add what you do.
-          </Text>
-          {(s.cls ?? 10) >= 11 && s.stream
-            ? CORE_BY_STREAM[s.stream]!.map(p => <SubjToggle key={p.name} pick={p} s={s} dispatch={dispatch} />)
-            : CLASS_9_10_CORE.map(p => <SubjToggle key={p.name} pick={p} s={s} dispatch={dispatch} />)}
-          <Text className="mb-2 mt-4 text-[13px] font-extrabold uppercase tracking-wider text-text">Electives</Text>
+          <Text className="-mt-3 mb-3 text-xs text-dim">Pre-ticked from your board — remove what you don't have, add what you do.</Text>
+          {active.map((p: SubjectPick) => (
+            <SubjToggle key={p.emoji} pick={p} removed={false} dispatch={dispatch} />
+          ))}
+          {s.subjects.filter((x: SubjectPick) => x.removed).map((p: SubjectPick) => (
+            <SubjToggle key={`rm-${p.emoji}`} pick={p} removed dispatch={dispatch} />
+          ))}
+          <Text className="mb-2 mt-4 text-[13px] font-extrabold uppercase tracking-wider text-text">Electives & others</Text>
           <Row>
-            {ELECTIVES.map(p => (
-              <Chip
-                key={p.name}
-                label={`${p.emoji} ${p.name}`}
-                on={s.subjects.some((x: SubjectPick) => x.emoji === p.emoji && !(x as SubjectPick).removed)}
-                onPress={() => dispatch({ t: 'toggleSubject', pick: p })}
-              />
-            ))}
+            {ELECTIVES.map(p => {
+              const inList = s.subjects.some((x: SubjectPick) => x.emoji === p.emoji && !(x as SubjectPick).removed);
+              return <Chip key={p.name} label={`${p.emoji} ${p.name}`} on={inList} onPress={() => dispatch({ t: 'toggleSubject', pick: p })} />;
+            })}
           </Row>
           <Text className="mb-1 mt-4 text-[13px] font-extrabold uppercase tracking-wider text-text">Subject not listed?</Text>
           <View className="flex-row gap-2">
@@ -194,14 +161,14 @@ export default function Onboarding() {
         </>
       )}
 
-      {/* STEP 4 · mid-year calibration (M1b) */}
-      {s.step === 4 && (
+      {/* mid-year calibration (M1b) */}
+      {role === 'coverage' && (
         <>
           <H>How far has school reached?</H>
           <Text className="-mt-3 mb-4 text-xs text-dim">One tap each — so plans match reality, not September.</Text>
           {active.map((sub: SubjectPick) => (
             <View key={sub.emoji} className="mb-4 rounded-2xl border border-line bg-surface p-3">
-              <Text className="mb-2 text-text font-bold">{sub.emoji} {sub.name}</Text>
+              <Text className="mb-2 font-bold text-text">{sub.emoji} {sub.name}</Text>
               <Row>
                 {COVERAGE_CHIPS.map(c => (
                   <Chip
@@ -218,22 +185,20 @@ export default function Onboarding() {
         </>
       )}
 
-      {/* STEP 5 · baseline marks (M1c) */}
-      {s.step === 5 && (
+      {/* baseline marks (M1c) */}
+      {role === 'baseline' && (
         <>
-          <H>Any recent scores? <Text className="text-dim text-sm font-normal">(optional)</Text></H>
-          <Text className="-mt-3 mb-4 text-xs text-dim">
-            Enter last exam's % to calibrate where revision starts. Skip freely.
-          </Text>
+          <H>Any recent scores? <Text className="text-sm font-normal text-dim">(optional)</Text></H>
+          <Text className="-mt-3 mb-4 text-xs text-dim">Enter last exam's % to calibrate where revision starts. Skip freely.</Text>
           {active.map((sub: SubjectPick) => (
             <View key={sub.emoji} className="mb-3 flex-row items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3">
-              <Text className="text-text font-bold">{sub.emoji} {sub.name}</Text>
+              <Text className="font-bold text-text">{sub.emoji} {sub.name}</Text>
               <TextInput
                 keyboardType="number-pad"
                 maxLength={3}
                 placeholder="%"
                 placeholderTextColor="#5A6473"
-                onChangeText={txt => dispatch({ t: 'setBaseline', emoji: sub.emoji, pct: parseInt(txt || '0', 10) })}
+                onChangeText={txt => dispatch({ t: 'setBaseline', emoji: sub.emoji, pct: parseInt(txt || '0', 10) || 0 })}
                 className="w-20 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-right text-text"
               />
             </View>
@@ -241,19 +206,17 @@ export default function Onboarding() {
         </>
       )}
 
-      {/* STEP 6 · exams (M1d) */}
-      {s.step === 6 && (
+      {/* exams (M1d minimal) */}
+      {role === 'exams' && (
         <>
           <H>Upcoming exams?</H>
-          <Text className="-mt-3 mb-4 text-xs text-dim">
-            Just a name + month is enough — exact dates when the datesheet lands.
-          </Text>
-          <Card><Text className="text-text">📝 Add later from Plan tab — nothing blocks you here.</Text></Card>
+          <Text className="-mt-3 mb-4 text-xs text-dim">Just a name + month is enough — exact dates when the datesheet lands.</Text>
+          <Card><Text className="text-text">📝 Add later from the Plan tab — nothing blocks you here.</Text></Card>
         </>
       )}
 
-      {/* STEP 7 · learning style dial (E2) */}
-      {s.step === 7 && (
+      {/* learning style dial (E2) */}
+      {role === 'style' && (
         <>
           <H>How well do you remember what you study?</H>
           <RatePick label='😵‍💫 I forget fast — remind me sooner' v='fast_forget' cur={s.learningStyle} set={v => dispatch({ t: 'setStyle', style: v })} />
@@ -313,8 +276,7 @@ function Card({ children, selected }: { children: React.ReactNode; selected?: bo
     </View>
   );
 }
-function SubjToggle({ pick, s, dispatch }: { pick: SubjectPick; s: ReturnType<typeof initOnboarding>; dispatch: (a: any) => void }) {
-  const removed = s.subjects.find((x: SubjectPick) => x.emoji === pick.emoji)?.removed ?? false;
+function SubjToggle({ pick, removed, dispatch }: { pick: SubjectPick; removed: boolean; dispatch: (a: any) => void }) {
   return (
     <Pressable
       onPress={() => dispatch({ t: 'toggleSubject', pick })}
@@ -328,10 +290,13 @@ function SubjToggle({ pick, s, dispatch }: { pick: SubjectPick; s: ReturnType<ty
     </Pressable>
   );
 }
-function RatePick({ label, v, cur, set }: { label: string; v: any; cur: any; set: (v: any) => void }) {
+function RatePick({ label, v, cur, set }: { label: string; v: string; cur: string; set: (v: any) => void }) {
   return (
     <Pressable onPress={() => set(v)} className={`mb-2 rounded-2xl border p-4 ${cur === v ? 'border-accent bg-accent/15' : 'border-line bg-surface'}`}>
       <Text className="text-text">{label}</Text>
     </Pressable>
   );
 }
+
+// local import to avoid circular top-level (engine exports it too)
+
