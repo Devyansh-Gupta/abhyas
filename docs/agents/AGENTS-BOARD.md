@@ -44,6 +44,9 @@ Preset additions validate against preset.schema.json and cite CBSE source.
 
 | Task | Role | State | Evidence |
 |---|---|---|---|
-| #4 F29 onboarding walk | verifier | prepared | — |
-| #8 repo layer + adapter seam | data-layer | prepared | — |
+| #8 seam slice (adapter) | data-layer | ✅ verified+merged | commit `feat(#8 prep)`; orchestrator re-ran gate 10/10; CI green |
+| CI lockfile sync | orchestrator | ✅ verified | run 32633534877 success |
+| APK pipeline repair | orchestrator | ✅ verified | run 32638843560 SUCCESS (pnpm dedupe → icon path → hoisted linker → reanimated 4.5.3 → runner disk free) |
+| #4 F29 onboarding walk | verifier | prepared | needs headless walk script |
+| #8 SQLite repo layer | data-layer | prepared (seam ready) | wire expo-sqlite adapter via configurePersistence() |
 | #7 Subjects/Progress tabs | app-builder | prepared | — |

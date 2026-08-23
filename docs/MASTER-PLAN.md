@@ -9,9 +9,10 @@ Derived daily study plans from the student's real timetable + a spaced-revision 
 
 | Area | State | Evidence |
 |---|---|---|
-| CI gate (`turbo typecheck+test`) | ✅ green, 10 tasks | run #32627639174 & local runs |
-| APK Build workflow | 🔧 fixed (pnpm version conflict), awaiting next push proof | run 32627639208 failure log |
+| CI gate (`turbo typecheck+test`) | ✅ green, 10 tasks, 54 tests | runs 32633534877, 32638843561 |
+| APK Build workflow | ✅ FIXED & GREEN — installable debug APK on every push | run 32638843560 success (was failing: pnpm conflict → icon ENOENT → pnpm isolation → reanimated/RN mismatch → runner disk) |
 | Onboarding v2 wizard | 🔄 screenFor() state-machine refactor pushed; F29 walk pending | commit 34e043a |
+| Persistence seam (#8 prep) | ✅ adapter interface + hydrate/persist merged, tested | commit `feat(#8 prep)`, 4 new tests |
 | Styling | ✅ migrated NativeWind v4 → v5-preview (Tailwind v4 CSS-first); tokens verified in compiled CSS | commit 27f848c |
 | Store scaffolding | ✅ dead code removed, behavior identical | commit 2ba63a7 |
 | Architecture decisions | ✅ externally validated (upstream review appendix in ADR) | docs/adr-infrastructure.md |
