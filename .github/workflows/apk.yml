@@ -1,11 +1,9 @@
 name: APK Build
 
-# Every push to main produces an installable debug APK.
-# Download: Actions tab → latest "APK Build" run → Artifacts → abhyas-apk
+# On-demand installable debug APK: Actions tab → "APK Build" → Run workflow.
+# (Deliberately NOT on push — RN Gradle builds cost ~35 min cold; CI covers pushes.)
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 jobs:
   apk:
@@ -27,6 +25,12 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+
+      # Cache Gradle wrapper + dependencies + native build outputs between runs.
+      # Cold RN builds ~35 min; warm-cache reruns land ~8-12 min.
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
 
       - name: Install deps
         run: pnpm install --frozen-lockfile

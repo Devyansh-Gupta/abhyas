@@ -19,6 +19,7 @@
     "expo-constants": "^57.0.13",
     "expo-linking": "^57.0.7",
     "expo-router": "^57.0.15",
+    "expo-sqlite": "^57.0.1",
     "expo-status-bar": "~57.0.1",
     "nativewind": "5.0.0-preview.4",
     "postcss": "^8.5.26",
