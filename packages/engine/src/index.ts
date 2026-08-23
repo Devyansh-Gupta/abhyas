@@ -5,3 +5,4 @@ export * from './streak';
 export * from './marks';
 export * from './rollover';
 export * from './toc';
+export * from './onboarding';

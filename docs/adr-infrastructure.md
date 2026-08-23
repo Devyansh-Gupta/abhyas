@@ -178,9 +178,11 @@ Practitioner consensus on what hand-rolled sync must have to be trustworthy:
 
 ## Follow-ups recorded
 
-- Migrate NativeWind v4 → v5 before adding more styling surface (scheduled 2026-08-23)
+- ✅ DONE 2026-08-23: NativeWind v4 → v5-preview migrated (commit 27f848c); Metro import must be 'nativewind/metro' subpath
 - Install @tanstack/react-query when #8 lands; define store-as-projection boundary then
 - ESLint/Prettier/husky (A2) still absent — either schedule or mark deferred in ADR to keep doc trustworthy
+- pnpm linker: `.npmrc node-linker=hoisted` is correct for pnpm 9.x and validated by Expo monorepo guide (SDK 54+ supports isolated, but RN native libs still break it); when upgrading to pnpm ≥10, the setting moves to `nodeLinker: hoisted` inside pnpm-workspace.yaml. Escape hatch to restore strict isolation later: rnx-kit/metro-resolver-symlinks
+- Gradle CI caching: gradle/actions/setup-gradle@v4 added (official mechanism); cold builds ~35 min, warm-cache target ~8-12 min. APK builds are workflow_dispatch-only — pushes rely on the fast turbo CI gate instead
 
 ---
 

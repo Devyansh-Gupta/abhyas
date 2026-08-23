@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router/stack';
 import { StatusBar } from 'expo-status-bar';
+import { configurePersistence, hydrate } from '../src/store';
+import { createSqliteAdapter } from '../src/repo/sqlite';
 import '../global.css';
 
 const navTheme = {
@@ -15,7 +18,36 @@ const navTheme = {
   },
 };
 
+/**
+ * #8 slice 1: wire SQLite persistence and hydrate before rendering tabs.
+ * Renders nothing until hydration settles so a slow disk read never flashes
+ * an empty state over restored data. The adapter itself resolves load() to null
+ * on failure (F21/F24 — logged, never silent), so `ready` always flips true and
+ * first launch / corrupted DB boots with empty state instead of hanging here.
+ */
+function useStartupHydration(): boolean {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    configurePersistence(createSqliteAdapter());
+    hydrate()
+      .catch(err => console.error('[startup] hydrate failed:', err))
+      .finally(() => {
+        if (!cancelled) setReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return ready;
+}
+
 export default function RootLayout() {
+  const ready = useStartupHydration();
+  if (!ready) return null;
+
   return (
     <ThemeProvider value={navTheme}>
       <StatusBar style="light" />

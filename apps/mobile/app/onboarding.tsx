@@ -6,10 +6,9 @@ import { useState, useReducer } from 'react';
 import { View, Text, Pressable, ScrollView, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import {
-  initOnboarding, reduce, canAdvance, stepCount, screenFor,
+  initOnboarding, reduce, canAdvance, stepCount, screenFor, recalibrate,
   type OnboardingState, type ScreenRole, type SubjectPick,
-} from '@abhyas/engine/src/onboarding';
-import { recalibrate } from '@abhyas/engine/src/marks';
+} from '@abhyas/engine';
 import { presetsFor, topicsFromPreset } from '@abhyas/presets';
 import { useApp } from '../src/store';
 
