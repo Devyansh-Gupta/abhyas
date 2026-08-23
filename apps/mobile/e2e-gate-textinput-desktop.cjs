@@ -1,0 +1,30 @@
+/** Desktop-only TextInput gate — separate process to dodge the Helium flake. */
+const { chromium } = require('playwright-core');
+const EXECUTABLE = 'C:/Program Files/imput/Helium/Application/chrome.exe';
+(async () => {
+  let failures = 0;
+  const browser = await chromium.launch({ executablePath: EXECUTABLE, headless: true });
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const page = await ctx.newPage();
+  await page.goto('http://localhost:8091/onboarding', { waitUntil: 'domcontentloaded' });
+  await page.evaluate(() => localStorage.clear());
+  await page.reload({ waitUntil: 'networkidle' });
+  const cont = async () => { await page.locator('text=Continue').last().click(); await page.waitForTimeout(600); };
+  await cont();
+  await page.locator('text=CBSE').first().click();
+  await page.locator('text=Class 10').first().click();
+  await cont();
+  await page.waitForTimeout(500);
+  const input = page.locator('input[placeholder*="Sanskrit"]').first();
+  const box = await input.boundingBox();
+  await input.click(); await input.type('Sanskrit');
+  const val = await input.inputValue();
+  const bw = await input.evaluate(el => getComputedStyle(el).borderWidth);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  console.log(`[gate] input box w=${Math.round(box.width)} h=${Math.round(box.height)}`);
+  console.log(`[gate] typed ok: ${val === 'Sanskrit'} | border-width: ${bw} | overflow: ${overflow}px`);
+  if (val !== 'Sanskrit' || bw === '0px' || overflow > 2) failures++;
+  await page.screenshot({ path: 'e2e-artifacts/gate-textinput-desktop-subjects.png' });
+  await ctx.close(); await browser.close();
+  console.log(failures === 0 ? 'DESKTOP LEG: ALL PASS' : `DESKTOP LEG: ${failures} FAIL`);
+})();
