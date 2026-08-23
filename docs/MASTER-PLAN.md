@@ -33,8 +33,8 @@ Priority order below reflects dependency + risk (adapter seam BEFORE UI expansio
 | — | **Store persistence adapter seam** (prerequisite slice of #8) | data-layer | ✅ merged 0ae06b7 | `useApp` accepts injectable persistence; existing actions route through it; all current tests pass unchanged | turbo suite green + new seam unit test |
 | #8 | SQLite persistence (repo layer) | data-layer | 🔄 code merged, on-device proof pending | Kill app → reopen → topics/plan/streak intact; Drizzle migrations run on device DB; live queries feed Today | schema tests + device kill/reopen manual proof + turbo green (9 repo tests in gate) |
 | #7 | Subjects / Progress tabs (parent view → P2 link flow) | app-builder | ✅ b39775e | Bars render from store mastery; rating a topic moves its bar; Progress reflects sessionLog counts | headless walk asserting bar delta after rateTopic (gate green; mastery helper golden-tested) |
-| — | Plan tab: week strip + timetable editor | app-builder | ⏳ | Move/cancel a period → derived plan re-solves within same frame | headless walk + planner golden tests still green |
-| #9 | Exam Season mode + gap-day engine | engine-builder | ⏳ | Exam window input → capacity slider → dated revision plan respects gaps | new engine golden tests + UI smoke |
+| — | Plan tab: week strip + timetable editor | app-builder | ✅ 46f581c | Move/cancel a period → derived plan re-solves within same frame | headless walk e2e-plan.cjs 8/8 PASS (free-time delta asserted); planner golden tests green |
+| #9 | Exam Season mode + gap-day engine | engine-builder | ✅ b111fbb (engine slice; UI slider deferred) | Exam window input → capacity slider → dated revision plan respects gaps | new engine golden tests (examSeason.ts, gap-day boost/taper/capacity extremes) + UI smoke pending P1 exit pass |
 
 **Exit criteria for P1:** a student can onboard, see a derived plan today AND tomorrow, focus-timer a session, watch mastery bars move, and lose nothing on app restart.
 
