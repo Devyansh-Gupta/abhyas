@@ -1,3 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+
+/* Abhyas design tokens (from v4 tailwind.config theme.extend.colors) —
+   Tailwind v4 is CSS-first: config lives here now. */
+@theme {
+  --color-bg: #0E1116;
+  --color-surface: #151B23;
+  --color-surface-2: #1C232D;
+  --color-line: #232C37;
+  --color-text: #E7EBF2;
+  --color-dim: #8B94A3;
+  --color-accent: #8B7CF6;
+  --color-done: #4ADE80;
+  --color-due: #F87171;
+}

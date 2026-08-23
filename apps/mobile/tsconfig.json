@@ -2,7 +2,16 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "paths": { "@abhyas/engine": ["../../packages/engine/src/index.ts"] }
+    "paths": {
+      "@abhyas/engine": [
+        "../../packages/engine/src/index.ts"
+      ]
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx", "../../packages/engine/src/**/*.ts"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../packages/engine/src/**/*.ts",
+    "nativewind-env.d.ts"
+  ]
 }
