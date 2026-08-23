@@ -2,12 +2,15 @@
  * App store (Zustand) — single source of truth mirroring the prototype's state model.
  * Persistence adapter is injectable; SQLite repo lands in issue #8.
  */
-import { create } from 'zustand';
 import {
   type Topic, type Exam, type PlanItem, type LearningStyle,
   applyRating, buildDayPlan, computeCarry,
   initialStreak, bumpToday, rollover, type StreakState, type DayActivity,
+  applyExamSeason, dateForDayIndex, clampCapacity,
+  type ClassSession, type MoveDelta,
+  movePeriod, cancelPeriod, slotsForWeekday, weekdayFor,
 } from '@abhyas/engine';
+import { create } from 'zustand';
 import { type PersistenceAdapter, type Snapshot } from './persistence';
 
 export interface SessionLogEntry { day: number; min: number }
@@ -16,12 +19,16 @@ interface AppState {
   // core data
   topics: Topic[];
   exams: Exam[];
+  /** class timetable — mirrors packages/db schema.classSessions (weekday 0=Sun..6=Sat) */
+  classSessions: ClassSession[];
   sessions: SessionLogEntry[];
   plan: PlanItem[];
   doneUids: Set<string>;
   dayIndex: number;
   learningStyle: LearningStyle;
   streak: StreakState;
+  /** Exam Season capacity dial (#9): 0.5–2.0 multiplier on season intensity. */
+  examSeasonDial: number;
 
   // actions
   checkItem(uid: string): void;
@@ -33,6 +40,14 @@ interface AppState {
   /** Focus-timer finish path: log minutes + optional confidence rating on any topic. */
   finishFocus(opts: { topicId: string | null; minutes: number; rating?: 1 | 2 | 3 }): void;
   addExam(exam: Exam): void;
+  /** Exam Season capacity dial (#9): clamped to [0.5, 2]; applies at next plan build. */
+  setExamSeasonDial(dial: number): void;
+  /** Plan-tab timetable editor: upsert a period by id. Re-solves the derived plan same frame. */
+  setClassSession(session: ClassSession): void;
+  /** Move a period (weekday and/or start/end). Returns false on invalid move — UI must surface it. */
+  moveClassPeriod(id: string, delta: MoveDelta): boolean;
+  /** Cancel (remove) a period. Re-solves the derived plan same frame. */
+  cancelClassPeriod(id: string): void;
   advanceDay(): { carried: number; droppedRevisions: number; droppedForward: number; broke: boolean };
 }
 
@@ -40,6 +55,26 @@ const todayActivity = (sessions: SessionLogEntry[], plan: PlanItem[], doneUids: 
   blocksDone: plan.filter(p => doneUids.has(p.uid)).length,
   focusMinutes: sessions.reduce((a, s) => a + s.min, 0),
 });
+
+/**
+ * Same-frame re-solve (Plan tab): rebuild today's derived plan against the current
+ * timetable. Carried items keep their place; everything else is re-placed into the
+ * real class-free slots for this weekday. Pure in its inputs — engine does the math.
+ */
+const resolveCurrentPlan = (
+  topics: Topic[],
+  exams: Exam[],
+  classSessions: ClassSession[],
+  plan: PlanItem[],
+  dayIndex: number,
+): PlanItem[] => {
+  const carried = plan.filter(p => p.carried);
+  const rest = buildDayPlan(topics, exams, 0, {
+    excludeTopicIds: carried.map(c => c.topic.id),
+    slots: slotsForWeekday(classSessions, weekdayFor(dayIndex)),
+  });
+  return [...carried, ...rest];
+};
 
 // --- injectable persistence seam (#8 prep) ---------------------------------
 let adapter: PersistenceAdapter | null = null;
@@ -57,6 +92,8 @@ const toSnapshot = (s: AppState): Snapshot => ({
   dayIndex: s.dayIndex,
   learningStyle: s.learningStyle,
   streak: s.streak,
+  examSeasonDial: s.examSeasonDial,
+  classSessions: s.classSessions,
 });
 
 /** Fire-and-forget save of the current state; no-op without a configured adapter. */
@@ -81,6 +118,8 @@ export async function hydrate(): Promise<boolean> {
     dayIndex: snap.dayIndex,
     learningStyle: snap.learningStyle,
     streak: snap.streak,
+    examSeasonDial: snap.examSeasonDial ?? 1,
+    classSessions: snap.classSessions ?? [],
   });
   return true;
 }
@@ -88,12 +127,14 @@ export async function hydrate(): Promise<boolean> {
 export const useApp = create<AppState>((set, get) => ({
   topics: [],
   exams: [],
+  classSessions: [],
   sessions: [],
   plan: [],
   doneUids: new Set(),
   dayIndex: 0,
   learningStyle: 'average',
   streak: initialStreak(),
+  examSeasonDial: 1,
 
   checkItem(uid) {
     const { plan, doneUids } = get();
@@ -166,6 +207,46 @@ export const useApp = create<AppState>((set, get) => ({
     persist();
   },
 
+  setExamSeasonDial(dial) {
+    set({ examSeasonDial: clampCapacity(dial) });
+    persist();
+  },
+
+  setClassSession(session) {
+    const { topics, exams } = get();
+    const list = get().classSessions;
+    const next = list.some(s => s.id === session.id)
+      ? list.map(s => (s.id === session.id ? session : s))
+      : [...list, session];
+    set({
+      classSessions: next,
+      plan: resolveCurrentPlan(topics, exams, next, get().plan, get().dayIndex),
+    });
+    persist();
+  },
+
+  moveClassPeriod(id, delta) {
+    const r = movePeriod(get().classSessions, id, delta);
+    if (!r.ok) return false;
+    const { topics, exams } = get();
+    set({
+      classSessions: r.sessions,
+      plan: resolveCurrentPlan(topics, exams, r.sessions, get().plan, get().dayIndex),
+    });
+    persist();
+    return true;
+  },
+
+  cancelClassPeriod(id) {
+    const { topics, exams } = get();
+    const next = cancelPeriod(get().classSessions, id);
+    set({
+      classSessions: next,
+      plan: resolveCurrentPlan(topics, exams, next, get().plan, get().dayIndex),
+    });
+    persist();
+  },
+
   advanceDay() {
     const { plan, doneUids, streak, sessions } = get();
     const carry = computeCarry(plan, doneUids);
@@ -173,10 +254,13 @@ export const useApp = create<AppState>((set, get) => ({
     const r = rollover(streak, activity);
 
     // rebuild tomorrow's plan from updated topics (SRS already rescheduled by rateTopic)
-    const { topics, exams } = get();
+    const { topics, exams, examSeasonDial } = get();
     const carriedNames = new Set(carry.carried.map(c => c.topic.id));
-    const tomorrowPlan = buildDayPlan(topics, exams, 1, {
+    // #9 Exam Season: shift weights toward exam subjects; gap days get boosted capacity
+    const season = applyExamSeason(topics, exams, dateForDayIndex(get().dayIndex + 1), examSeasonDial);
+    const tomorrowPlan = buildDayPlan(season.topics, exams, 1, {
       excludeTopicIds: [...carriedNames],
+      slots: slotsForWeekday(get().classSessions, weekdayFor(get().dayIndex + 1)),
     });
 
     set({

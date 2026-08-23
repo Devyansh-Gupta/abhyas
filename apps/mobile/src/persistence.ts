@@ -3,7 +3,7 @@
  * The store stays in-memory by default; a host (app entry, tests, future SQLite
  * repo) opts in via `configurePersistence(adapter)`. No storage backend lives here.
  */
-import { type Topic, type Exam, type LearningStyle, type StreakState } from '@abhyas/engine';
+import { type Topic, type Exam, type LearningStyle, type StreakState, type ClassSession } from '@abhyas/engine';
 import type { SessionLogEntry } from './store';
 
 /**
@@ -19,8 +19,13 @@ export interface Snapshot {
   dayIndex: number;
   learningStyle: LearningStyle;
   streak: StreakState;
+  /** Exam Season capacity dial (#9); optional for pre-#9 snapshots. */
+  examSeasonDial?: number;
+  /** Plan-tab timetable (optional so pre-Plan adapters stay source-compatible). */
+  classSessions?: ClassSession[];
 }
 
+/** Injectable persistence backend; hosts opt in via configurePersistence(adapter). */
 export interface PersistenceAdapter {
   /** Return the last saved snapshot, or null when nothing has been persisted yet. */
   load(): Promise<Snapshot | null>;

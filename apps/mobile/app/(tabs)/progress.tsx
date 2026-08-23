@@ -1,6 +1,13 @@
 import { useMemo } from 'react';
-import { View, Text, ScrollView } from 'react-native';
-import { masteryBySubject } from '@abhyas/engine';
+import { View, Text, ScrollView, Pressable } from 'react-native';
+import {
+  masteryBySubject,
+  applyExamSeason,
+  dateForDayIndex,
+  clampCapacity,
+  CAPACITY_MIN,
+  CAPACITY_MAX,
+} from '@abhyas/engine';
 import { useApp } from '../../src/store';
 
 export default function ProgressScreen() {
@@ -8,9 +15,17 @@ export default function ProgressScreen() {
   const streak = useApp(s => s.streak);
   const topics = useApp(s => s.topics);
   const dayIndex = useApp(s => s.dayIndex);
+  // Exam Season capacity dial (#9) — minimal settings surface
+  const exams = useApp(s => s.exams);
+  const dial = useApp(s => s.examSeasonDial);
+  const setDial = useApp(s => s.setExamSeasonDial);
 
   // live derive from store — bars move when rating moves boxes (#7 acceptance)
   const mastery = useMemo(() => masteryBySubject(topics), [topics]);
+  const season = useMemo(
+    () => applyExamSeason(topics, exams, dateForDayIndex(dayIndex), dial),
+    [topics, exams, dayIndex, dial],
+  );
 
   const totalMin = sessions.reduce((a, s) => a + s.min, 0);
   const todayMin = sessions.filter(s => s.day === dayIndex).reduce((a, s) => a + s.min, 0);
@@ -30,6 +45,49 @@ export default function ProgressScreen() {
         <Stat emoji='⏱️' value={`${todayMin}m`} label='focused today' />
         <Stat emoji='📚' value={`${Math.round(totalMin / 60)}h ${totalMin % 60}m`} label='total focus' />
         <Stat emoji='📆' value={`${daysStudied}`} label='days studied' />
+      </View>
+
+      {/* Exam Season capacity dial (#9) */}
+      <View className='mt-3 rounded-3xl border border-line bg-surface p-4'>
+        <View className='flex-row items-center justify-between'>
+          <Text className='font-extrabold' style={{ color: '#E7EBF2' }}>🎯 Exam Season</Text>
+          <Text className='text-xs font-bold text-dim'>
+            {season.active
+              ? season.gapDay ? 'gap day · boosted' : 'active'
+              : 'off-season'}
+          </Text>
+        </View>
+        <View className='mt-3 flex-row items-center justify-between'>
+          <Pressable
+            accessibilityLabel='Decrease exam-season capacity'
+            className='h-10 w-10 items-center justify-center rounded-full border border-line bg-surface-2'
+            onPress={() => setDial(dial - 0.25)}
+            disabled={dial <= CAPACITY_MIN}
+          >
+            <Text className='text-lg font-extrabold' style={{ color: '#E7EBF2' }}>−</Text>
+          </Pressable>
+          <View className='items-center'>
+            <Text className='text-xl font-extrabold tabular-nums' style={{ color: '#C9BFFF' }}>
+              {Math.round(clampCapacity(dial) * 100)}%
+            </Text>
+            <Text className='text-[11px] text-dim'>
+              today&apos;s target ≈ {season.capacityMinutes}m
+            </Text>
+          </View>
+          <Pressable
+            accessibilityLabel='Increase exam-season capacity'
+            className='h-10 w-10 items-center justify-center rounded-full border border-line bg-surface-2'
+            onPress={() => setDial(dial + 0.25)}
+            disabled={dial >= CAPACITY_MAX}
+          >
+            <Text className='text-lg font-extrabold' style={{ color: '#E7EBF2' }}>+</Text>
+          </Pressable>
+        </View>
+        {season.active && (
+          <Text className='mt-2 text-[11px] text-dim'>
+            focus: {season.focusSubjects.join(' ') || '—'} · other subjects tapered
+          </Text>
+        )}
       </View>
 
       {/* per-subject mastery */}
