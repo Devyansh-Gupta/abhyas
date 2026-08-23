@@ -8,6 +8,7 @@ import {
   applyRating, buildDayPlan, computeCarry,
   initialStreak, bumpToday, rollover, type StreakState, type DayActivity,
 } from '@abhyas/engine';
+import { type PersistenceAdapter, type Snapshot } from './persistence';
 
 export interface SessionLogEntry { day: number; min: number }
 
@@ -37,6 +38,50 @@ const todayActivity = (sessions: SessionLogEntry[], plan: PlanItem[], doneUids: 
   focusMinutes: sessions.reduce((a, s) => a + s.min, 0),
 });
 
+// --- injectable persistence seam (#8 prep) ---------------------------------
+let adapter: PersistenceAdapter | null = null;
+
+/** Wire (or unwire, with `null`) a persistence backend. Default: none — memory only. */
+export function configurePersistence(next: PersistenceAdapter | null): void {
+  adapter = next;
+}
+
+const toSnapshot = (s: AppState): Snapshot => ({
+  topics: s.topics,
+  exams: s.exams,
+  sessions: s.sessions,
+  doneUids: [...s.doneUids],
+  dayIndex: s.dayIndex,
+  learningStyle: s.learningStyle,
+  streak: s.streak,
+});
+
+/** Fire-and-forget save of the current state; no-op without a configured adapter. */
+function persist(): void {
+  if (!adapter) return;
+  adapter.save(toSnapshot(useApp.getState()));
+}
+
+/**
+ * Load the persisted snapshot (if any) into the store.
+ * Resolves false when no adapter is configured or nothing was persisted.
+ */
+export async function hydrate(): Promise<boolean> {
+  if (!adapter) return false;
+  const snap = await adapter.load();
+  if (!snap) return false;
+  useApp.setState({
+    topics: snap.topics,
+    exams: snap.exams,
+    sessions: snap.sessions,
+    doneUids: new Set(snap.doneUids),
+    dayIndex: snap.dayIndex,
+    learningStyle: snap.learningStyle,
+    streak: snap.streak,
+  });
+  return true;
+}
+
 export const useApp = create<AppState>((set, get) => ({
   topics: [],
   exams: [],
@@ -55,8 +100,9 @@ export const useApp = create<AppState>((set, get) => ({
     set({ doneUids: next });
     const item = plan.find(p => p.uid === uid);
     if (item) {
-      get().logSession(item.topic.id, item.durationMin);
+      get().logSession(item.topic.id, item.durationMin); // also persists via logSession
     }
+    persist();
   },
 
   logSession(topicId, minutes) {
@@ -65,6 +111,7 @@ export const useApp = create<AppState>((set, get) => ({
       sessions: [...sessions, { day: get().dayIndex, min: minutes }],
       streak: bumpToday(streak, todayActivity([...sessions, { day: 0, min: minutes }], [], new Set())),
     });
+    persist();
   },
 
   rateTopic(uid, rating) {
@@ -77,6 +124,7 @@ export const useApp = create<AppState>((set, get) => ({
       ),
       sessions: [...sessions, { day: dayIndex, min: 25 }],
     });
+    persist();
   },
 
   finishFocus({ topicId, minutes, rating }) {
@@ -94,10 +142,12 @@ export const useApp = create<AppState>((set, get) => ({
           : t
       ),
     });
+    persist();
   },
 
   addExam(exam) {
     set({ exams: [...get().exams, exam] });
+    persist();
   },
 
   advanceDay() {
@@ -119,6 +169,7 @@ export const useApp = create<AppState>((set, get) => ({
       doneUids: new Set(),
       streak: r.state,
     });
+    persist();
     return {
       carried: carry.carried.length,
       droppedRevisions: carry.droppedRevisions,
