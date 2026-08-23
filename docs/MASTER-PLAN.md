@@ -64,8 +64,11 @@ Priority order below reflects dependency + risk (adapter seam BEFORE UI expansio
 
 ## Verification toolchain (established)
 - `pnpm exec expo export --platform web --output-dir ./dist` then `npx serve -sl 8085 ./dist` (the `-s` SPA flag is mandatory — routes 404 without it)
-- Headless walks: `node e2e-*.cjs` via playwright-core + Helium Chromium (`C:/Program Files/imput/Helium`)
-- Store logic: vitest against Zustand directly (no DOM)
+- Headless walks: `node e2e-onboarding.cjs`, `node e2e-plan.cjs` via playwright-core + Helium Chromium (`C:/Program Files/imput/Helium`)
+- Store logic: vitest against Zustand directly (no DOM needed)
+
+### Known limitation (follow-up): #8 persistence on web preview
+SQLite hydration throws `SharedArrayBuffer is not defined` under plain `serve` (needs COOP/COEP cross-origin isolation headers) → falls back to empty-state boot by design (F21/F24 logged visibly). Android unaffected; walks assert UI logic, not persistence. If web-preview parity for #8 ever matters, serve with COOP/COEP headers (e.g. `npx serve --config` with headers, or a tiny Node static server setting `Cross-Origin-Opener-Policy: same-origin` + `Cross-Origin-Embedder-Policy: require-corp`).
 - Full gate: `pnpm exec turbo run typecheck test` (10 tasks) — CI-enforced
 
 ## Multi-agent operating model
