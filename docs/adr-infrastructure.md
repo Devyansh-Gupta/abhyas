@@ -26,6 +26,7 @@ Every question: **Context → Options → Recommendation → Owner question.** D
 
 ### A2. TypeScript strictness & lint baseline
 - **Recommendation**: TS `strict: true` from day 1; ESLint (typescript-eslint) + Prettier; pre-commit via husky+lint-staged. Retro-fitting strictness costs more than starting strict.
+- **Status 2026-08-23**: ESLint/Prettier/husky deferred — not yet wired (TS `strict: true` is enforced in tsconfig.base.json; no lint/format configs in repo yet).
 - **Default**: strict, enforced in CI.
 
 ### A3. Testing stack
@@ -62,6 +63,7 @@ Every question: **Context → Options → Recommendation → Owner question.** D
 ### C2. State management
 - **Options**: Redux Toolkit / Zustand / Jotai / React Query only.
 - **Recommendation**: **Zustand** for app state + **TanStack Query** for server state. Minimal boilerplate, works fine with local-first (DB is source of truth; stores are projections).
+- **Status 2026-08-23**: TanStack Query part deferred — not yet wired (`@tanstack/react-query` not installed; Zustand v5 in use).
 - **Default**: Zustand + TanStack Query.
 
 ### C3. Styling system
@@ -183,6 +185,10 @@ Practitioner consensus on what hand-rolled sync must have to be trustworthy:
 - ESLint/Prettier/husky (A2) still absent — either schedule or mark deferred in ADR to keep doc trustworthy
 - pnpm linker: `.npmrc node-linker=hoisted` is correct for pnpm 9.x and validated by Expo monorepo guide (SDK 54+ supports isolated, but RN native libs still break it); when upgrading to pnpm ≥10, the setting moves to `nodeLinker: hoisted` inside pnpm-workspace.yaml. Escape hatch to restore strict isolation later: rnx-kit/metro-resolver-symlinks
 - Gradle CI caching: gradle/actions/setup-gradle@v4 added (official mechanism); cold builds ~35 min, warm-cache target ~8-12 min. APK builds are workflow_dispatch-only — pushes rely on the fast turbo CI gate instead
+
+## CI caching review — 2026-08-23
+**Verdict: `gradle/actions/setup-gradle` is upstream-preferred over hand-rolled `actions/cache@v4` over `~/.gradle/caches` + `~/.gradle/wrapper`** for our Expo prebuild → `./gradlew assembleDebug` flow. Official Gradle docs explicitly advise against combining the two ("avoid using other mechanisms to save and restore the Gradle User Home … may interfere"), so HEAD apk.yml's `actions/cache@v4` (keyed on `hashFiles(pnpm-lock.yaml)`) is functional but not recommended long-term. Why setup-gradle wins: **(1) cache-cleanup** — purges unused files from Gradle User Home before each save (`cache-cleanup: on-success` default), preventing the ever-growing entries a lockfile-keyed actions/cache accumulates until eviction; **(2) cache-write discipline** — by default only jobs on the default branch write entries (`cache-read-only` semantics), avoiding branch/PR-scope cache pollution that manual keys invite; **(3) restore-keys semantics** — instead of lockfile-hash prefix matching, it restores the closest entry by OS/job/workflow precedence with deduplication of dependencies + wrapper distributions (enhanced provider, free for public repos, default since v6.1), which yields higher hit rates than `setup-java`/`actions/cache` strategies. Note on versioning: commit b2254f2 pinned @v4; as of Aug 2026 the current major is **@v6** — @v4 still works but new setups should pin v6 (`cache-provider: basic` if 100% MIT-licensed caching is required). Confidence: high — explicit official guidance, no credible counter-source found.
+Sources: https://github.com/gradle/actions/blob/main/docs/setup-gradle.md · https://docs.gradle.org/current/userguide/github-actions.html · https://github.com/marketplace/actions/build-with-gradle
 
 ---
 
