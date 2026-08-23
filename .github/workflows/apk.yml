@@ -58,17 +58,21 @@ jobs:
           cd apps/mobile
           pnpm exec expo prebuild --platform android --no-install
 
-      - name: Assemble debug APK
+      - name: Assemble release APK (self-contained JS bundle)
+        # assembleDebug would produce a dev APK that requires a Metro server
+        # ("Unable to load script" on device). Release embeds the JS bundle and
+        # is signed with the debug keystore by the RN template's default
+        # signingConfig, so it installs standalone.
         env:
           GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.workers.max=2
         run: |
           cd apps/mobile/android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: abhyas-apk
-          path: apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          path: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
           retention-days: 30
