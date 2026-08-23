@@ -1,9 +1,10 @@
 name: APK Build
 
-# On-demand installable debug APK: Actions tab → "APK Build" → Run workflow.
-# (Deliberately NOT on push — RN Gradle builds cost ~35 min cold; CI covers pushes.)
+# On-demand installable debug APK. Trigger from the Actions tab
+# ("Run workflow") or via `gh workflow run apk.yml`.
+# Not on push: full RN native builds take ~40 min uncached; CI covers every push.
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 jobs:
   apk:
@@ -26,12 +27,6 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      # Cache Gradle wrapper + dependencies + native build outputs between runs.
-      # Cold RN builds ~35 min; warm-cache reruns land ~8-12 min.
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: false
-
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
@@ -43,6 +38,19 @@ jobs:
           sudo rm -rf /usr/local/lib/android/sdk/ndk-bundle || true
           sudo docker image prune --all --force > /dev/null 2>&1 || true
           df -h /
+
+      # Gradle build cache: RN/Expo native artifacts (Hermes, Reanimated AARs,
+      # worklets) are the multi-GB cost of every cold build. Caching ~/.gradle
+      # cuts repeat builds to a fraction. Cache is keyed on lockfiles +
+      # generated android project so dependency changes bust it cleanly.
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'apps/mobile/package.json') }}
+          restore-keys: gradle-${{ runner.os }}-
 
       # engine is TS source consumed via workspace path — ensure it's present
       - name: Generate native android project (expo prebuild)
