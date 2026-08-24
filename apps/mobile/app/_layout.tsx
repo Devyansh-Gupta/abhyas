@@ -4,6 +4,7 @@ import { Stack } from 'expo-router/stack';
 import { StatusBar } from 'expo-status-bar';
 import { configurePersistence, hydrate } from '../src/store';
 import { createSqliteAdapter } from '../src/repo/sqlite';
+import { startAuthListener } from '../src/lib/auth';
 import '../global.css';
 
 const navTheme = {
@@ -31,6 +32,8 @@ function useStartupHydration(): boolean {
   useEffect(() => {
     let cancelled = false;
     configurePersistence(createSqliteAdapter());
+    // P2: mirror supabase auth state into the app-wide useAuth slice.
+    startAuthListener();
     hydrate()
       .catch(err => console.error('[startup] hydrate failed:', err))
       .finally(() => {

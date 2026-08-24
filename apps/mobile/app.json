@@ -19,7 +19,11 @@
       }
     },
     "web": { "bundler": "metro", "output": "single" },
-    "plugins": ["expo-router"],
+    "_comment_auth": "google-signin plugin: set EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID before prebuild; Android needs the debug+release SHA-1 fingerprints registered in Google Cloud Console (see docs/P2-AUTH-SETUP.md).",
+    "plugins": [
+      "expo-router",
+      ["@react-native-google-signin/google-signin", {}]
+    ],
     "experiments": { "typedRoutes": true }
   }
 }

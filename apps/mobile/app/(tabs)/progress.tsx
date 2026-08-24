@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
 import {
   masteryBySubject,
   applyExamSeason,
@@ -9,8 +10,12 @@ import {
   CAPACITY_MAX,
 } from '@abhyas/engine';
 import { useApp } from '../../src/store';
+import { useAuth } from '../../src/lib/auth';
+import { syncNow } from '../../src/repo/syncTransport';
+import { useState } from 'react';
 
 export default function ProgressScreen() {
+  const router = useRouter();
   const sessions = useApp(s => s.sessions);
   const streak = useApp(s => s.streak);
   const topics = useApp(s => s.topics);
@@ -92,6 +97,9 @@ export default function ProgressScreen() {
 
       {/* P2 parent link: mint a shareable read-only invite */}
       <ParentLinkCard />
+
+      {/* P2 account + cloud sync entry point */}
+      <AccountSyncCard onOpenAuth={() => router.push('/auth')} />
 
       {/* per-subject mastery */}
       <Text className="mb-3 mt-7 text-[13px] font-extrabold uppercase tracking-wider text-text">
@@ -187,6 +195,71 @@ function ParentLinkCard() {
           {latest ? 'Generate new invite' : 'Generate invite code'}
         </Text>
       </Pressable>
+    </View>
+  );
+}
+
+/** P2 account + cloud sync — sign-in entry point and manual "Sync now". */
+function AccountSyncCard({ onOpenAuth }: { onOpenAuth: () => void }) {
+  const userId = useAuth(s => s.userId);
+  const email = useAuth(s => s.email);
+  const [syncNote, setSyncNote] = useState<string | null>(null);
+
+  const runSync = async () => {
+    setSyncNote('Syncing…');
+    const r = await syncNow();
+    if (r.skipped) {
+      // Visible reason — offline-only mode is a state, not a failure to hide.
+      setSyncNote(
+        r.reason === 'not-signed-in'
+          ? 'Sign in first to sync.'
+          : `Sync unavailable: ${r.reason}`,
+      );
+    } else if (!r.ok) {
+      setSyncNote(`Sync failed: ${r.errors.join(' | ')}`);
+    } else {
+      setSyncNote(`Synced · ↑${r.pushed} ↓${r.pulled} ops`);
+    }
+  };
+
+  return (
+    <View className="mt-3 rounded-3xl border border-line bg-surface p-4">
+      <View className="flex-row items-center justify-between">
+        <Text className="font-extrabold" style={{ color: '#E7EBF2' }}>☁️ Account</Text>
+        {userId && <Text className="text-xs font-bold text-dim">{email ?? 'signed in'}</Text>}
+      </View>
+      {!userId && (
+        <Text className="mt-1 text-[11px] text-dim">
+          Sign in to keep your plan in sync across devices — the app stays fully usable offline.
+        </Text>
+      )}
+      {syncNote && (
+        <Text accessibilityLabel='sync status' className='mt-2 text-[11px] text-dim'>
+          {syncNote}
+        </Text>
+      )}
+      <View className='mt-3 flex-row gap-3'>
+        <Pressable
+          accessibilityLabel={userId ? 'Account settings' : 'Sign in'}
+          className='flex-1 items-center rounded-2xl border border-line bg-surface-2 py-3 active:bg-accent/30'
+          onPress={onOpenAuth}
+        >
+          <Text className='text-sm font-extrabold' style={{ color: '#C9BFFF' }}>
+            {userId ? 'Manage account' : 'Sign in'}
+          </Text>
+        </Pressable>
+        {userId && (
+          <Pressable
+            accessibilityLabel='Sync now'
+            className='flex-1 items-center rounded-2xl border border-line bg-surface-2 py-3 active:bg-accent/30'
+            onPress={() => void runSync()}
+          >
+            <Text className='text-sm font-extrabold' style={{ color: '#C9BFFF' }}>
+              Sync now
+            </Text>
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 }
