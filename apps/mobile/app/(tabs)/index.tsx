@@ -167,7 +167,7 @@ function PlanCard({ uid, hero }: { uid: string; hero: boolean }) {
             </Text>
           </View>
           <Pressable
-            onPress={() => router.push('/focus')}
+            onPress={() => router.push(`/focus?topicId=${item.topic.id}`)}
             className="rounded-xl bg-accent px-4 py-2 active:opacity-80"
           >
             <Text className="text-xs font-extrabold" style={{ color: '#0E1116' }}>
