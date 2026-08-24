@@ -3,7 +3,7 @@
  * The store stays in-memory by default; a host (app entry, tests, future SQLite
  * repo) opts in via `configurePersistence(adapter)`. No storage backend lives here.
  */
-import { type Topic, type Exam, type LearningStyle, type StreakState, type ClassSession } from '@abhyas/engine';
+import { type Topic, type Exam, type LearningStyle, type StreakState, type ClassSession, type GuardianInvite } from '@abhyas/engine';
 import type { SessionLogEntry } from './store';
 
 /**
@@ -23,6 +23,8 @@ export interface Snapshot {
   examSeasonDial?: number;
   /** Plan-tab timetable (optional so pre-Plan adapters stay source-compatible). */
   classSessions?: ClassSession[];
+  /** P2 parent-link invites minted but not yet accepted (optional for older snapshots). */
+  pendingGuardianInvites?: GuardianInvite[];
 }
 
 /** Injectable persistence backend; hosts opt in via configurePersistence(adapter). */

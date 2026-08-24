@@ -9,3 +9,6 @@ export * from './mastery';
 export * from './rollover';
 export * from './toc';
 export * from './onboarding';
+export * from './sync/oplog';
+export * from './sync/backfill';
+export * from './guardian';

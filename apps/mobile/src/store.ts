@@ -9,6 +9,7 @@ import {
   applyExamSeason, dateForDayIndex, clampCapacity,
   type ClassSession, type MoveDelta,
   movePeriod, cancelPeriod, slotsForWeekday, weekdayFor,
+  createGuardianInvite, type GuardianInvite,
 } from '@abhyas/engine';
 import { create } from 'zustand';
 import { type PersistenceAdapter, type Snapshot } from './persistence';
@@ -29,6 +30,8 @@ interface AppState {
   streak: StreakState;
   /** Exam Season capacity dial (#9): 0.5–2.0 multiplier on season intensity. */
   examSeasonDial: number;
+  /** P2 parent-link invites minted on this device, newest last. */
+  pendingGuardianInvites: GuardianInvite[];
 
   // actions
   checkItem(uid: string): void;
@@ -49,6 +52,8 @@ interface AppState {
   /** Cancel (remove) a period. Re-solves the derived plan same frame. */
   cancelClassPeriod(id: string): void;
   advanceDay(): { carried: number; droppedRevisions: number; droppedForward: number; broke: boolean };
+  /** P2 parent link: mint a shareable invite (signed code + deep link), persisted. */
+  createGuardianInvite(): GuardianInvite;
 }
 
 const todayActivity = (sessions: SessionLogEntry[], plan: PlanItem[], doneUids: Set<string>): DayActivity => ({
@@ -93,6 +98,7 @@ const toSnapshot = (s: AppState): Snapshot => ({
   learningStyle: s.learningStyle,
   streak: s.streak,
   examSeasonDial: s.examSeasonDial,
+  pendingGuardianInvites: s.pendingGuardianInvites,
   classSessions: s.classSessions,
 });
 
@@ -129,6 +135,7 @@ export async function hydrate(): Promise<boolean> {
     streak: snap.streak,
     examSeasonDial: snap.examSeasonDial ?? 1,
     classSessions: snap.classSessions ?? [],
+    pendingGuardianInvites: snap.pendingGuardianInvites ?? [],
     plan,
   });
   return true;
@@ -145,6 +152,7 @@ export const useApp = create<AppState>((set, get) => ({
   learningStyle: 'average',
   streak: initialStreak(),
   examSeasonDial: 1,
+  pendingGuardianInvites: [],
 
   checkItem(uid) {
     const { plan, doneUids } = get();
@@ -291,5 +299,18 @@ export const useApp = create<AppState>((set, get) => ({
       droppedForward: carry.droppedForward,
       broke: r.broke,
     };
+  },
+
+  createGuardianInvite() {
+    // studentId is a local placeholder until P2 auth lands; the transport
+    // adapter re-signs with a real identity at handshake time.
+    const invite = createGuardianInvite({
+      studentId: 'local-student',
+      dayIndex: get().dayIndex,
+      nonce: get().pendingGuardianInvites.length,
+    });
+    set({ pendingGuardianInvites: [...get().pendingGuardianInvites, invite] });
+    persist();
+    return invite;
   },
 }));

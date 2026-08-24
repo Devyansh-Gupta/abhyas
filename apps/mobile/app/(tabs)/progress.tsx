@@ -90,6 +90,9 @@ export default function ProgressScreen() {
         )}
       </View>
 
+      {/* P2 parent link: mint a shareable read-only invite */}
+      <ParentLinkCard />
+
       {/* per-subject mastery */}
       <Text className="mb-3 mt-7 text-[13px] font-extrabold uppercase tracking-wider text-text">
         Mastery by subject <Text className="font-normal normal-case text-dim">· avg box ÷ 5</Text>
@@ -133,6 +136,57 @@ function Stat({ emoji, value, label }: { emoji: string; value: string; label: st
       <Text className="text-lg">{emoji}</Text>
       <Text className="mt-0.5 font-extrabold tabular-nums" style={{ color: '#E7EBF2' }}>{value}</Text>
       <Text className="text-[11px] text-dim">{label}</Text>
+    </View>
+  );
+}
+
+/** P2 parent link — student side: generate a signed invite a parent can open. */
+function ParentLinkCard() {
+  const invites = useApp(s => s.pendingGuardianInvites);
+  const mint = useApp(s => s.createGuardianInvite);
+  const latest = invites.length > 0 ? invites[invites.length - 1] : null;
+
+  return (
+    <View className="mt-3 rounded-3xl border border-line bg-surface p-4">
+      <View className="flex-row items-center justify-between">
+        <Text className="font-extrabold" style={{ color: '#E7EBF2' }}>👨‍👩‍👧 Parent link</Text>
+        {latest && (
+          <Text className="text-xs font-bold text-dim">valid thru day {latest.expiresDay}</Text>
+        )}
+      </View>
+
+      {latest ? (
+        <>
+          <Text className="mt-1 text-[11px] text-dim">
+            Share this code — it opens your read-only Parent view:
+          </Text>
+          <Text
+            selectable
+            numberOfLines={2}
+            className="mt-2 rounded-xl border border-line bg-surface-2 p-3 font-mono text-[11px]"
+            style={{ color: '#C9BFFF' }}
+          >
+            {latest.deepLink}
+          </Text>
+          {invites.length > 1 && (
+            <Text className="mt-2 text-[11px] text-dim">{invites.length} invites generated.</Text>
+          )}
+        </>
+      ) : (
+        <Text className="mt-1 text-[11px] text-dim">
+          Let a parent follow your streak, focus and mastery — read-only.
+        </Text>
+      )}
+
+      <Pressable
+        accessibilityLabel="Generate parent invite"
+        className="mt-3 items-center rounded-2xl border border-line bg-surface-2 py-3 active:bg-accent/30"
+        onPress={() => mint()}
+      >
+        <Text className="text-sm font-extrabold" style={{ color: '#C9BFFF' }}>
+          {latest ? 'Generate new invite' : 'Generate invite code'}
+        </Text>
+      </Pressable>
     </View>
   );
 }
