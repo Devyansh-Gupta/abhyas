@@ -6,6 +6,7 @@ import {
   masteryBySubject,
   applyExamSeason,
   dateForDayIndex,
+  weekdayFor,
   clampCapacity,
   CAPACITY_MIN,
   CAPACITY_MAX,
@@ -15,6 +16,9 @@ import { useAuth } from '../../src/lib/auth';
 import { syncNow } from '../../src/repo/syncTransport';
 import { tNum, tNumStrong } from '../../src/ui/typography';
 import { useState } from 'react';
+
+/** surface-3-ish dim for non-today chart bars (cycle-2 #3). */
+const COLOR_CHART_DIM = '#232C37';
 
 export default function ProgressScreen() {
   const router = useRouter();
@@ -38,6 +42,23 @@ export default function ProgressScreen() {
   const todayMin = sessions.filter(s => s.day === dayIndex).reduce((a, s) => a + s.min, 0);
   const daysStudied = new Set(sessions.filter(s => s.min > 0).map(s => s.day)).size;
 
+  // Cycle-2 #3: 7-day focus-minutes buckets (Mon..Sun of the current store-week).
+  // weekdayFor maps a dayIndex to its weekday (0=Sun..6=Sat); Monday is
+  // todayIdx minus how far past Monday we are. Zero-filled — no fake data.
+  const mondayIdx = useMemo(
+    () => dayIndex - ((weekdayFor(dayIndex) + 6) % 7),
+    [dayIndex],
+  );
+  const weekMinutes = useMemo(() => {
+    const buckets = [0, 0, 0, 0, 0, 0, 0];
+    for (const s of sessions) {
+      const off = s.day - mondayIdx;
+      if (off >= 0 && off < 7 && s.min > 0) buckets[off] += s.min;
+    }
+    return buckets;
+  }, [sessions, mondayIdx]);
+  const todayOffset = dayIndex - mondayIdx;
+
   return (
     <ScrollView className="flex-1 bg-bg px-5 pt-14">
       <Text className="text-text text-2xl font-extrabold tracking-tight">Progress</Text>
@@ -53,6 +74,9 @@ export default function ProgressScreen() {
         <Stat icon='library' value={`${Math.round(totalMin / 60)}h ${totalMin % 60}m`} label='total focus' />
         <Stat icon='calendar-clear' value={`${daysStudied}`} label='days studied' />
       </View>
+
+      {/* cycle-2 #3: 7-day focus-minutes mini chart */}
+      <WeeklyFocusChart minutes={weekMinutes} todayOffset={todayOffset} />
 
       {/* Exam Season capacity dial (#9) */}
       <View className='mt-3 rounded-3xl border border-line bg-surface p-4'>
@@ -149,6 +173,61 @@ function Stat({ icon, value, label }: { icon: keyof typeof Ionicons.glyphMap; va
       <Ionicons name={icon} size={20} color='#8B7CF6' />
       <Text className="mt-0.5 font-extrabold tabular-nums" style={{ color: '#E7EBF2', ...tNumStrong }}>{value}</Text>
       <Text className="text-[11px] text-dim">{label}</Text>
+    </View>
+  );
+}
+
+/** Cycle-2 #3 — 7-day focus-minutes mini bar chart (Mon..Sun).
+ *  Bar heights are proportional to minutes with a 60px cap (scaled to the week's
+ *  busiest day); today gets the accent, every other bar surface/dim. Zero-session
+ *  weeks render an explicit empty line instead of fake data. */
+const CHART_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as const;
+const BAR_MAX = 60;
+
+function WeeklyFocusChart({ minutes, todayOffset }: { minutes: number[]; todayOffset: number }) {
+  const weekTotal = minutes.reduce((a, m) => a + m, 0);
+  if (weekTotal === 0) {
+    return (
+      <View className='mt-3 rounded-3xl border border-line bg-surface p-4'>
+        <Text className='text-center text-sm text-dim'>No sessions yet this week</Text>
+      </View>
+    );
+  }
+  const peak = Math.max(...minutes);
+  return (
+    <View className='mt-3 rounded-3xl border border-line bg-surface p-4'>
+      <View className='flex-row items-center gap-1.5'>
+        <Ionicons name='bar-chart' size={16} color='#8B7CF6' />
+        <Text className='font-extrabold' style={{ color: '#E7EBF2' }}>This week</Text>
+        <Text className='ml-auto text-xs font-bold text-dim' style={tNum}>
+          {weekTotal}m focused
+        </Text>
+      </View>
+      <View className='mt-3 h-[60px] flex-row items-end justify-between'>
+        {minutes.map((min, i) => (
+          <View key={i} className='w-6 items-center justify-end' style={{ height: BAR_MAX }}>
+            <View
+              style={{
+                width: 14,
+                height: min > 0 ? Math.max(4, Math.round((min / peak) * BAR_MAX)) : 2,
+                borderRadius: 4,
+                backgroundColor: i === todayOffset ? '#8B7CF6' : COLOR_CHART_DIM,
+              }}
+            />
+          </View>
+        ))}
+      </View>
+      <View className='mt-1.5 flex-row justify-between'>
+        {CHART_LETTERS.map((letter, i) => (
+          <Text
+            key={i}
+            className='w-6 text-center text-[10px] font-bold'
+            style={{ color: i === todayOffset ? '#C9BFFF' : '#8B94A3', ...tNum }}
+          >
+            {letter}
+          </Text>
+        ))}
+      </View>
     </View>
   );
 }
