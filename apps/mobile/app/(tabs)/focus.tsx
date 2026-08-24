@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, Modal, Pressable as RNPressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useApp } from '../../src/store';
 import { tNumStrong } from '../../src/ui/typography';
@@ -120,12 +121,18 @@ export default function FocusScreen() {
 
   const todayMin = sessions.reduce((a, s) => a + s.min, 0);
 
+  // progress bar fraction — derived from the existing countdown state, no new timers
+  const totalSecs = preset * 60;
+  const elapsedFrac = Math.min(1, Math.max(0, (totalSecs - left) / totalSecs));
+
   return (
     <View className="flex-1 bg-bg px-5 pt-14">
       <Text className="text-text text-2xl font-extrabold tracking-tight">Focus</Text>
-      <Text className="mt-1 text-[13px] text-dim">
-        {todayMin}m today · 🔥 {streak.current} day streak
-      </Text>
+      <View className="mt-1 flex-row items-center gap-1">
+        <Text className="text-[13px] text-dim">{todayMin}m today ·</Text>
+        <Ionicons name="flame" size={14} color="#4ADE80" />
+        <Text className="text-[13px] text-dim">{streak.current} day streak</Text>
+      </View>
 
       {/* presets */}
       <View className="mt-6 flex-row gap-2">
@@ -153,7 +160,8 @@ export default function FocusScreen() {
           <Pressable
             key={t.id}
             onPress={() => { setTopicId(t.id); setWarn(null); }}
-            className={`rounded-full border px-3 py-2 ${topicId === t.id ? 'border-accent bg-accent/20' : 'border-line bg-surface'}`}
+            className={`rounded-full border px-3 py-2 ${topicId === t.id ? 'border-accent' : 'border-line bg-surface'}`}
+            style={topicId === t.id ? { backgroundColor: 'rgba(139,124,246,0.16)' } : undefined}
           >
             <Text style={{ color: topicId === t.id ? '#C9BFFF' : '#E7EBF2' }} className="text-xs">
               {t.subjectId} {t.name}
@@ -163,10 +171,17 @@ export default function FocusScreen() {
       </View>
 
       {/* timer */}
-      <View className="mt-8 items-center rounded-3xl border border-line bg-surface py-10">
+      <View className="mt-8 items-center rounded-3xl border border-line bg-surface px-8 py-10">
         <Text className="font-extrabold text-text" style={{ fontSize: 56, ...tNumStrong }}>
           {fmt(left)}
         </Text>
+        {/* elapsed-fraction bar — track = line, fill = accent (no new timers; ticks off `left`) */}
+        <View className="mt-4 h-1 w-full overflow-hidden rounded-full bg-line">
+          <View
+            className="h-full rounded-full"
+            style={{ width: `${elapsedFrac * 100}%`, backgroundColor: '#8B7CF6' }}
+          />
+        </View>
         <Text className="mt-1 text-xs text-dim">{picked ? `${picked.subjectId} ${picked.name}` : 'no topic bound — session still logs'}</Text>
         <View className="mt-6 flex-row gap-3">
           {!running
@@ -184,6 +199,8 @@ export default function FocusScreen() {
       <Modal visible={ratingFor !== null} transparent animationType="slide" onRequestClose={() => setRatingFor(null)}>
         <View className="flex-1 justify-end bg-black/60">
           <View className="rounded-t-3xl border-t border-line bg-surface p-6 pb-10">
+            {/* grab handle */}
+            <View className="mb-4 h-1 w-9 self-center rounded-full bg-line" />
             <Text className="text-center text-lg font-extrabold text-text">
               How confident do you feel about{'\n'}{picked ? `${picked.subjectId} ${picked.name}` : 'this topic'}?
             </Text>

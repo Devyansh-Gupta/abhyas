@@ -108,7 +108,9 @@ export default function PlanScreen() {
       </Text>
 
       {dayPeriods.map(p => (
-        <View key={p.id} className="mb-3 rounded-3xl border border-line bg-surface p-4">
+        <View key={p.id} className="relative mb-2 overflow-hidden rounded-3xl border border-line bg-surface p-4 pl-5">
+          {/* left color bar — distinguishes class rows from study blocks */}
+          <View className="absolute bottom-0 left-0 top-0 w-[3px] bg-dim" />
           <View className="flex-row items-center">
             <View className="h-10 w-10 items-center justify-center rounded-2xl bg-surface-2">
               <Text className="text-lg">{p.subjectId}</Text>
@@ -147,10 +149,11 @@ export default function PlanScreen() {
 
       <Pressable
         onPress={addClass}
-        className="mb-1 items-center rounded-2xl border border-dashed py-3"
+        className="mb-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-dashed py-3 active:opacity-80"
         style={{ borderColor: '#2A3441' }}
       >
-        <Text className="text-sm font-semibold" style={{ color: ACCENT }}>＋ Add class</Text>
+        <Ionicons name="add" size={16} color={ACCENT} />
+        <Text className="text-sm font-semibold" style={{ color: ACCENT }}>Add class</Text>
       </Pressable>
 
       {/* --- derived plan for the selected day --- */}
