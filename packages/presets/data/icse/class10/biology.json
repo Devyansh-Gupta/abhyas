@@ -1,0 +1,84 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class10·biology@2026-27",
+  "board": "ICSE",
+  "class": 10,
+  "subject": "Biology",
+  "emoji": "🌿",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "topics": [
+    {
+      "id": "icse10-bio-cell-cycle",
+      "name": "Cell Cycle and Cell Division",
+      "weight": 6
+    },
+    {
+      "id": "icse10-bio-chromosomes-genetics",
+      "name": "Structure of Chromosomes and Genetics",
+      "weight": 7
+    },
+    {
+      "id": "icse10-bio-absorption-by-roots",
+      "name": "Absorption by Roots — Imbibition, Diffusion and Osmosis",
+      "weight": 7
+    },
+    {
+      "id": "icse10-bio-transpiration",
+      "name": "Transpiration",
+      "weight": 6
+    },
+    {
+      "id": "icse10-bio-photosynthesis",
+      "name": "Photosynthesis",
+      "weight": 8
+    },
+    {
+      "id": "icse10-bio-plant-tropisms",
+      "name": "Chemical Coordination in Plants — Tropisms",
+      "weight": 5
+    },
+    {
+      "id": "icse10-bio-circulatory-system",
+      "name": "The Circulatory System",
+      "weight": 8
+    },
+    {
+      "id": "icse10-bio-excretory-system",
+      "name": "The Excretory System",
+      "weight": 6
+    },
+    {
+      "id": "icse10-bio-nervous-system",
+      "name": "The Nervous System",
+      "weight": 7
+    },
+    {
+      "id": "icse10-bio-sense-organs",
+      "name": "Sense Organs",
+      "weight": 5
+    },
+    {
+      "id": "icse10-bio-endocrine-system",
+      "name": "The Endocrine System",
+      "weight": 6
+    },
+    {
+      "id": "icse10-bio-reproductive-system",
+      "name": "The Reproductive System",
+      "weight": 6
+    },
+    {
+      "id": "icse10-bio-population",
+      "name": "Population and Its Impact",
+      "weight": 4
+    },
+    {
+      "id": "icse10-bio-pollution",
+      "name": "Pollution and Its Types",
+      "weight": 4
+    }
+  ]
+}

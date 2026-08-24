@@ -1,0 +1,59 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class9·hindi@2026-27",
+  "board": "ICSE",
+  "class": 9,
+  "subject": "Hindi",
+  "emoji": "📜",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 8,
+  "topics": [
+    {
+      "id": "icse9-hin-essay",
+      "name": "Essay Writing (Nibandh Lekhan)",
+      "weight": 6
+    },
+    {
+      "id": "icse9-hin-letters",
+      "name": "Letter Writing (Patra Lekhan)",
+      "weight": 5
+    },
+    {
+      "id": "icse9-hin-comprehension",
+      "name": "Unseen Passage Comprehension (Apathit Gadyansh)",
+      "weight": 5
+    },
+    {
+      "id": "icse9-hin-grammar-sandhi",
+      "name": "Grammar — Sandhi",
+      "weight": 4
+    },
+    {
+      "id": "icse9-hin-grammar-samas",
+      "name": "Grammar — Samas",
+      "weight": 4
+    },
+    {
+      "id": "icse9-hin-grammar-vocab",
+      "name": "Vocabulary — Synonyms, Antonyms and Word Forms",
+      "weight": 4
+    },
+    {
+      "id": "icse9-hin-idioms",
+      "name": "Muhavare and Lokoktiyan (Idioms)",
+      "weight": 3
+    },
+    {
+      "id": "icse9-hin-lit-prose",
+      "name": "Literature — Gadya (Prose)",
+      "weight": 5
+    },
+    {
+      "id": "icse9-hin-lit-poetry",
+      "name": "Literature — Padya (Poetry)",
+      "weight": 5
+    }
+  ]
+}

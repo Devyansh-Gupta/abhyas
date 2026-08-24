@@ -1,0 +1,84 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class10·geography@2026-27",
+  "board": "ICSE",
+  "class": 10,
+  "subject": "Geography",
+  "emoji": "🗺️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 8,
+  "topics": [
+    {
+      "id": "icse10-geo-india-location-extent",
+      "name": "Map Study of India — Location and Extent",
+      "weight": 4
+    },
+    {
+      "id": "icse10-geo-relief",
+      "name": "Relief of India",
+      "weight": 6
+    },
+    {
+      "id": "icse10-geo-drainage",
+      "name": "Drainage — Rivers of India",
+      "weight": 6
+    },
+    {
+      "id": "icse10-geo-climate",
+      "name": "Climate of India",
+      "weight": 7
+    },
+    {
+      "id": "icse10-geo-natural-vegetation",
+      "name": "Natural Vegetation",
+      "weight": 5
+    },
+    {
+      "id": "icse10-geo-soils",
+      "name": "Soil Resources",
+      "weight": 5
+    },
+    {
+      "id": "icse10-geo-water-resources",
+      "name": "Water Resources",
+      "weight": 5
+    },
+    {
+      "id": "icse10-geo-minerals-energy",
+      "name": "Minerals and Energy Resources",
+      "weight": 6
+    },
+    {
+      "id": "icse10-geo-agriculture-food",
+      "name": "Agriculture — Food Crops",
+      "weight": 5
+    },
+    {
+      "id": "icse10-geo-agriculture-cash",
+      "name": "Agriculture — Cash Crops and Plantations",
+      "weight": 4
+    },
+    {
+      "id": "icse10-geo-industries-agro",
+      "name": "Industries — Agro-based",
+      "weight": 5
+    },
+    {
+      "id": "icse10-geo-industries-mineral",
+      "name": "Industries — Mineral-based",
+      "weight": 5
+    },
+    {
+      "id": "icse10-geo-transport",
+      "name": "Transport",
+      "weight": 4
+    },
+    {
+      "id": "icse10-geo-waste-management",
+      "name": "Waste Management",
+      "weight": 4
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class10·english-language@2026-27",
+  "board": "ICSE",
+  "class": 10,
+  "subject": "English Language & Literature",
+  "emoji": "📚",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "_note": "Board anthology/play text changes year to year — topic ids map to skill areas; verify current prescribed texts at curation time.",
+  "topics": [
+    {
+      "id": "icse10-eng-composition",
+      "name": "Composition — Argumentative, Descriptive and Narrative",
+      "weight": 7
+    },
+    {
+      "id": "icse10-eng-letters",
+      "name": "Letter Writing — Formal & Informal",
+      "weight": 6
+    },
+    {
+      "id": "icse10-eng-comprehension",
+      "name": "Comprehension of Unseen Passages",
+      "weight": 6
+    },
+    {
+      "id": "icse10-eng-grammar-tenses",
+      "name": "Grammar — Tenses and Sequence of Tenses",
+      "weight": 6
+    },
+    {
+      "id": "icse10-eng-grammar-transformation",
+      "name": "Grammar — Transformation and Synthesis of Sentences",
+      "weight": 7
+    },
+    {
+      "id": "icse10-eng-grammar-voice-speech",
+      "name": "Grammar — Active/Passive Voice and Direct/Indirect Speech",
+      "weight": 5
+    },
+    {
+      "id": "icse10-eng-lit-poetry",
+      "name": "Literature — Poetry Collection",
+      "weight": 5
+    },
+    {
+      "id": "icse10-eng-lit-short-stories",
+      "name": "Literature — Short Stories",
+      "weight": 5
+    },
+    {
+      "id": "icse10-eng-lit-play",
+      "name": "Literature — Play",
+      "weight": 4
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "type": "object",
   "required": ["id", "board", "class", "subject", "emoji", "acadYear", "version", "kind", "topics"],
   "properties": {
-    "id": { "type": "string", "pattern": "^[a-z0-9·]+·class\\d+·[a-z]+@\\d{4}-\\d{2}$" },
+    "id": { "type": "string", "pattern": "^[a-z0-9·]+·class\\d+·[a-z][a-z-]*@\\d{4}-\\d{2}$" },
     "board": { "type": "string" },
     "class": { "type": "integer", "minimum": 5, "maximum": 12 },
     "subject": { "type": "string" },

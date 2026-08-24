@@ -1,0 +1,59 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class9·chemistry@2026-27",
+  "board": "ICSE",
+  "class": 9,
+  "subject": "Chemistry",
+  "emoji": "🧪",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "topics": [
+    {
+      "id": "icse9-che-language-of-chemistry",
+      "name": "The Language of Chemistry",
+      "weight": 7
+    },
+    {
+      "id": "icse9-che-physical-chemical-change",
+      "name": "Physical and Chemical Changes",
+      "weight": 5
+    },
+    {
+      "id": "icse9-che-water",
+      "name": "Water",
+      "weight": 5
+    },
+    {
+      "id": "icse9-che-atomic-structure",
+      "name": "Atomic Structure",
+      "weight": 7
+    },
+    {
+      "id": "icse9-che-periodic-table",
+      "name": "The Periodic Table",
+      "weight": 7
+    },
+    {
+      "id": "icse9-che-gas-laws",
+      "name": "Study of Gas Laws",
+      "weight": 6
+    },
+    {
+      "id": "icse9-che-atmosphere-pollution",
+      "name": "The Atmosphere and Air Pollution",
+      "weight": 4
+    },
+    {
+      "id": "icse9-che-hydrogen",
+      "name": "Hydrogen",
+      "weight": 4
+    },
+    {
+      "id": "icse9-che-practical-separation",
+      "name": "Practical Chemistry — Separation Techniques",
+      "weight": 4
+    }
+  ]
+}

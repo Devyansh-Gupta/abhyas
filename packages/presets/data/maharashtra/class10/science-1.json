@@ -1,0 +1,60 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "maharashtra·class10·science-1@2026-27",
+  "board": "Maharashtra",
+  "class": 10,
+  "subject": "Science & Technology Part 1",
+  "emoji": "🔬",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "_note": "Source: Balbharati (MSBSHSE) SSC textbooks, 2026-27 edition — chapter-level mapping.",
+  "topics": [
+    {
+      "id": "mh10-sc1-gravitation",
+      "name": "Gravitation",
+      "weight": 7
+    },
+    {
+      "id": "mh10-sc1-periodic-classification",
+      "name": "Periodic Classification of Elements",
+      "weight": 6
+    },
+    {
+      "id": "mh10-sc1-chemical-reactions",
+      "name": "Chemical Reactions and Equations",
+      "weight": 7
+    },
+    {
+      "id": "mh10-sc1-electric-current",
+      "name": "Effects of Electric Current",
+      "weight": 8
+    },
+    {
+      "id": "mh10-sc1-heat",
+      "name": "Heat",
+      "weight": 5
+    },
+    {
+      "id": "mh10-sc1-refraction",
+      "name": "Refraction of Light",
+      "weight": 7
+    },
+    {
+      "id": "mh10-sc1-lenses",
+      "name": "Lenses",
+      "weight": 7
+    },
+    {
+      "id": "mh10-sc1-metallurgy",
+      "name": "Metallurgy",
+      "weight": 5
+    },
+    {
+      "id": "mh10-sc1-space-missions",
+      "name": "Space Missions",
+      "weight": 4
+    }
+  ]
+}

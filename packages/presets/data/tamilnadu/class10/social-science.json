@@ -1,0 +1,75 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "tamilnadu·class10·social-science@2026-27",
+  "board": "Tamil Nadu",
+  "class": 10,
+  "subject": "Social Science",
+  "emoji": "🏛️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 8,
+  "_note": "Source: Tamil Nadu SCERT Samacheer Kalvi Class 10 textbooks, 2026-27 edition. Conservative unit-level mapping across History/Geography/Civics/Economics volumes.",
+  "topics": [
+    {
+      "id": "tn10-soc-ww1-aftermath",
+      "name": "Outbreak of World War I and Its Aftermath",
+      "weight": 5
+    },
+    {
+      "id": "tn10-soc-world-between-wars",
+      "name": "The World Between Two World Wars",
+      "weight": 5
+    },
+    {
+      "id": "tn10-soc-nationalism-gandhian-era",
+      "name": "Nationalism and the Gandhian Era in India",
+      "weight": 6
+    },
+    {
+      "id": "tn10-soc-social-transformation-tn",
+      "name": "Social Transformation in Tamil Nadu",
+      "weight": 4
+    },
+    {
+      "id": "tn10-soc-india-relief-drainage",
+      "name": "India — Location, Relief and Drainage",
+      "weight": 6
+    },
+    {
+      "id": "tn10-soc-india-climate-vegetation",
+      "name": "Climate and Natural Vegetation of India",
+      "weight": 6
+    },
+    {
+      "id": "tn10-soc-india-agriculture",
+      "name": "India — Agriculture",
+      "weight": 5
+    },
+    {
+      "id": "tn10-soc-indian-constitution",
+      "name": "The Indian Constitution",
+      "weight": 5
+    },
+    {
+      "id": "tn10-soc-democracy-government",
+      "name": "Central and State Government in Indian Democracy",
+      "weight": 4
+    },
+    {
+      "id": "tn10-soc-gdp-national-income",
+      "name": "Gross Domestic Product and National Income",
+      "weight": 4
+    },
+    {
+      "id": "tn10-soc-employment-food-security",
+      "name": "Employment and Food Security",
+      "weight": 4
+    },
+    {
+      "id": "tn10-soc-globalisation-consumer-rights",
+      "name": "Globalisation and Consumer Rights",
+      "weight": 4
+    }
+  ]
+}

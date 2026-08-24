@@ -1,0 +1,84 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class9·history-civics@2026-27",
+  "board": "ICSE",
+  "class": 9,
+  "subject": "History & Civics",
+  "emoji": "🏛️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 8,
+  "topics": [
+    {
+      "id": "icse9-his-civics-constitution",
+      "name": "The Constitution of India — Basic Principles",
+      "weight": 6
+    },
+    {
+      "id": "icse9-his-civics-rights-duties",
+      "name": "Fundamental Rights and Duties",
+      "weight": 6
+    },
+    {
+      "id": "icse9-his-civics-directive-principles",
+      "name": "Directive Principles of State Policy",
+      "weight": 5
+    },
+    {
+      "id": "icse9-his-civics-elections",
+      "name": "Elections and the Election Commission",
+      "weight": 5
+    },
+    {
+      "id": "icse9-his-civics-local-rural",
+      "name": "Local Self-Government — Rural",
+      "weight": 4
+    },
+    {
+      "id": "icse9-his-civics-local-urban",
+      "name": "Local Self-Government — Urban",
+      "weight": 4
+    },
+    {
+      "id": "icse9-his-hist-harappan",
+      "name": "The Harappan Civilisation",
+      "weight": 5
+    },
+    {
+      "id": "icse9-his-hist-vedic",
+      "name": "The Vedic Age",
+      "weight": 4
+    },
+    {
+      "id": "icse9-his-hist-jainism-buddhism",
+      "name": "Jainism and Buddhism",
+      "weight": 4
+    },
+    {
+      "id": "icse9-his-hist-mauryan",
+      "name": "The Mauryan Empire",
+      "weight": 5
+    },
+    {
+      "id": "icse9-his-hist-delhi-sultanate",
+      "name": "The Delhi Sultanate",
+      "weight": 4
+    },
+    {
+      "id": "icse9-his-hist-mughal",
+      "name": "The Mughal Empire",
+      "weight": 4
+    },
+    {
+      "id": "icse9-his-hist-renaissance",
+      "name": "The Renaissance",
+      "weight": 5
+    },
+    {
+      "id": "icse9-his-hist-industrial-revolution",
+      "name": "The Industrial Revolution",
+      "weight": 4
+    }
+  ]
+}

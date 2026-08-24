@@ -1,0 +1,65 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "maharashtra·class10·science-2@2026-27",
+  "board": "Maharashtra",
+  "class": 10,
+  "subject": "Science & Technology Part 2",
+  "emoji": "🧫",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "_note": "Source: Balbharati (MSBSHSE) SSC textbooks, 2026-27 edition — chapter-level mapping.",
+  "topics": [
+    {
+      "id": "mh10-sc2-heredity-evolution",
+      "name": "Heredity and Evolution",
+      "weight": 7
+    },
+    {
+      "id": "mh10-sc2-life-processes-1",
+      "name": "Life Processes in Living Organisms — Part 1",
+      "weight": 7
+    },
+    {
+      "id": "mh10-sc2-life-processes-2",
+      "name": "Life Processes in Living Organisms — Part 2",
+      "weight": 7
+    },
+    {
+      "id": "mh10-sc2-environmental-management",
+      "name": "Environmental Management",
+      "weight": 5
+    },
+    {
+      "id": "mh10-sc2-green-energy",
+      "name": "Towards Green Energy",
+      "weight": 5
+    },
+    {
+      "id": "mh10-sc2-animal-classification",
+      "name": "Animal Classification",
+      "weight": 5
+    },
+    {
+      "id": "mh10-sc2-microbiology",
+      "name": "Introduction to Microbiology",
+      "weight": 5
+    },
+    {
+      "id": "mh10-sc2-cell-biotech",
+      "name": "Cell Biology and Biotechnology",
+      "weight": 5
+    },
+    {
+      "id": "mh10-sc2-social-health",
+      "name": "Social Health",
+      "weight": 3
+    },
+    {
+      "id": "mh10-sc2-disaster-management",
+      "name": "Disaster Management",
+      "weight": 3
+    }
+  ]
+}

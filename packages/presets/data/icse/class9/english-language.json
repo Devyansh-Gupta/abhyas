@@ -1,0 +1,60 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class9·english-language@2026-27",
+  "board": "ICSE",
+  "class": 9,
+  "subject": "English Language & Literature",
+  "emoji": "📚",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "_note": "Language skills stable across years; literature text selections vary by school — keep ids tied to skill areas, not texts.",
+  "topics": [
+    {
+      "id": "icse9-eng-composition",
+      "name": "Composition — Descriptive & Narrative Essays",
+      "weight": 7
+    },
+    {
+      "id": "icse9-eng-letters",
+      "name": "Letter Writing — Formal & Informal",
+      "weight": 6
+    },
+    {
+      "id": "icse9-eng-comprehension",
+      "name": "Comprehension of Unseen Passages",
+      "weight": 6
+    },
+    {
+      "id": "icse9-eng-grammar-tenses",
+      "name": "Grammar — Tenses and Verb Forms",
+      "weight": 6
+    },
+    {
+      "id": "icse9-eng-grammar-transformation",
+      "name": "Grammar — Transformation and Synthesis of Sentences",
+      "weight": 7
+    },
+    {
+      "id": "icse9-eng-grammar-voice-speech",
+      "name": "Grammar — Active/Passive Voice and Direct/Indirect Speech",
+      "weight": 5
+    },
+    {
+      "id": "icse9-eng-lit-poetry",
+      "name": "Literature — Poetry",
+      "weight": 5
+    },
+    {
+      "id": "icse9-eng-lit-prose",
+      "name": "Literature — Short Stories and Prose",
+      "weight": 5
+    },
+    {
+      "id": "icse9-eng-lit-drama",
+      "name": "Literature — Drama",
+      "weight": 4
+    }
+  ]
+}

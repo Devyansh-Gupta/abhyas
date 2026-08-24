@@ -1,0 +1,74 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class10·chemistry@2026-27",
+  "board": "ICSE",
+  "class": 10,
+  "subject": "Chemistry",
+  "emoji": "🧪",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "topics": [
+    {
+      "id": "icse10-che-periodic-properties",
+      "name": "Periodic Properties and Their Variations",
+      "weight": 6
+    },
+    {
+      "id": "icse10-che-chemical-bonding",
+      "name": "Chemical Bonding — Ionic and Covalent",
+      "weight": 7
+    },
+    {
+      "id": "icse10-che-acids-bases-salts",
+      "name": "Acids, Bases and Salts",
+      "weight": 7
+    },
+    {
+      "id": "icse10-che-analytical-chemistry",
+      "name": "Analytical Chemistry — Ion Identification",
+      "weight": 6
+    },
+    {
+      "id": "icse10-che-mole-concept",
+      "name": "Mole Concept and Stoichiometry",
+      "weight": 8
+    },
+    {
+      "id": "icse10-che-electrolysis",
+      "name": "Electrolysis",
+      "weight": 7
+    },
+    {
+      "id": "icse10-che-metallurgy",
+      "name": "Metallurgy",
+      "weight": 6
+    },
+    {
+      "id": "icse10-che-compounds-hcl",
+      "name": "Study of Compounds — Hydrogen Chloride",
+      "weight": 5
+    },
+    {
+      "id": "icse10-che-compounds-ammonia-nitric",
+      "name": "Study of Compounds — Ammonia and Nitric Acid",
+      "weight": 5
+    },
+    {
+      "id": "icse10-che-compounds-sulphuric",
+      "name": "Study of Compounds — Sulphuric Acid",
+      "weight": 5
+    },
+    {
+      "id": "icse10-che-organic-basics",
+      "name": "Organic Chemistry — Homologous Series and IUPAC Nomenclature",
+      "weight": 7
+    },
+    {
+      "id": "icse10-che-organic-alcohols-acids",
+      "name": "Organic Chemistry — Alcohols and Carboxylic Acids",
+      "weight": 6
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class9·commercial-studies@2026-27",
+  "board": "ICSE",
+  "class": 9,
+  "subject": "Commercial Studies",
+  "emoji": "💼",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "elective",
+  "weight": 5,
+  "topics": [
+    {
+      "id": "icse9-com-human-activities",
+      "name": "Human Activities and Business",
+      "weight": 4
+    },
+    {
+      "id": "icse9-com-needs-wants-business",
+      "name": "Needs, Wants and Types of Business Activity",
+      "weight": 5
+    },
+    {
+      "id": "icse9-com-non-commercial-orgs",
+      "name": "Non-commercial Organisations",
+      "weight": 4
+    },
+    {
+      "id": "icse9-com-ownership-forms",
+      "name": "Forms of Business Ownership",
+      "weight": 5
+    },
+    {
+      "id": "icse9-com-stakeholders",
+      "name": "Stakeholders and Their Value",
+      "weight": 5
+    },
+    {
+      "id": "icse9-com-business-functions",
+      "name": "Business Functions Overview",
+      "weight": 5
+    },
+    {
+      "id": "icse9-com-communication",
+      "name": "Communication in Business Organisations",
+      "weight": 4
+    },
+    {
+      "id": "icse9-com-money-banking",
+      "name": "Money and Banking Basics",
+      "weight": 4
+    },
+    {
+      "id": "icse9-com-transport-insurance",
+      "name": "Transport and Insurance Basics",
+      "weight": 3
+    }
+  ]
+}

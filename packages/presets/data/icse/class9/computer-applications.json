@@ -1,0 +1,69 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class9·computer-applications@2026-27",
+  "board": "ICSE",
+  "class": 9,
+  "subject": "Computer Applications",
+  "emoji": "💻",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "elective",
+  "weight": 6,
+  "topics": [
+    {
+      "id": "icse9-csa-intro-oop",
+      "name": "Introduction to Object-Oriented Programming",
+      "weight": 5
+    },
+    {
+      "id": "icse9-csa-java-basics",
+      "name": "Java Fundamentals — Values, Data Types and Variables",
+      "weight": 6
+    },
+    {
+      "id": "icse9-csa-operators",
+      "name": "Operators and Expressions",
+      "weight": 6
+    },
+    {
+      "id": "icse9-csa-conditionals",
+      "name": "Conditional Constructs",
+      "weight": 7
+    },
+    {
+      "id": "icse9-csa-loops",
+      "name": "Iterative Constructs and Nested Loops",
+      "weight": 8
+    },
+    {
+      "id": "icse9-csa-classes-methods",
+      "name": "Classes, Objects and Methods",
+      "weight": 7
+    },
+    {
+      "id": "icse9-csa-constructors-encapsulation",
+      "name": "Constructors and Encapsulation",
+      "weight": 6
+    },
+    {
+      "id": "icse9-csa-library-math",
+      "name": "Mathematical Library Methods",
+      "weight": 4
+    },
+    {
+      "id": "icse9-csa-arrays-intro",
+      "name": "Introduction to Arrays",
+      "weight": 6
+    },
+    {
+      "id": "icse9-csa-strings-intro",
+      "name": "String Handling Basics",
+      "weight": 5
+    },
+    {
+      "id": "icse9-csa-input-scanner",
+      "name": "Input Functions (Scanner)",
+      "weight": 3
+    }
+  ]
+}

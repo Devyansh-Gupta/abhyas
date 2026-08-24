@@ -1,0 +1,50 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "maharashtra·class10·maths-geometry@2026-27",
+  "board": "Maharashtra",
+  "class": 10,
+  "subject": "Mathematics Part 2 — Geometry",
+  "emoji": "📏",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "_note": "Source: Balbharati (MSBSHSE) SSC textbooks, 2026-27 edition — chapter-level mapping.",
+  "topics": [
+    {
+      "id": "mh10-geo-similarity",
+      "name": "Similarity",
+      "weight": 8
+    },
+    {
+      "id": "mh10-geo-pythagoras",
+      "name": "Pythagoras Theorem",
+      "weight": 7
+    },
+    {
+      "id": "mh10-geo-circle",
+      "name": "Circle",
+      "weight": 8
+    },
+    {
+      "id": "mh10-geo-constructions",
+      "name": "Geometric Constructions",
+      "weight": 5
+    },
+    {
+      "id": "mh10-geo-coordinate-geometry",
+      "name": "Co-ordinate Geometry",
+      "weight": 7
+    },
+    {
+      "id": "mh10-geo-trigonometry",
+      "name": "Trigonometry",
+      "weight": 8
+    },
+    {
+      "id": "mh10-geo-mensuration",
+      "name": "Mensuration",
+      "weight": 7
+    }
+  ]
+}

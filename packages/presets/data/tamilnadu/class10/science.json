@@ -1,0 +1,95 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "tamilnadu·class10·science@2026-27",
+  "board": "Tamil Nadu",
+  "class": 10,
+  "subject": "Science",
+  "emoji": "🔬",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "_note": "Source: Tamil Nadu SCERT Samacheer Kalvi Class 10 textbooks, 2026-27 edition.",
+  "topics": [
+    {
+      "id": "tn10-sci-laws-of-motion",
+      "name": "Laws of Motion",
+      "weight": 8
+    },
+    {
+      "id": "tn10-sci-optics",
+      "name": "Optics",
+      "weight": 7
+    },
+    {
+      "id": "tn10-sci-thermal-physics",
+      "name": "Thermal Physics",
+      "weight": 6
+    },
+    {
+      "id": "tn10-sci-electricity",
+      "name": "Electricity",
+      "weight": 8
+    },
+    {
+      "id": "tn10-sci-acoustics",
+      "name": "Acoustics",
+      "weight": 5
+    },
+    {
+      "id": "tn10-sci-nuclear-physics",
+      "name": "Nuclear Physics",
+      "weight": 5
+    },
+    {
+      "id": "tn10-sci-atoms-molecules",
+      "name": "Atoms and Molecules",
+      "weight": 6
+    },
+    {
+      "id": "tn10-sci-periodic-classification",
+      "name": "Periodic Classification of Elements",
+      "weight": 6
+    },
+    {
+      "id": "tn10-sci-solutions",
+      "name": "Solutions",
+      "weight": 5
+    },
+    {
+      "id": "tn10-sci-chemical-reactions-types",
+      "name": "Types of Chemical Reactions",
+      "weight": 6
+    },
+    {
+      "id": "tn10-sci-carbon-compounds",
+      "name": "Carbon and its Compounds",
+      "weight": 6
+    },
+    {
+      "id": "tn10-sci-plant-anatomy-physiology",
+      "name": "Plant Anatomy and Plant Physiology",
+      "weight": 6
+    },
+    {
+      "id": "tn10-sci-structural-organisation-animals",
+      "name": "Structural Organisation of Animals",
+      "weight": 5
+    },
+    {
+      "id": "tn10-sci-reproduction-living-organisms",
+      "name": "Reproduction in Living Organisms",
+      "weight": 6
+    },
+    {
+      "id": "tn10-sci-health-diseases",
+      "name": "Health and Diseases",
+      "weight": 5
+    },
+    {
+      "id": "tn10-sci-environmental-management",
+      "name": "Environmental Management",
+      "weight": 4
+    }
+  ]
+}

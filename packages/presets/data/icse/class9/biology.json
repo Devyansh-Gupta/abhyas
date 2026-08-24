@@ -1,0 +1,64 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class9·biology@2026-27",
+  "board": "ICSE",
+  "class": 9,
+  "subject": "Biology",
+  "emoji": "🌿",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "topics": [
+    {
+      "id": "icse9-bio-introducing-biology",
+      "name": "Introducing Biology",
+      "weight": 3
+    },
+    {
+      "id": "icse9-bio-cell-unit-of-life",
+      "name": "The Cell — Unit of Life",
+      "weight": 7
+    },
+    {
+      "id": "icse9-bio-tissues",
+      "name": "Tissues",
+      "weight": 6
+    },
+    {
+      "id": "icse9-bio-flower",
+      "name": "The Flower",
+      "weight": 5
+    },
+    {
+      "id": "icse9-bio-pollination-fertilisation",
+      "name": "Pollination and Fertilisation",
+      "weight": 6
+    },
+    {
+      "id": "icse9-bio-seeds-germination",
+      "name": "Seeds — Structure and Germination",
+      "weight": 5
+    },
+    {
+      "id": "icse9-bio-respiration-plants",
+      "name": "Respiration in Plants",
+      "weight": 6
+    },
+    {
+      "id": "icse9-bio-five-kingdoms",
+      "name": "Five Kingdom Classification",
+      "weight": 5
+    },
+    {
+      "id": "icse9-bio-bacteria",
+      "name": "Economic Importance of Bacteria",
+      "weight": 4
+    },
+    {
+      "id": "icse9-bio-fungi",
+      "name": "Economic Importance of Fungi",
+      "weight": 4
+    }
+  ]
+}

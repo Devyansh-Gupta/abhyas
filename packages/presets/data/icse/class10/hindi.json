@@ -1,0 +1,60 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class10·hindi@2026-27",
+  "board": "ICSE",
+  "class": 10,
+  "subject": "Hindi",
+  "emoji": "📜",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 8,
+  "_note": "Prescribed anthologies change; ids kept at skill-area granularity.",
+  "topics": [
+    {
+      "id": "icse10-hin-essay",
+      "name": "Essay Writing (Nibandh Lekhan)",
+      "weight": 6
+    },
+    {
+      "id": "icse10-hin-letters",
+      "name": "Letter Writing (Patra Lekhan)",
+      "weight": 5
+    },
+    {
+      "id": "icse10-hin-comprehension",
+      "name": "Unseen Passage Comprehension (Apathit Gadyansh)",
+      "weight": 5
+    },
+    {
+      "id": "icse10-hin-grammar-sandhi",
+      "name": "Grammar — Sandhi",
+      "weight": 4
+    },
+    {
+      "id": "icse10-hin-grammar-samas",
+      "name": "Grammar — Samas",
+      "weight": 4
+    },
+    {
+      "id": "icse10-hin-grammar-vocab",
+      "name": "Vocabulary — Synonyms, Antonyms and Word Forms",
+      "weight": 4
+    },
+    {
+      "id": "icse10-hin-idioms",
+      "name": "Muhavare and Lokoktiyan (Idioms)",
+      "weight": 3
+    },
+    {
+      "id": "icse10-hin-lit-prose",
+      "name": "Literature — Prose Anthology",
+      "weight": 5
+    },
+    {
+      "id": "icse10-hin-lit-poetry",
+      "name": "Literature — Poetry Anthology",
+      "weight": 5
+    }
+  ]
+}

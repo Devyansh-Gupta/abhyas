@@ -1,0 +1,69 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class9·geography@2026-27",
+  "board": "ICSE",
+  "class": 9,
+  "subject": "Geography",
+  "emoji": "🗺️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 8,
+  "topics": [
+    {
+      "id": "icse9-geo-earth-planet",
+      "name": "Earth as a Planet",
+      "weight": 4
+    },
+    {
+      "id": "icse9-geo-grid-latlong",
+      "name": "Geographic Grid — Latitudes and Longitudes",
+      "weight": 5
+    },
+    {
+      "id": "icse9-geo-rotation-revolution",
+      "name": "Rotation and Revolution",
+      "weight": 5
+    },
+    {
+      "id": "icse9-geo-earth-interior",
+      "name": "Earth's Interior — Volcanoes and Earthquakes",
+      "weight": 5
+    },
+    {
+      "id": "icse9-geo-weathering",
+      "name": "Weathering and Erosion",
+      "weight": 4
+    },
+    {
+      "id": "icse9-geo-atmosphere",
+      "name": "Structure of the Atmosphere",
+      "weight": 4
+    },
+    {
+      "id": "icse9-geo-insolation",
+      "name": "Insolation and Temperature",
+      "weight": 5
+    },
+    {
+      "id": "icse9-geo-pressure-winds",
+      "name": "Pressure Belts and Winds",
+      "weight": 5
+    },
+    {
+      "id": "icse9-geo-humidity-precipitation",
+      "name": "Humidity and Precipitation",
+      "weight": 4
+    },
+    {
+      "id": "icse9-geo-natural-regions",
+      "name": "Natural Regions of the World",
+      "weight": 4
+    },
+    {
+      "id": "icse9-geo-topo-maps",
+      "name": "Interpretation of Topographical Maps",
+      "weight": 6
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class9·mathematics@2026-27",
+  "board": "ICSE",
+  "class": 9,
+  "subject": "Mathematics",
+  "emoji": "📐",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 12,
+  "topics": [
+    {
+      "id": "icse9-mat-rational-numbers",
+      "name": "Rational and Irrational Numbers",
+      "weight": 5
+    },
+    {
+      "id": "icse9-mat-compound-interest",
+      "name": "Compound Interest",
+      "weight": 6
+    },
+    {
+      "id": "icse9-mat-expansions",
+      "name": "Expansions",
+      "weight": 7
+    },
+    {
+      "id": "icse9-mat-factorisation",
+      "name": "Factorisation",
+      "weight": 8
+    },
+    {
+      "id": "icse9-mat-simultaneous-linear",
+      "name": "Simultaneous Linear Equations",
+      "weight": 8
+    },
+    {
+      "id": "icse9-mat-indices",
+      "name": "Indices (Exponents)",
+      "weight": 6
+    },
+    {
+      "id": "icse9-mat-logarithms",
+      "name": "Logarithms",
+      "weight": 5
+    },
+    {
+      "id": "icse9-mat-triangles-congruence",
+      "name": "Triangles — Congruence",
+      "weight": 8
+    },
+    {
+      "id": "icse9-mat-midpoint-pythagoras",
+      "name": "Mid-point Theorem and Pythagoras Theorem",
+      "weight": 8
+    },
+    {
+      "id": "icse9-mat-rectilinear-figures",
+      "name": "Rectilinear Figures (Quadrilaterals)",
+      "weight": 7
+    },
+    {
+      "id": "icse9-mat-area-theorems",
+      "name": "Area Theorems",
+      "weight": 6
+    },
+    {
+      "id": "icse9-mat-circles",
+      "name": "Circles",
+      "weight": 8
+    },
+    {
+      "id": "icse9-mat-statistics",
+      "name": "Statistics",
+      "weight": 7
+    },
+    {
+      "id": "icse9-mat-trig-ratios",
+      "name": "Trigonometrical Ratios",
+      "weight": 7
+    },
+    {
+      "id": "icse9-mat-coordinate-plane",
+      "name": "Coordinate Geometry — Cartesian Plane",
+      "weight": 6
+    }
+  ]
+}

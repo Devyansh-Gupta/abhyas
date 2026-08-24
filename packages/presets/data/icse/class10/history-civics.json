@@ -1,0 +1,79 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class10·history-civics@2026-27",
+  "board": "ICSE",
+  "class": 10,
+  "subject": "History & Civics",
+  "emoji": "🏛️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 8,
+  "topics": [
+    {
+      "id": "icse10-his-civics-union-legislature",
+      "name": "The Union Legislature",
+      "weight": 6
+    },
+    {
+      "id": "icse10-his-civics-union-executive",
+      "name": "The Union Executive",
+      "weight": 6
+    },
+    {
+      "id": "icse10-his-civics-judiciary",
+      "name": "The Judiciary — Supreme Court and High Courts",
+      "weight": 6
+    },
+    {
+      "id": "icse10-his-hist-1857",
+      "name": "The First War of Independence, 1857",
+      "weight": 6
+    },
+    {
+      "id": "icse10-his-hist-nationalism-growth",
+      "name": "Growth of Indian Nationalism",
+      "weight": 5
+    },
+    {
+      "id": "icse10-his-hist-swadeshi-partition",
+      "name": "Partition of Bengal and the Swadeshi Movement",
+      "weight": 5
+    },
+    {
+      "id": "icse10-his-hist-gandhian-era",
+      "name": "The Gandhian Era — Non-cooperation and Civil Disobedience",
+      "weight": 7
+    },
+    {
+      "id": "icse10-his-hist-quit-india",
+      "name": "Quit India Movement and Subhas Chandra Bose",
+      "weight": 5
+    },
+    {
+      "id": "icse10-his-hist-ww1-versailles",
+      "name": "World War I and the Treaty of Versailles",
+      "weight": 5
+    },
+    {
+      "id": "icse10-his-hist-dictatorships",
+      "name": "Rise of Dictatorships — Fascism and Nazism",
+      "weight": 5
+    },
+    {
+      "id": "icse10-his-hist-ww2",
+      "name": "The Second World War",
+      "weight": 5
+    },
+    {
+      "id": "icse10-his-hist-united-nations",
+      "name": "The United Nations Organisation",
+      "weight": 6
+    },
+    {
+      "id": "icse10-his-hist-un-agencies",
+      "name": "Major UN Agencies",
+      "weight": 4
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class10·commercial-studies@2026-27",
+  "board": "ICSE",
+  "class": 10,
+  "subject": "Commercial Studies",
+  "emoji": "💼",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "elective",
+  "weight": 5,
+  "topics": [
+    {
+      "id": "icse10-com-stakeholders",
+      "name": "Stakeholders in Commercial Organisations",
+      "weight": 5
+    },
+    {
+      "id": "icse10-com-functions-overview",
+      "name": "Functions of a Commercial Organisation — Overview",
+      "weight": 5
+    },
+    {
+      "id": "icse10-com-motivation",
+      "name": "Motivation at the Workplace",
+      "weight": 4
+    },
+    {
+      "id": "icse10-com-communication",
+      "name": "Communication",
+      "weight": 5
+    },
+    {
+      "id": "icse10-com-industrial-relations",
+      "name": "Industrial Relations",
+      "weight": 4
+    },
+    {
+      "id": "icse10-com-marketing-sales",
+      "name": "Marketing and Sales",
+      "weight": 5
+    },
+    {
+      "id": "icse10-com-finance-accounting",
+      "name": "Finance and Accounting Basics",
+      "weight": 5
+    },
+    {
+      "id": "icse10-com-human-resources",
+      "name": "Human Resources",
+      "weight": 4
+    },
+    {
+      "id": "icse10-com-environment-ethics",
+      "name": "Business Environment and Ethics",
+      "weight": 3
+    }
+  ]
+}

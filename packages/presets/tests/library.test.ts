@@ -18,7 +18,11 @@ describe('preset library (T1)', () => {
   it('presetsFor filters by board+class', () => {
     expect(presetsFor('CBSE', 10).length).toBe(2);
     expect(presetsFor('CBSE', 12).map(p => p.subject)).toEqual(['Physics']);
-    expect(presetsFor('Maharashtra', 10)).toEqual([]); // long tail → T2 builder
+    // P3 expansion: state boards are now registered (was "long tail → T2 builder")
+    expect(presetsFor('Maharashtra', 10).length).toBe(6);
+    expect(presetsFor('ICSE', 9).length).toBe(10);
+    expect(presetsFor('ICSE', 10).length).toBe(10);
+    expect(presetsFor('Tamil Nadu', 9)).toEqual([]); // unregistered board/class still → []
   });
 
   it('topicsFromPreset instantiates engine topics with provenance', () => {

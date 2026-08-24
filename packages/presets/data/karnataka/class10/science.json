@@ -1,0 +1,95 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "karnataka·class10·science@2026-27",
+  "board": "Karnataka",
+  "class": 10,
+  "subject": "Science",
+  "emoji": "🔬",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "_note": "Source: KSEEB SSLC textbooks, 2026-27 edition (NCERT-aligned Science/Maths).",
+  "topics": [
+    {
+      "id": "ka10-sci-chemical-reactions",
+      "name": "Chemical Reactions and Equations",
+      "weight": 7
+    },
+    {
+      "id": "ka10-sci-acids-bases-salts",
+      "name": "Acids, Bases and Salts",
+      "weight": 6
+    },
+    {
+      "id": "ka10-sci-metals-nonmetals",
+      "name": "Metals and Non-metals",
+      "weight": 6
+    },
+    {
+      "id": "ka10-sci-carbon-compounds",
+      "name": "Carbon and its Compounds",
+      "weight": 6
+    },
+    {
+      "id": "ka10-sci-periodic-classification",
+      "name": "Periodic Classification of Elements",
+      "weight": 5
+    },
+    {
+      "id": "ka10-sci-life-processes",
+      "name": "Life Processes",
+      "weight": 8
+    },
+    {
+      "id": "ka10-sci-control-coordination",
+      "name": "Control and Coordination",
+      "weight": 6
+    },
+    {
+      "id": "ka10-sci-organisms-reproduce",
+      "name": "How do Organisms Reproduce?",
+      "weight": 6
+    },
+    {
+      "id": "ka10-sci-heredity-evolution",
+      "name": "Heredity and Evolution",
+      "weight": 5
+    },
+    {
+      "id": "ka10-sci-light-reflection-refraction",
+      "name": "Light — Reflection and Refraction",
+      "weight": 8
+    },
+    {
+      "id": "ka10-sci-human-eye",
+      "name": "The Human Eye and the Colourful World",
+      "weight": 6
+    },
+    {
+      "id": "ka10-sci-electricity",
+      "name": "Electricity",
+      "weight": 9
+    },
+    {
+      "id": "ka10-sci-magnetic-effects",
+      "name": "Magnetic Effects of Electric Current",
+      "weight": 7
+    },
+    {
+      "id": "ka10-sci-sources-of-energy",
+      "name": "Sources of Energy",
+      "weight": 4
+    },
+    {
+      "id": "ka10-sci-our-environment",
+      "name": "Our Environment",
+      "weight": 3
+    },
+    {
+      "id": "ka10-sci-natural-resources",
+      "name": "Management of Natural Resources",
+      "weight": 3
+    }
+  ]
+}

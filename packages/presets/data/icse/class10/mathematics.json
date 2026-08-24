@@ -1,0 +1,114 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class10·mathematics@2026-27",
+  "board": "ICSE",
+  "class": 10,
+  "subject": "Mathematics",
+  "emoji": "📐",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 12,
+  "topics": [
+    {
+      "id": "icse10-mat-gst",
+      "name": "Goods and Services Tax (GST)",
+      "weight": 6
+    },
+    {
+      "id": "icse10-mat-banking",
+      "name": "Banking",
+      "weight": 5
+    },
+    {
+      "id": "icse10-mat-shares-dividends",
+      "name": "Shares and Dividends",
+      "weight": 5
+    },
+    {
+      "id": "icse10-mat-linear-inequations",
+      "name": "Linear Inequations",
+      "weight": 6
+    },
+    {
+      "id": "icse10-mat-quadratic-equations",
+      "name": "Quadratic Equations",
+      "weight": 8
+    },
+    {
+      "id": "icse10-mat-ratio-proportion",
+      "name": "Ratio, Proportion and Variation",
+      "weight": 6
+    },
+    {
+      "id": "icse10-mat-remainder-factor-theorem",
+      "name": "Remainder and Factor Theorem",
+      "weight": 6
+    },
+    {
+      "id": "icse10-mat-matrices",
+      "name": "Matrices",
+      "weight": 6
+    },
+    {
+      "id": "icse10-mat-ap",
+      "name": "Arithmetic Progression",
+      "weight": 7
+    },
+    {
+      "id": "icse10-mat-gp",
+      "name": "Geometric Progression",
+      "weight": 6
+    },
+    {
+      "id": "icse10-mat-section-formula",
+      "name": "Coordinate Geometry — Section Formula",
+      "weight": 6
+    },
+    {
+      "id": "icse10-mat-straight-line",
+      "name": "Equation of a Straight Line",
+      "weight": 7
+    },
+    {
+      "id": "icse10-mat-similarity",
+      "name": "Similarity",
+      "weight": 8
+    },
+    {
+      "id": "icse10-mat-loci",
+      "name": "Loci",
+      "weight": 6
+    },
+    {
+      "id": "icse10-mat-circles",
+      "name": "Circles — Chords, Tangents and Angles",
+      "weight": 8
+    },
+    {
+      "id": "icse10-mat-constructions",
+      "name": "Constructions",
+      "weight": 5
+    },
+    {
+      "id": "icse10-mat-mensuration",
+      "name": "Mensuration — Cylinder, Cone and Sphere",
+      "weight": 8
+    },
+    {
+      "id": "icse10-mat-trigonometry",
+      "name": "Trigonometry — Identities and Heights & Distances",
+      "weight": 9
+    },
+    {
+      "id": "icse10-mat-statistics",
+      "name": "Statistics — Mean, Median, Mode and Ogive",
+      "weight": 7
+    },
+    {
+      "id": "icse10-mat-probability",
+      "name": "Probability",
+      "weight": 6
+    }
+  ]
+}

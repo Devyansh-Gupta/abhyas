@@ -1,0 +1,75 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "maharashtra·class10·history-political-science@2026-27",
+  "board": "Maharashtra",
+  "class": 10,
+  "subject": "History & Political Science",
+  "emoji": "🏛️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 8,
+  "_note": "Source: Balbharati (MSBSHSE) SSC textbooks, 2026-27 edition — chapter-level mapping.",
+  "topics": [
+    {
+      "id": "mh10-hps-historiography-west",
+      "name": "Historiography — Development in the West",
+      "weight": 4
+    },
+    {
+      "id": "mh10-hps-historiography-india",
+      "name": "Historiography — Indian Tradition",
+      "weight": 4
+    },
+    {
+      "id": "mh10-hps-applied-history",
+      "name": "Applied History",
+      "weight": 3
+    },
+    {
+      "id": "mh10-hps-indian-arts",
+      "name": "History of Indian Arts",
+      "weight": 4
+    },
+    {
+      "id": "mh10-hps-mass-media-history",
+      "name": "Mass Media and History",
+      "weight": 3
+    },
+    {
+      "id": "mh10-hps-entertainment-sports-tourism",
+      "name": "Entertainment, Sports and Tourism in History",
+      "weight": 3
+    },
+    {
+      "id": "mh10-hps-heritage-management",
+      "name": "Heritage Management",
+      "weight": 3
+    },
+    {
+      "id": "mh10-hps-polsci-world-politics",
+      "name": "World Politics and the Cold War Era",
+      "weight": 4
+    },
+    {
+      "id": "mh10-hps-polsci-foreign-policy",
+      "name": "Indian Foreign Policy",
+      "weight": 4
+    },
+    {
+      "id": "mh10-hps-polsci-defence",
+      "name": "India's Defence System",
+      "weight": 3
+    },
+    {
+      "id": "mh10-hps-polsci-united-nations",
+      "name": "The United Nations",
+      "weight": 4
+    },
+    {
+      "id": "mh10-hps-polsci-international-problems",
+      "name": "India and International Problems",
+      "weight": 3
+    }
+  ]
+}

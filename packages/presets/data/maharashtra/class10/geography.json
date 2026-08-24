@@ -1,0 +1,60 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "maharashtra·class10·geography@2026-27",
+  "board": "Maharashtra",
+  "class": 10,
+  "subject": "Geography",
+  "emoji": "🗺️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 8,
+  "_note": "Source: Balbharati (MSBSHSE) SSC textbooks, 2026-27 edition — chapter-level mapping.",
+  "topics": [
+    {
+      "id": "mh10-gog-field-visit",
+      "name": "Field Visit and Map Skills",
+      "weight": 3
+    },
+    {
+      "id": "mh10-gog-location-extent",
+      "name": "Location and Extent",
+      "weight": 4
+    },
+    {
+      "id": "mh10-gog-physiography-drainage",
+      "name": "Physiography and Drainage",
+      "weight": 6
+    },
+    {
+      "id": "mh10-gog-climate",
+      "name": "Climate",
+      "weight": 7
+    },
+    {
+      "id": "mh10-gog-vegetation-wildlife",
+      "name": "Natural Vegetation and Wildlife",
+      "weight": 5
+    },
+    {
+      "id": "mh10-gog-population",
+      "name": "Population",
+      "weight": 5
+    },
+    {
+      "id": "mh10-gog-settlements",
+      "name": "Human Settlements",
+      "weight": 4
+    },
+    {
+      "id": "mh10-gog-economy-occupations",
+      "name": "Economy and Occupations",
+      "weight": 5
+    },
+    {
+      "id": "mh10-gog-tourism-transport",
+      "name": "Tourism, Transport and Communication",
+      "weight": 4
+    }
+  ]
+}

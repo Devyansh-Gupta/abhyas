@@ -1,0 +1,69 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class10·computer-applications@2026-27",
+  "board": "ICSE",
+  "class": 10,
+  "subject": "Computer Applications",
+  "emoji": "💻",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "elective",
+  "weight": 6,
+  "topics": [
+    {
+      "id": "icse10-csa-revision-class9",
+      "name": "Revision of Class IX Concepts",
+      "weight": 5
+    },
+    {
+      "id": "icse10-csa-oop-values",
+      "name": "Objects, Values and Data Types — Review",
+      "weight": 5
+    },
+    {
+      "id": "icse10-csa-operators-controlflow",
+      "name": "Operators and Control Flow — Review",
+      "weight": 6
+    },
+    {
+      "id": "icse10-csa-user-defined-types",
+      "name": "Classes as User-defined Types",
+      "weight": 7
+    },
+    {
+      "id": "icse10-csa-functions-overloading",
+      "name": "Functions — Definition and Overloading",
+      "weight": 7
+    },
+    {
+      "id": "icse10-csa-constructors",
+      "name": "Constructors",
+      "weight": 6
+    },
+    {
+      "id": "icse10-csa-library-classes",
+      "name": "Library Classes — Wrapper, String and Math",
+      "weight": 6
+    },
+    {
+      "id": "icse10-csa-arrays-1d",
+      "name": "Arrays — Single Dimensional",
+      "weight": 8
+    },
+    {
+      "id": "icse10-csa-arrays-2d",
+      "name": "Arrays — Two Dimensional",
+      "weight": 7
+    },
+    {
+      "id": "icse10-csa-string-handling",
+      "name": "String Handling — String and StringBuffer",
+      "weight": 7
+    },
+    {
+      "id": "icse10-csa-programs-objects",
+      "name": "Programs Involving User-defined Objects",
+      "weight": 5
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class9·physics@2026-27",
+  "board": "ICSE",
+  "class": 9,
+  "subject": "Physics",
+  "emoji": "⚛️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "topics": [
+    {
+      "id": "icse9-phy-measurements",
+      "name": "Measurements and Experimentation",
+      "weight": 6
+    },
+    {
+      "id": "icse9-phy-motion-1d",
+      "name": "Motion in One Dimension",
+      "weight": 8
+    },
+    {
+      "id": "icse9-phy-laws-of-motion",
+      "name": "Laws of Motion",
+      "weight": 8
+    },
+    {
+      "id": "icse9-phy-fluids-pressure",
+      "name": "Pressure in Fluids and Atmospheric Pressure",
+      "weight": 7
+    },
+    {
+      "id": "icse9-phy-upthrust-archimedes",
+      "name": "Upthrust in Fluids and Archimedes' Principle",
+      "weight": 6
+    },
+    {
+      "id": "icse9-phy-heat-thermometry",
+      "name": "Heat — Thermometry and Specific Heat",
+      "weight": 6
+    },
+    {
+      "id": "icse9-phy-heat-transfer",
+      "name": "Heat — Transfer of Thermal Energy",
+      "weight": 5
+    },
+    {
+      "id": "icse9-phy-light-reflection",
+      "name": "Reflection of Light at Spherical Mirrors",
+      "weight": 7
+    },
+    {
+      "id": "icse9-phy-sound",
+      "name": "Sound — Propagation and Range of Hearing",
+      "weight": 6
+    },
+    {
+      "id": "icse9-phy-current-electricity",
+      "name": "Current Electricity — Charge, Potential and Ohm's Law",
+      "weight": 8
+    },
+    {
+      "id": "icse9-phy-magnetism",
+      "name": "Magnetism",
+      "weight": 5
+    }
+  ]
+}

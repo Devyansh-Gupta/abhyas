@@ -1,0 +1,74 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "icse·class10·physics@2026-27",
+  "board": "ICSE",
+  "class": 10,
+  "subject": "Physics",
+  "emoji": "⚛️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "topics": [
+    {
+      "id": "icse10-phy-force-moments",
+      "name": "Force — Turning Forces and Equilibrium",
+      "weight": 7
+    },
+    {
+      "id": "icse10-phy-work-power-energy",
+      "name": "Work, Power and Energy",
+      "weight": 7
+    },
+    {
+      "id": "icse10-phy-machines",
+      "name": "Machines",
+      "weight": 7
+    },
+    {
+      "id": "icse10-phy-refraction-plane",
+      "name": "Refraction of Light at Plane Surfaces",
+      "weight": 7
+    },
+    {
+      "id": "icse10-phy-refraction-lens",
+      "name": "Refraction Through a Lens",
+      "weight": 8
+    },
+    {
+      "id": "icse10-phy-spectrum",
+      "name": "Spectrum — Dispersion and Scattering",
+      "weight": 5
+    },
+    {
+      "id": "icse10-phy-sound",
+      "name": "Sound — Echoes, Resonance and Loudness",
+      "weight": 6
+    },
+    {
+      "id": "icse10-phy-current-electricity",
+      "name": "Current Electricity — Ohm's Law and Circuits",
+      "weight": 9
+    },
+    {
+      "id": "icse10-phy-household-circuits",
+      "name": "Electrical Power and Household Circuits",
+      "weight": 6
+    },
+    {
+      "id": "icse10-phy-electromagnetism",
+      "name": "Electromagnetism",
+      "weight": 6
+    },
+    {
+      "id": "icse10-phy-calorimetry",
+      "name": "Calorimetry",
+      "weight": 6
+    },
+    {
+      "id": "icse10-phy-radioactivity",
+      "name": "Radioactivity",
+      "weight": 5
+    }
+  ]
+}

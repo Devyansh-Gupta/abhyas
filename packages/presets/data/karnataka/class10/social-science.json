@@ -1,0 +1,55 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "karnataka·class10·social-science@2026-27",
+  "board": "Karnataka",
+  "class": 10,
+  "subject": "Social Science",
+  "emoji": "🏛️",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 8,
+  "_note": "Source: KSEEB SSLC textbooks, 2026-27 edition (NCERT-aligned Science/Maths). Conservative broad-unit mapping; verify against current KSEEB textbook before deep curation.",
+  "topics": [
+    {
+      "id": "ka10-soc-first-war-independence",
+      "name": "The First War of Indian Independence (1857)",
+      "weight": 5
+    },
+    {
+      "id": "ka10-soc-freedom-movement",
+      "name": "The Freedom Movement — Gandhian Phase",
+      "weight": 6
+    },
+    {
+      "id": "ka10-soc-india-physiography",
+      "name": "India — Physiography",
+      "weight": 6
+    },
+    {
+      "id": "ka10-soc-india-drainage-climate",
+      "name": "India — Drainage and Climate",
+      "weight": 6
+    },
+    {
+      "id": "ka10-soc-india-resources-agriculture",
+      "name": "India — Natural Resources and Agriculture",
+      "weight": 5
+    },
+    {
+      "id": "ka10-soc-india-democratic-nation",
+      "name": "India — A Democratic Nation",
+      "weight": 5
+    },
+    {
+      "id": "ka10-soc-indian-foreign-policy",
+      "name": "Foreign Policy of India and International Relations",
+      "weight": 4
+    },
+    {
+      "id": "ka10-soc-economic-development",
+      "name": "Economic Development and Employment",
+      "weight": 4
+    }
+  ]
+}

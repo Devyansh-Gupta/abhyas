@@ -1,0 +1,45 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "maharashtra·class10·maths-algebra@2026-27",
+  "board": "Maharashtra",
+  "class": 10,
+  "subject": "Mathematics Part 1 — Algebra",
+  "emoji": "📐",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "_note": "Source: Balbharati (MSBSHSE) SSC textbooks, 2026-27 edition — chapter-level mapping.",
+  "topics": [
+    {
+      "id": "mh10-alg-linear-equations",
+      "name": "Linear Equations in Two Variables",
+      "weight": 8
+    },
+    {
+      "id": "mh10-alg-quadratic-equations",
+      "name": "Quadratic Equations",
+      "weight": 9
+    },
+    {
+      "id": "mh10-alg-arithmetic-progression",
+      "name": "Arithmetic Progression",
+      "weight": 8
+    },
+    {
+      "id": "mh10-alg-financial-planning",
+      "name": "Financial Planning",
+      "weight": 6
+    },
+    {
+      "id": "mh10-alg-probability",
+      "name": "Probability",
+      "weight": 6
+    },
+    {
+      "id": "mh10-alg-statistics",
+      "name": "Statistics",
+      "weight": 7
+    }
+  ]
+}

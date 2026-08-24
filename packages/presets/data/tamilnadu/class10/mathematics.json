@@ -1,0 +1,55 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "tamilnadu·class10·mathematics@2026-27",
+  "board": "Tamil Nadu",
+  "class": 10,
+  "subject": "Mathematics",
+  "emoji": "📐",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 12,
+  "_note": "Source: Tamil Nadu SCERT Samacheer Kalvi Class 10 textbooks, 2026-27 edition.",
+  "topics": [
+    {
+      "id": "tn10-mat-relations-functions",
+      "name": "Relations and Functions",
+      "weight": 7
+    },
+    {
+      "id": "tn10-mat-numbers-sequences",
+      "name": "Numbers and Sequences",
+      "weight": 7
+    },
+    {
+      "id": "tn10-mat-algebra",
+      "name": "Algebra",
+      "weight": 9
+    },
+    {
+      "id": "tn10-mat-geometry",
+      "name": "Geometry",
+      "weight": 9
+    },
+    {
+      "id": "tn10-mat-coordinate-geometry",
+      "name": "Coordinate Geometry",
+      "weight": 8
+    },
+    {
+      "id": "tn10-mat-trigonometry",
+      "name": "Trigonometry",
+      "weight": 8
+    },
+    {
+      "id": "tn10-mat-mensuration",
+      "name": "Mensuration",
+      "weight": 7
+    },
+    {
+      "id": "tn10-mat-statistics-probability",
+      "name": "Statistics and Probability",
+      "weight": 6
+    }
+  ]
+}

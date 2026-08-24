@@ -1,0 +1,90 @@
+{
+  "$schema": "../../preset.schema.json",
+  "id": "karnataka·class10·mathematics@2026-27",
+  "board": "Karnataka",
+  "class": 10,
+  "subject": "Mathematics",
+  "emoji": "📐",
+  "acadYear": "2026-27",
+  "version": "1.0.0",
+  "kind": "core",
+  "weight": 10,
+  "_note": "Source: KSEEB SSLC textbooks, 2026-27 edition (NCERT-aligned Science/Maths).",
+  "topics": [
+    {
+      "id": "ka10-mat-real-numbers",
+      "name": "Real Numbers",
+      "weight": 5
+    },
+    {
+      "id": "ka10-mat-polynomials",
+      "name": "Polynomials",
+      "weight": 5
+    },
+    {
+      "id": "ka10-mat-linear-equations-pair",
+      "name": "Pair of Linear Equations in Two Variables",
+      "weight": 8
+    },
+    {
+      "id": "ka10-mat-quadratic-equations",
+      "name": "Quadratic Equations",
+      "weight": 8
+    },
+    {
+      "id": "ka10-mat-arithmetic-progressions",
+      "name": "Arithmetic Progressions",
+      "weight": 7
+    },
+    {
+      "id": "ka10-mat-triangles",
+      "name": "Triangles",
+      "weight": 8
+    },
+    {
+      "id": "ka10-mat-circles",
+      "name": "Circles",
+      "weight": 6
+    },
+    {
+      "id": "ka10-mat-constructions",
+      "name": "Constructions",
+      "weight": 4
+    },
+    {
+      "id": "ka10-mat-coordinate-geometry",
+      "name": "Coordinate Geometry",
+      "weight": 6
+    },
+    {
+      "id": "ka10-mat-trigonometry-intro",
+      "name": "Introduction to Trigonometry",
+      "weight": 8
+    },
+    {
+      "id": "ka10-mat-trigonometry-applications",
+      "name": "Applications of Trigonometry — Heights & Distances",
+      "weight": 5
+    },
+    {
+      "id": "ka10-mat-statistics",
+      "name": "Statistics",
+      "weight": 6
+    },
+    {
+      "id": "ka10-mat-probability",
+      "name": "Probability",
+      "weight": 5
+    },
+    {
+      "id": "ka10-mat-surface-areas-volumes",
+      "name": "Surface Areas and Volumes",
+      "weight": 6
+    },
+    {
+      "id": "ka10-mat-areas-related-circles",
+      "name": "Areas Related to Circles",
+      "weight": 5
+    }
+  ]
+}
