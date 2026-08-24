@@ -42,3 +42,29 @@ Functional skeleton is solid (5 tabs, derived plan, SRS rating, timetable re-sol
 - **L3:** progress ring on Today header; haptics on check/rating
 - **L4:** Focus pre-binding from Today + post-session rating modal
 Verification: served-surface gates at 2 viewports + on-device screenshot comparison + full turbo gate.
+
+## Cycle 1 RESULTS (2026-08-25, APK9 run 32778810284)
+
+**Served-surface gate (both viewports): PASS** — full onboarding walk → hero Start → Focus pre-bound, 0px overflow. Script: `apps/mobile/e2e-gate-uxc1.cjs`.
+
+**On-device (MEmu, release): VERIFIED**
+- Live date "Tue, 25 Aug" ✅ (hardcoded date gone)
+- Progress ring renders, advances 0% → 17% on first check-off ✅
+- Hero card: accent border + UP NEXT chip + Start → ✅; recomputes to next block after check-off ✅
+- Hero Start deep-links → Focus **pre-bound** to "Introduction to Trigonometry" ✅ (chip highlighted, bound under timer)
+- Done card: green wash + strikethrough + filled green check ✅
+- Ionicons everywhere (tab bar, chips, pins, flame) ✅; Inter loaded (TTFs served on web, rendered on device) ✅
+- Streak flame icon (was emoji) ✅
+- Haptics wired (success on check-on, medium on day-complete) — code path present; physical feel needs human hands
+
+**After screenshots:** docs/ux-c1-after-{today,done,focus}.png
+
+## Cycle 1 defects FIXED: #1 (ring), #2 (hero), #5 (date), #6 (meta line), #7 (card differentiation), #8 (reason gating), #9 (Inter+tabular), #10 (Ionicons), #11 (tab bar), #12 (partial — washes on done), #13 (focus binding), #14 (rating sheet via L4)
+
+## Remaining for Cycle 2 (from original list + new observations)
+- #3 streak celebration moment (weekly dots, increment animation)
+- #4 micro-interaction polish (checkmark animation, plan re-solve transition)
+- #15 empty-state delight (illustration + 3-step guide)
+- NEW: subject emoji avatars on cards (🫒 etc.) — replace with subject-color initial chips
+- NEW: Focus "0m today · 🔥 0 day streak" header still emoji flame (L2 missed focus.tsx header)
+- NEW: Plan screen hierarchy pass (week strip polish, class list vs study plan visual separation)
