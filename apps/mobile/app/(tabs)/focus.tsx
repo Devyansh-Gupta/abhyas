@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, Modal, Pressable as RNPressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useApp } from '../../src/store';
+import { tNumStrong } from '../../src/ui/typography';
 
 const PRESETS = [25, 50, 90] as const;
 
@@ -163,7 +164,7 @@ export default function FocusScreen() {
 
       {/* timer */}
       <View className="mt-8 items-center rounded-3xl border border-line bg-surface py-10">
-        <Text className="font-extrabold text-text" style={{ fontSize: 56, fontVariant: ['tabular-nums'] }}>
+        <Text className="font-extrabold text-text" style={{ fontSize: 56, ...tNumStrong }}>
           {fmt(left)}
         </Text>
         <Text className="mt-1 text-xs text-dim">{picked ? `${picked.subjectId} ${picked.name}` : 'no topic bound — session still logs'}</Text>

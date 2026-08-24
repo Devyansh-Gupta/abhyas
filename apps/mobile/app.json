@@ -8,7 +8,9 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "backgroundColor": "#0E1116",
-    "ios": { "supportsTablet": true },
+    "ios": {
+      "supportsTablet": true
+    },
     "android": {
       "package": "com.studysync.abhyas",
       "edgeToEdgeEnabled": true,
@@ -18,12 +20,23 @@
         "backgroundColor": "#0E1116"
       }
     },
-    "web": { "bundler": "metro", "output": "single" },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
     "_comment_auth": "google-signin plugin: set EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID before prebuild; Android needs the debug+release SHA-1 fingerprints registered in Google Cloud Console (see docs/P2-AUTH-SETUP.md).",
     "plugins": [
       "expo-router",
-      ["@react-native-google-signin/google-signin", { "iosUrlScheme": "com.googleusercontent.apps.000000000000-0123456789abcdef" }]
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.000000000000-0123456789abcdef"
+        }
+      ],
+      "expo-font"
     ],
-    "experiments": { "typedRoutes": true }
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

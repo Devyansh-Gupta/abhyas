@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import {
   type ClassSession,
   buildWeekPlan, capacityMinutes, slotsForWeekday, busyPeriods,
   DAY_NAMES, DAY_SHORT, WEEKDAY_TODAY, weekdayFor,
 } from '@abhyas/engine';
 import { useApp } from '../../src/store';
+import { tNum } from '../../src/ui/typography';
 
 /** Prototype calendar anchor: Thu 2026-08-21 (engine's WEEKDAY_TODAY). */
 const WEEK_ANCHOR = new Date('2026-08-21T00:00:00Z');
@@ -86,7 +88,7 @@ export default function PlanScreen() {
               <Text className="text-xs" style={{ color: on ? ACCENT : '#8B94A3' }}>
                 {DAY_SHORT[weekdayFor(i)]}
               </Text>
-              <Text className={`text-base font-bold ${on ? '' : 'opacity-70'}`} style={{ color: '#E7EBF2' }}>
+              <Text className={`text-base font-bold tabular-nums ${on ? '' : 'opacity-70'}`} style={{ color: '#E7EBF2', ...tNum }}>
                 {d.getUTCDate()}
               </Text>
             </Pressable>
@@ -112,7 +114,7 @@ export default function PlanScreen() {
               <Text className="text-lg">{p.subjectId}</Text>
             </View>
             <View className="ml-3 flex-1">
-              <Text className="font-bold" style={{ color: '#E7EBF2' }}>
+              <Text className="font-bold" style={{ color: '#E7EBF2', ...tNum }}>
                 {fmt(p.startMin)}–{fmt(p.endMin)}
               </Text>
               <Text className="text-xs text-dim">class period{p.room ? ` · ${p.room}` : ''}</Text>
@@ -164,7 +166,7 @@ export default function PlanScreen() {
       {dayBlocks.map(item => (
         <View key={item.uid} className="mb-2.5 rounded-2xl border border-line bg-surface px-4 py-3">
           <View className="flex-row items-center">
-            <Text className="mr-3 text-xs font-bold" style={{ color: item.kind === 'rev' ? RED : ACCENT }}>
+            <Text className="mr-3 text-xs font-bold" style={{ color: item.kind === 'rev' ? RED : ACCENT, ...tNum }}>
               {item.startMin == null ? 'anytime' : fmt(item.startMin)}
             </Text>
             <Text className="flex-1 font-semibold" style={{ color: '#E7EBF2' }}>
@@ -172,7 +174,10 @@ export default function PlanScreen() {
             </Text>
           </View>
           {item.why && (
-            <Text className="mt-1 text-[11px] text-dim">📌 {item.why}</Text>
+            <View className="mt-1 flex-row items-center gap-1">
+              <Ionicons name='pin-outline' size={14} color='#8B94A3' />
+              <Text className="flex-1 text-[11px] text-dim">{item.why}</Text>
+            </View>
           )}
         </View>
       ))}

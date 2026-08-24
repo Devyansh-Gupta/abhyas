@@ -1,12 +1,16 @@
 import { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { type Topic } from '@abhyas/engine';
+import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../src/store';
+import { tNum } from '../../src/ui/typography';
 
+// Cycle-1 L2 (#10): rating chips swap emoji for Ionicons — same 3 ratings,
+// same tap targets/behavior.
 const RATINGS = [
-  { r: 1 as const, emoji: '😵‍💫' },
-  { r: 2 as const, emoji: '🚶' },
-  { r: 3 as const, emoji: '💪' },
+  { r: 1 as const, icon: 'sad-outline' as const },
+  { r: 2 as const, icon: 'walk' as const },
+  { r: 3 as const, icon: 'fitness' as const },
 ];
 
 export default function SubjectsScreen() {
@@ -63,9 +67,10 @@ export default function SubjectsScreen() {
       ))}
 
       {warn && (
-        <Text className="mt-4 rounded-xl border border-due/40 bg-due/10 p-3 text-xs" style={{ color: '#F87171' }}>
-          ⚠ {warn}
-        </Text>
+        <View className="mt-4 flex-row items-center gap-1.5 rounded-xl border border-due/40 bg-due/10 p-3">
+          <Ionicons name='warning-outline' size={14} color='#F87171' />
+          <Text className="flex-1 text-xs" style={{ color: '#F87171' }}>{warn}</Text>
+        </View>
       )}
     </ScrollView>
   );
@@ -83,7 +88,7 @@ function TopicRow({ topic, onRate }: { topic: Topic; onRate: (r: 1 | 2 | 3) => v
     <View className="mb-3 rounded-3xl border border-line bg-surface p-4">
       <View className="flex-row items-center justify-between">
         <Text className="flex-1 font-bold" style={{ color: '#E7EBF2' }}>{topic.name}</Text>
-        <Text className="ml-2 text-xs" style={{ color: due.color }}>{due.text}</Text>
+        <Text className="ml-2 text-xs" style={{ color: due.color, ...tNum }}>{due.text}</Text>
       </View>
 
       <View className="mt-3 flex-row items-center justify-between">
@@ -103,13 +108,14 @@ function TopicRow({ topic, onRate }: { topic: Topic; onRate: (r: 1 | 2 | 3) => v
 
         {!mastered && (
           <View className="flex-row gap-1.5">
-            {RATINGS.map(({ r, emoji }) => (
+            {RATINGS.map(({ r, icon }) => (
               <Pressable
                 key={r}
                 onPress={() => onRate(r)}
+                accessibilityLabel={`Rate ${r}`}
                 className="h-8 w-8 items-center justify-center rounded-full border border-line bg-surface-2 active:bg-accent/30"
               >
-                <Text className="text-sm">{emoji}</Text>
+                <Ionicons name={icon} size={16} color='#E7EBF2' />
               </Pressable>
             ))}
           </View>

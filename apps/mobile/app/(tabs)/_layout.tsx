@@ -1,19 +1,25 @@
 import { Tabs } from 'expo-router/tabs';
-import { Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-const TAB_ICONS: Record<string, string> = {
-  today: '☀️',
-  plan: '🗓️',
-  focus: '⏱️',
-  subjects: '📚',
-  progress: '📊',
-};
+// Cycle-1 L2 (#10/#11): one Ionicons set replaces the mixed emoji tab bar —
+// consistent weight/size, accent tint when focused, dim otherwise.
+const TAB_ICONS = {
+  today: 'today',
+  plan: 'calendar',
+  focus: 'timer',
+  subjects: 'library',
+  progress: 'stats-chart',
+} as const;
 
-function TabIcon({ name, focused }: { name: string; focused: boolean }) {
+type TabName = keyof typeof TAB_ICONS;
+
+function TabIcon({ name, focused }: { name: TabName; focused: boolean }) {
   return (
-    <Text style={{ fontSize: 18, opacity: focused ? 1 : 0.55 }}>
-      {TAB_ICONS[name] ?? '•'}
-    </Text>
+    <Ionicons
+      name={TAB_ICONS[name]}
+      size={23}
+      color={focused ? '#8B7CF6' : '#8B94A3'}
+    />
   );
 }
 

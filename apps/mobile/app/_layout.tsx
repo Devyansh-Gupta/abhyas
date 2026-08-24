@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router/stack';
 import { StatusBar } from 'expo-status-bar';
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+} from '@expo-google-fonts/inter';
 import { configurePersistence, hydrate } from '../src/store';
 import { createSqliteAdapter } from '../src/repo/sqlite';
 import { startAuthListener } from '../src/lib/auth';
@@ -49,7 +57,17 @@ function useStartupHydration(): boolean {
 
 export default function RootLayout() {
   const ready = useStartupHydration();
-  if (!ready) return null;
+  // Cycle-1 L2: brand font — block first paint until Inter is loaded so no
+  // screen flashes in the system face and swaps underneath (same pattern as
+  // the hydration gate below: render nothing until startup settles).
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+  });
+  if (!ready || !fontsLoaded) return null;
 
   return (
     <ThemeProvider value={navTheme}>

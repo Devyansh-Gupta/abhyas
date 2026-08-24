@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import {
   masteryBySubject,
   applyExamSeason,
@@ -12,6 +13,7 @@ import {
 import { useApp } from '../../src/store';
 import { useAuth } from '../../src/lib/auth';
 import { syncNow } from '../../src/repo/syncTransport';
+import { tNum, tNumStrong } from '../../src/ui/typography';
 import { useState } from 'react';
 
 export default function ProgressScreen() {
@@ -41,21 +43,24 @@ export default function ProgressScreen() {
       <Text className="text-text text-2xl font-extrabold tracking-tight">Progress</Text>
       <Text className="mt-1 text-[13px] text-dim">live from your session log &amp; mastery ladder</Text>
 
-      {/* streak + focus stats */}
+      {/* streak + focus stats — Ionicons swap (#10) */}
       <View className="mt-6 flex-row gap-3">
-        <Stat emoji='🔥' value={`${streak.current}`} label='day streak' />
-        <Stat emoji='🏆' value={`${streak.longest}`} label='longest' />
+        <Stat icon='flame' value={`${streak.current}`} label='day streak' />
+        <Stat icon='trophy' value={`${streak.longest}`} label='longest' />
       </View>
       <View className="mt-3 flex-row gap-3">
-        <Stat emoji='⏱️' value={`${todayMin}m`} label='focused today' />
-        <Stat emoji='📚' value={`${Math.round(totalMin / 60)}h ${totalMin % 60}m`} label='total focus' />
-        <Stat emoji='📆' value={`${daysStudied}`} label='days studied' />
+        <Stat icon='stopwatch' value={`${todayMin}m`} label='focused today' />
+        <Stat icon='library' value={`${Math.round(totalMin / 60)}h ${totalMin % 60}m`} label='total focus' />
+        <Stat icon='calendar-clear' value={`${daysStudied}`} label='days studied' />
       </View>
 
       {/* Exam Season capacity dial (#9) */}
       <View className='mt-3 rounded-3xl border border-line bg-surface p-4'>
         <View className='flex-row items-center justify-between'>
-          <Text className='font-extrabold' style={{ color: '#E7EBF2' }}>🎯 Exam Season</Text>
+          <View className='flex-row items-center gap-1.5'>
+          <Ionicons name='locate' size={16} color='#8B7CF6' />
+          <Text className='font-extrabold' style={{ color: '#E7EBF2' }}>Exam Season</Text>
+          </View>
           <Text className='text-xs font-bold text-dim'>
             {season.active
               ? season.gapDay ? 'gap day · boosted' : 'active'
@@ -72,7 +77,7 @@ export default function ProgressScreen() {
             <Text className='text-lg font-extrabold' style={{ color: '#E7EBF2' }}>−</Text>
           </Pressable>
           <View className='items-center'>
-            <Text className='text-xl font-extrabold tabular-nums' style={{ color: '#C9BFFF' }}>
+            <Text className='text-xl font-extrabold tabular-nums' style={{ color: '#C9BFFF', ...tNumStrong }}>
               {Math.round(clampCapacity(dial) * 100)}%
             </Text>
             <Text className='text-[11px] text-dim'>
@@ -116,7 +121,7 @@ export default function ProgressScreen() {
             <Text className="font-bold" style={{ color: '#E7EBF2' }}>
               {m.subjectId} <Text className="text-xs font-normal text-dim">· {m.topics} topics</Text>
             </Text>
-            <Text className="text-xs font-extrabold" style={{ color: m.pct >= 80 ? '#4ADE80' : '#C9BFFF' }}>
+            <Text className="text-xs font-extrabold tabular-nums" style={{ color: m.pct >= 80 ? '#4ADE80' : '#C9BFFF', ...tNum }}>
               {m.pct}%
             </Text>
           </View>
@@ -138,11 +143,11 @@ export default function ProgressScreen() {
   );
 }
 
-function Stat({ emoji, value, label }: { emoji: string; value: string; label: string }) {
+function Stat({ icon, value, label }: { icon: keyof typeof Ionicons.glyphMap; value: string; label: string }) {
   return (
     <View className="flex-1 items-center rounded-2xl border border-line bg-surface py-3">
-      <Text className="text-lg">{emoji}</Text>
-      <Text className="mt-0.5 font-extrabold tabular-nums" style={{ color: '#E7EBF2' }}>{value}</Text>
+      <Ionicons name={icon} size={20} color='#8B7CF6' />
+      <Text className="mt-0.5 font-extrabold tabular-nums" style={{ color: '#E7EBF2', ...tNumStrong }}>{value}</Text>
       <Text className="text-[11px] text-dim">{label}</Text>
     </View>
   );
@@ -157,7 +162,10 @@ function ParentLinkCard() {
   return (
     <View className="mt-3 rounded-3xl border border-line bg-surface p-4">
       <View className="flex-row items-center justify-between">
-        <Text className="font-extrabold" style={{ color: '#E7EBF2' }}>👨‍👩‍👧 Parent link</Text>
+        <View className="flex-row items-center gap-1.5">
+        <Ionicons name='people' size={16} color='#C9BFFF' />
+        <Text className="font-extrabold" style={{ color: '#E7EBF2' }}>Parent link</Text>
+        </View>
         {latest && (
           <Text className="text-xs font-bold text-dim">valid thru day {latest.expiresDay}</Text>
         )}
@@ -225,7 +233,10 @@ function AccountSyncCard({ onOpenAuth }: { onOpenAuth: () => void }) {
   return (
     <View className="mt-3 rounded-3xl border border-line bg-surface p-4">
       <View className="flex-row items-center justify-between">
-        <Text className="font-extrabold" style={{ color: '#E7EBF2' }}>☁️ Account</Text>
+        <View className='flex-row items-center gap-1.5'>
+          <Ionicons name='cloud-outline' size={16} color='#C9BFFF' />
+          <Text className='font-extrabold' style={{ color: '#E7EBF2' }}>Account</Text>
+        </View>
         {userId && <Text className="text-xs font-bold text-dim">{email ?? 'signed in'}</Text>}
       </View>
       {!userId && (

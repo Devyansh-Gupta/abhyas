@@ -2,7 +2,9 @@ import { View, Text, ScrollView, Pressable } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../src/store';
+import { tNum, tNumStrong } from '../../src/ui/typography';
 
 /* Cycle-1 L1+L3 polish (docs/ux-loop-cycle1.md): live date, next-up hero card,
    done-wash styling, reason-line gating, SVG progress ring, check-off haptics. */
@@ -46,7 +48,11 @@ export default function TodayScreen() {
           <Text className="text-dim mt-1 text-[13px]">{today}</Text>
         </View>
         <View className="flex-row items-center gap-3">
-          <Text className="text-done font-extrabold">🔥 {streak.current}</Text>
+          <View className="flex-row items-center gap-1">
+            {/* L2: streak flame as an icon in the done-green accent (#10/#3) */}
+            <Ionicons name='flame' size={16} color='#4ADE80' />
+            <Text className="text-done font-extrabold" style={tNumStrong}>{streak.current}</Text>
+          </View>
           <ProgressRing pct={pct} />
         </View>
       </View>
@@ -144,12 +150,12 @@ function PlanCard({ uid, hero }: { uid: string; hero: boolean }) {
           >
             {item.topic.name} — {item.carried ? 'catch-up' : item.kind === 'rev' ? 'revise' : 'focus'}
           </Text>
-          <Text className="mt-0.5 text-xs" style={{ color: tagColor }}>
+          <Text className="mt-0.5 text-xs" style={{ color: tagColor, ...tNum }}>
             {time} · {item.carried ? 'CARRIED' : item.kind === 'rev' ? 'DUE' : 'NEW'}
           </Text>
         </View>
         <View className={`h-7 w-7 items-center justify-center rounded-full border ${done ? 'border-done bg-done' : 'border-line'}`}>
-          {done && <Text className="font-extrabold" style={{ color: '#0E1116' }}>✓</Text>}
+          {done && <Ionicons name='checkmark' size={18} color='#0E1116' />}
         </View>
       </View>
 
@@ -172,7 +178,10 @@ function PlanCard({ uid, hero }: { uid: string; hero: boolean }) {
       )}
 
       {item.why && !done && isInformativeReason(item) && (
-        <Text className="mt-2 rounded-xl bg-surface-2/60 p-2 text-xs text-dim">📌 Why: {item.why}</Text>
+        <View className="mt-2 flex-row items-center gap-1 rounded-xl bg-surface-2/60 p-2">
+          <Ionicons name='pin-outline' size={14} color='#8B94A3' />
+          <Text className="flex-1 text-xs text-dim">Why: {item.why}</Text>
+        </View>
       )}
     </Pressable>
   );
@@ -200,7 +209,7 @@ function ProgressRing({ pct }: { pct: number }) {
       </Svg>
       <Text
         className="absolute text-done font-extrabold"
-        style={{ fontSize: 10, fontVariant: ['tabular-nums'] }}
+        style={{ fontSize: 10, ...tNumStrong }}
       >
         {pct}%
       </Text>
