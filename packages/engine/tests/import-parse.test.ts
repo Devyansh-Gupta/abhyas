@@ -91,6 +91,89 @@ describe('parseSyllabusText — all-caps textbook chapter list with dash bullets
   });
 });
 
+describe('parseSyllabusText — letter-spaced OCR caps (real NCERT artifact)', () => {
+  it('collapses "QU E S TI N S" and "C H A P T E R  1" into headers', () => {
+    const r = parseSyllabusText([
+      'C H E M I C A L   R E A C T I O N S',
+      '2 TYPES OF CHEMICAL REACTIONS',
+      'Q U E S TI O NS',
+      'Why should a magnesium ribbon be cleaned before burning in air?',
+      'Write the balanced equation for the following chemical reactions.',
+    ]);
+    expect(r.subjects).toEqual([
+      { name: 'CHEMICAL REACTIONS', topics: ['TYPES OF CHEMICAL REACTIONS'] },
+      {
+        name: 'QUESTIONS',
+        topics: [
+          'Why should a magnesium ribbon be cleaned before burning in air?',
+          'Write the balanced equation for the following chemical reactions.',
+        ],
+      },
+    ]);
+    expect(r.warnings).toEqual([]);
+  });
+
+  it('does not collapse normal multi-word caps or mixed-case lines', () => {
+    expect(parseSyllabusText(['SOCIAL SCIENCE']).subjects[0]?.name).toBe('SOCIAL SCIENCE');
+    expect(parseSyllabusText(['Quadratic Equations chapter']).subjects).toEqual([]);
+  });
+});
+
+describe('parseSyllabusText — subsection lines ("2.1 Title") are topics, not headers', () => {
+  it('appends numbered subsections to the current subject with numbering stripped', () => {
+    const r = parseSyllabusText([
+      'CHEMICAL REACTIONS AND EQUATIONS',
+      '1. Chemical Reactions and Equations',
+      '2 TYPES OF CHEMICAL REACTIONS',
+      '2.1 Combination Reaction',
+      '2.2 Decomposition Reaction',
+      '2.3 Displacement Reaction',
+    ]);
+    expect(r.subjects).toEqual([
+      {
+        name: 'CHEMICAL REACTIONS AND EQUATIONS',
+        topics: [
+          'Chemical Reactions and Equations',
+          'TYPES OF CHEMICAL REACTIONS',
+          'Combination Reaction',
+          'Decomposition Reaction',
+          'Displacement Reaction',
+        ],
+      },
+    ]);
+    expect(r.warnings).toEqual([]);
+  });
+
+  it('a "2.1 Title:" line still counts as a header', () => {
+    const r = parseSyllabusText(['CHEMISTRY', '2.1 Combination Reaction:', 'Magnesium + Oxygen']);
+    expect(r.subjects).toEqual([
+      { name: 'CHEMISTRY', topics: [] },
+      { name: '2.1 Combination Reaction', topics: ['Magnesium + Oxygen'] },
+    ]);
+  });
+});
+
+describe('parseSyllabusText — question-density hint (exercise page)', () => {
+  const questions = [
+    'Why should a magnesium ribbon be cleaned before burning in air?',
+    'Write the balanced equation for the following chemical reactions.',
+    'What happens when dilute hydrochloric acid is added to iron filings?',
+    'Why is respiration considered an exothermic reaction?',
+  ];
+
+  it('warns when more than 60% of topics end with "?"', () => {
+    const r = parseSyllabusText(['QUESTIONS', ...questions]);
+    expect(r.warnings).toEqual([
+      'This looks like an exercise/questions page rather than a topic list — review carefully before importing.',
+    ]);
+  });
+
+  it('does not warn when only some topics are questions', () => {
+    const r = parseSyllabusText(['SCIENCE', 'Acids, Bases and Salts', ...questions.slice(0, 1)]);
+    expect(r.warnings).toEqual([]);
+  });
+});
+
 describe('parseSyllabusText — garbage / empty OCR results never fail silently', () => {
   it('empty input produces the retry warning', () => {
     expect(parseSyllabusText([])).toEqual({
