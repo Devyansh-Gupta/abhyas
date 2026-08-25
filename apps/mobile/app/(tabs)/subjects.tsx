@@ -13,6 +13,46 @@ const RATINGS = [
   { r: 3 as const, icon: 'fitness' as const },
 ];
 
+/* Cycle-3 lane A: subject avatar chips. The mobile store carries no subjects
+ * table (subject identity is `topic.subjectId`, emoji-as-id in v1) and has no
+ * color field, so chip colors come from the fallback path: hash the subject
+ * key → fixed palette. Deterministic ⇒ same subject keeps the same color. */
+const SUBJECT_PALETTE = ['#8B7CF6', '#4ADE80', '#F87171', '#FBBF24', '#38BDF8', '#F472B6'] as const;
+
+const subjectColor = (key: string): string => {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
+  return SUBJECT_PALETTE[Math.abs(h) % SUBJECT_PALETTE.length];
+};
+
+/** Hex + alpha suffix (e.g. 18% ≈ 0x2E) for the chip's tinted background. */
+const withAlpha = (hex: string, alpha: number) =>
+  `${hex}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+
+/** First Latin letter of the subject key, uppercase. Emoji keys (v1 ids) have
+ *  no letter to show, so they fall back to the glyph itself — still color-coded. */
+const initialFor = (key: string): string => {
+  const m = key.match(/[A-Za-z]/);
+  return m ? m[0].toUpperCase() : '';
+};
+
+/** 40px rounded-2xl square: subject color @18% bg, full-color bold initial centered. */
+function SubjectAvatar({ subjectKey }: { subjectKey: string }) {
+  const color = subjectColor(subjectKey);
+  const initial = initialFor(subjectKey);
+  return (
+    <View
+      accessibilityLabel={`Subject ${subjectKey}`}
+      className='h-10 w-10 items-center justify-center rounded-2xl'
+      style={{ backgroundColor: withAlpha(color, 0.18) }}
+    >
+      <Text className='font-extrabold' style={{ color, fontSize: initial ? 17 : 16 }}>
+        {initial || subjectKey}
+      </Text>
+    </View>
+  );
+}
+
 export default function SubjectsScreen() {
   const topics = useApp(s => s.topics);
   const plan = useApp(s => s.plan);
@@ -57,9 +97,13 @@ export default function SubjectsScreen() {
 
       {groups.map(([subjectId, gtopics]) => (
         <View key={subjectId}>
-          <Text className="mb-2 mt-6 text-[13px] font-extrabold uppercase tracking-wider text-text">
-            {subjectId} <Text className="font-normal normal-case text-dim">· {gtopics.length} topics</Text>
-          </Text>
+          {/* cycle-3 lane A: color-coded subject chip anchors each group header */}
+          <View className='mb-2 mt-6 flex-row items-center gap-2'>
+            <SubjectAvatar subjectKey={subjectId} />
+            <Text className="flex-1 text-[13px] font-extrabold uppercase tracking-wider text-text">
+              {subjectId} <Text className="font-normal normal-case text-dim">· {gtopics.length} topics</Text>
+            </Text>
+          </View>
           {gtopics.map(t => (
             <TopicRow key={t.id} topic={t} onRate={r => rate(t.id, r)} />
           ))}

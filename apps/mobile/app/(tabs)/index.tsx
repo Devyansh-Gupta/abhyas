@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Easing, View, Text, ScrollView, Pressable } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
@@ -17,6 +17,46 @@ const COLOR_LINE = '#232C37'; // --color-line
 const COLOR_DONE = '#4ADE80'; // --color-done
 /** Mon-first letters for the streak dot-row (cycle-2 #3). */
 const WEEK_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as const;
+
+/* Cycle-3 lane A: subject avatar chips. The mobile store carries no subjects
+ * table (subject identity is `topic.subjectId`, emoji-as-id in v1) and has no
+ * color field, so chip colors come from the fallback path: hash the subject
+ * key → fixed palette. Deterministic ⇒ same subject keeps the same color. */
+const SUBJECT_PALETTE = ['#8B7CF6', '#4ADE80', '#F87171', '#FBBF24', '#38BDF8', '#F472B6'] as const;
+
+const subjectColor = (key: string): string => {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
+  return SUBJECT_PALETTE[Math.abs(h) % SUBJECT_PALETTE.length];
+};
+
+/** Hex + alpha suffix (e.g. 18% ≈ 0x2E) for the chip's tinted background. */
+const withAlpha = (hex: string, alpha: number) =>
+  `${hex}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+
+/** First Latin letter of the subject key, uppercase. Emoji keys (v1 ids) have
+ *  no letter to show, so they fall back to the glyph itself — still color-coded. */
+const initialFor = (key: string): string => {
+  const m = key.match(/[A-Za-z]/);
+  return m ? m[0].toUpperCase() : '';
+};
+
+/** 40px rounded-2xl square: subject color @18% bg, full-color bold initial centered. */
+function SubjectAvatar({ subjectKey }: { subjectKey: string }) {
+  const color = subjectColor(subjectKey);
+  const initial = initialFor(subjectKey);
+  return (
+    <View
+      accessibilityLabel={`Subject ${subjectKey}`}
+      className='h-10 w-10 items-center justify-center rounded-2xl'
+      style={{ backgroundColor: withAlpha(color, 0.18) }}
+    >
+      <Text className='font-extrabold' style={{ color, fontSize: initial ? 17 : 16 }}>
+        {initial || subjectKey}
+      </Text>
+    </View>
+  );
+}
 
 /** A reason is only worth showing when it explains WHY this block exists
  *  (exam-linked, carried from yesterday, or backlog) — "Not started yet" is noise. */
@@ -121,19 +161,8 @@ export default function TodayScreen() {
         <Text className="text-dim mt-2 text-xs">{plan.length} blocks</Text>
       )}
 
-      {/* cycle-2 #3: day-complete moment — single card, green wash, self-dismisses */}
-      {celebrate && (
-        <View
-          accessibilityLabel={`Day complete. Streak is now ${streak.current}`}
-          className='mt-4 flex-row items-center rounded-3xl border border-done/40 p-4'
-          style={{ backgroundColor: 'rgba(74,222,128,0.12)' }}
-        >
-          <Ionicons name='sparkles' size={20} color={COLOR_DONE} />
-          <Text className='ml-2 flex-1 text-sm font-bold' style={{ color: COLOR_DONE }}>
-            🎉 Day complete — streak is now {streak.current}
-          </Text>
-        </View>
-      )}
+      {/* cycle-2 #3 + cycle-3 lane A: day-complete moment — slides down + fades in */}
+      {celebrate && <CelebrateBanner streak={streak.current} />}
 
       {revs.length > 0 && (
         <Text className="mt-6 mb-3 text-[13px] font-extrabold uppercase tracking-wider" style={{ color: '#F87171' }}>
@@ -185,10 +214,54 @@ export default function TodayScreen() {
   );
 }
 
+/** Cycle-3 lane A: day-complete banner (cycle-2 #3) with an entrance — slides
+ *  down from -20px while fading in over 250ms. Pure presentation; the
+ *  show/dismiss timing logic stays in TodayScreen. */
+function CelebrateBanner({ streak }: { streak: number }) {
+  const anim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: 250,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [anim]);
+  return (
+    <Animated.View
+      accessibilityLabel={`Day complete. Streak is now ${streak}`}
+      className='mt-4 flex-row items-center rounded-3xl border border-done/40 p-4'
+      style={{
+        backgroundColor: 'rgba(74,222,128,0.12)',
+        opacity: anim,
+        transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }],
+      }}
+    >
+      <Ionicons name='sparkles' size={20} color={COLOR_DONE} />
+      <Text className='ml-2 flex-1 text-sm font-bold' style={{ color: COLOR_DONE }}>
+        🎉 Day complete — streak is now {streak}
+      </Text>
+    </Animated.View>
+  );
+}
+
 function PlanCard({ uid, hero }: { uid: string; hero: boolean }) {
   const item = useApp(s => s.plan.find(p => p.uid === uid));
   const done = useApp(s => s.doneUids.has(uid));
   const checkItem = useApp(s => s.checkItem);
+  // cycle-3 lane A: spring pop on the check circle when the card flips to done.
+  const checkScale = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!done) {
+      checkScale.setValue(0);
+      return;
+    }
+    checkScale.setValue(0);
+    Animated.sequence([
+      Animated.spring(checkScale, { toValue: 1.2, friction: 6, tension: 180, useNativeDriver: true }),
+      Animated.spring(checkScale, { toValue: 1, friction: 9, tension: 220, useNativeDriver: true }),
+    ]).start();
+  }, [done, checkScale]);
   if (!item) return null;
 
   const time = item.startMin == null
@@ -225,9 +298,8 @@ function PlanCard({ uid, hero }: { uid: string; hero: boolean }) {
       style={done ? { backgroundColor: 'rgba(74,222,128,0.12)' } : undefined}
     >
       <View className="flex-row items-center">
-        <View className="h-11 w-11 items-center justify-center rounded-2xl bg-surface-2">
-          <Text className="text-xl">{item.topic.subjectId}</Text>
-        </View>
+        {/* cycle-3 lane A: color-coded subject chip replaces the plain emoji square */}
+        <SubjectAvatar subjectKey={item.topic.subjectId} />
         <View className="ml-3 flex-1">
           <Text
             className={`font-bold ${done ? 'line-through opacity-50' : ''}`}
@@ -239,9 +311,11 @@ function PlanCard({ uid, hero }: { uid: string; hero: boolean }) {
             {time} · {item.carried ? 'CARRIED' : item.kind === 'rev' ? 'DUE' : 'NEW'}
           </Text>
         </View>
-        <View className={`h-7 w-7 items-center justify-center rounded-full border ${done ? 'border-done bg-done' : 'border-line'}`}>
-          {done && <Ionicons name='checkmark' size={18} color='#0E1116' />}
-        </View>
+        <Animated.View style={{ transform: [{ scale: checkScale }] }}>
+          <View className={`h-7 w-7 items-center justify-center rounded-full border ${done ? 'border-done bg-done' : 'border-line'}`}>
+            {done && <Ionicons name='checkmark' size={18} color='#0E1116' />}
+          </View>
+        </Animated.View>
       </View>
 
       {hero && !done && (
