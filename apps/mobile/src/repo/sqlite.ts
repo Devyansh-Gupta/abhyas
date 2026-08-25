@@ -81,6 +81,7 @@ const KV_KEYS = {
   learningStyle: 'learningStyle',
   streak: 'streak',
   doneUids: 'doneUids',
+  subjectMeta: 'subjectMeta',
 } as const;
 
 // ─── Pure mappers ───────────────────────────────────────────────────────────────
@@ -130,6 +131,10 @@ export function toRows(s: Snapshot): RawState {
     { key: KV_KEYS.learningStyle, value: s.learningStyle },
     { key: KV_KEYS.streak, value: JSON.stringify(s.streak) },
     { key: KV_KEYS.doneUids, value: JSON.stringify([...s.doneUids]) },
+    // Only persisted when present — snapshots without it round-trip without it.
+    ...(s.subjectMeta
+      ? [{ key: KV_KEYS.subjectMeta, value: JSON.stringify(s.subjectMeta) }]
+      : []),
   ];
 
   return { topicRows, examRows, sessionRows, kvRows };
@@ -183,7 +188,11 @@ export function fromRows(raw: RawState): Snapshot | null {
   const doneRaw = kv.get(KV_KEYS.doneUids);
   if (doneRaw !== undefined) doneUids = JSON.parse(doneRaw) as string[];
 
-  return {
+  let subjectMeta: Snapshot['subjectMeta'] = {};
+  const metaRaw = kv.get(KV_KEYS.subjectMeta);
+  if (metaRaw !== undefined) subjectMeta = JSON.parse(metaRaw) as NonNullable<Snapshot['subjectMeta']>;
+
+  const base = {
     topics,
     exams,
     sessions,
@@ -192,6 +201,9 @@ export function fromRows(raw: RawState): Snapshot | null {
     learningStyle: (kv.get(KV_KEYS.learningStyle) ?? 'average') as LearningStyle,
     streak,
   };
+  // subjectMeta stays ABSENT (not {}) when never saved — keeps round-trip
+  // deep-equality with snapshots from before this field existed.
+  return metaRaw !== undefined ? { ...base, subjectMeta } : base;
 }
 
 // ─── Adapter ─────────────────────────────────────────────────────────────────────

@@ -25,6 +25,14 @@ export interface Snapshot {
   classSessions?: ClassSession[];
   /** P2 parent-link invites minted but not yet accepted (optional for older snapshots). */
   pendingGuardianInvites?: GuardianInvite[];
+  /** Cycle-4 lane A: subject display names/colors (optional for older snapshots). */
+  subjectMeta?: Record<string, SubjectMeta>;
+}
+
+/** Cycle-4 lane A: display identity for a subject id (v1 ids are emoji keys). */
+export interface SubjectMeta {
+  name: string;
+  color?: string;
 }
 
 /** Injectable persistence backend; hosts opt in via configurePersistence(adapter). */

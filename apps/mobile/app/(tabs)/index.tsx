@@ -41,18 +41,21 @@ const initialFor = (key: string): string => {
   return m ? m[0].toUpperCase() : '';
 };
 
-/** 40px rounded-2xl square: subject color @18% bg, full-color bold initial centered. */
+/** 40px rounded-2xl square: subject color @18% bg, full-color bold initial centered.
+ *  Cycle-4 lane A: prefers the store's subjectMeta (real name → initial letter,
+ *  preset color) and falls back to the emoji-key path for old installs. */
 function SubjectAvatar({ subjectKey }: { subjectKey: string }) {
-  const color = subjectColor(subjectKey);
-  const initial = initialFor(subjectKey);
+  const meta = useApp(s => s.subjectMeta[subjectKey]);
+  const color = meta?.color ?? subjectColor(subjectKey);
+  const label = meta ? initialFor(meta.name) : initialFor(subjectKey);
   return (
     <View
-      accessibilityLabel={`Subject ${subjectKey}`}
+      accessibilityLabel={`Subject ${meta?.name ?? subjectKey}`}
       className='h-10 w-10 items-center justify-center rounded-2xl'
       style={{ backgroundColor: withAlpha(color, 0.18) }}
     >
-      <Text className='font-extrabold' style={{ color, fontSize: initial ? 17 : 16 }}>
-        {initial || subjectKey}
+      <Text className='font-extrabold' style={{ color, fontSize: label ? 17 : 16 }}>
+        {label || meta?.name || subjectKey}
       </Text>
     </View>
   );

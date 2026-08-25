@@ -64,8 +64,12 @@ export default function Onboarding() {
 
   const finish = () => {
     const topics = [];
+    // cycle-4 lane A: keep subject display identity (name; presets carry no
+    // color today → undefined lets the UI hash-fallback palette apply)
+    const subjectMeta: Record<string, { name: string; color?: string }> = {};
     for (const sub of active) {
       const preset = presetForPick(sub);
+      subjectMeta[sub.emoji] = { name: preset?.subject ?? sub.name };
       if (preset) {
         const cov = s.coverage[sub.emoji] ?? 0;
         topics.push(...topicsFromPreset(preset, cov === 0 ? 'unstarted' : cov >= 0.75 ? 'covered' : 'in_progress').topics);
@@ -92,6 +96,7 @@ export default function Onboarding() {
     }
     setState({
       topics: seeded as any,
+      subjectMeta,
       // F29 (#4): seed TODAY's plan too — store.plan starts [] and only
       // advanceDay() rebuilds it, so finishing onboarding previously landed
       // on an empty Today ("0 blocks") despite topics being in the store.

@@ -12,7 +12,7 @@ import {
   createGuardianInvite, type GuardianInvite,
 } from '@abhyas/engine';
 import { create } from 'zustand';
-import { type PersistenceAdapter, type Snapshot } from './persistence';
+import { type PersistenceAdapter, type Snapshot, type SubjectMeta } from './persistence';
 
 export interface SessionLogEntry { day: number; min: number }
 
@@ -32,6 +32,8 @@ interface AppState {
   examSeasonDial: number;
   /** P2 parent-link invites minted on this device, newest last. */
   pendingGuardianInvites: GuardianInvite[];
+  /** Cycle-4 lane A: subject display identity (name/color) by subjectId. */
+  subjectMeta: Record<string, SubjectMeta>;
 
   // actions
   checkItem(uid: string): void;
@@ -100,6 +102,7 @@ const toSnapshot = (s: AppState): Snapshot => ({
   examSeasonDial: s.examSeasonDial,
   pendingGuardianInvites: s.pendingGuardianInvites,
   classSessions: s.classSessions,
+  subjectMeta: s.subjectMeta,
 });
 
 /** Fire-and-forget save of the current state; no-op without a configured adapter. */
@@ -136,6 +139,7 @@ export async function hydrate(): Promise<boolean> {
     examSeasonDial: snap.examSeasonDial ?? 1,
     classSessions: snap.classSessions ?? [],
     pendingGuardianInvites: snap.pendingGuardianInvites ?? [],
+    subjectMeta: snap.subjectMeta ?? {},
     plan,
   });
   return true;
@@ -153,6 +157,7 @@ export const useApp = create<AppState>((set, get) => ({
   streak: initialStreak(),
   examSeasonDial: 1,
   pendingGuardianInvites: [],
+  subjectMeta: {},
 
   checkItem(uid) {
     const { plan, doneUids } = get();
