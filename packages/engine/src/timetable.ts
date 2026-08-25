@@ -28,6 +28,49 @@ export interface ClassSession {
 /** Prototype anchor: today = Thu 2026-08-21 (weekday 4). */
 export const WEEKDAY_TODAY = 4;
 
+/**
+ * c5 L5: onboarding-authored class period, keyed by weekday in the store
+ * ({weekday: [{startMin,endMin,label?}]}) — lighter than a ClassSession row
+ * (no id/subjectId; the wizard doesn't know subjects yet).
+ */
+export interface ClassPeriod {
+  startMin: number;
+  endMin: number;
+  label?: string;
+}
+
+/** Per-weekday class periods, weekday 0=Sun..6=Sat. Missing day = no classes. */
+export type ClassPeriods = Partial<Record<number, readonly ClassPeriod[]>>;
+
+/**
+ * Flatten per-weekday periods into repo-shaped ClassSession rows so they merge
+ * with plan-tab classSessions in every slotsForWeekday call. Pure; ids are
+ * deterministic (`p_<wd>_<i>`) so re-flattening is stable across renders.
+ */
+export function classPeriodsToSessions(periods: ClassPeriods): ClassSession[] {
+  const out: ClassSession[] = [];
+  for (const key of Object.keys(periods)) {
+    const wd = Number(key);
+    (periods[wd] ?? []).forEach((p, i) =>
+      out.push({ id: `p_${wd}_${i}`, subjectId: 'class', weekday: wd, startMin: p.startMin, endMin: p.endMin }),
+    );
+  }
+  return out;
+}
+
+/** Plan-tab sessions + onboarding periods → one busy-time list. Pure. */
+export function mergedClassSessions(
+  sessions: readonly ClassSession[],
+  periods: ClassPeriods,
+): ClassSession[] {
+  return [...sessions, ...classPeriodsToSessions(periods)];
+}
+
+/** Total number of authored periods across all weekdays. Pure. */
+export function countClassPeriods(periods: ClassPeriods): number {
+  return Object.values(periods).reduce((a, list) => a + (list?.length ?? 0), 0);
+}
+
 export const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 export const DAY_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 

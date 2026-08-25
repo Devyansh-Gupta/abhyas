@@ -7,8 +7,9 @@ import {
   applyRating, buildDayPlan, computeCarry,
   initialStreak, bumpToday, rollover, type StreakState, type DayActivity,
   applyExamSeason, dateForDayIndex, clampCapacity,
-  type ClassSession, type MoveDelta,
+  type ClassSession, type MoveDelta, type ClassPeriods,
   movePeriod, cancelPeriod, slotsForWeekday, weekdayFor, studyWindowFor,
+  mergedClassSessions,
   createGuardianInvite, type GuardianInvite,
 } from '@abhyas/engine';
 import { create } from 'zustand';
@@ -28,6 +29,8 @@ interface AppState {
   exams: Exam[];
   /** class timetable — mirrors packages/db schema.classSessions (weekday 0=Sun..6=Sat) */
   classSessions: ClassSession[];
+  /** c5 L5: onboarding-authored per-weekday periods (weekday → start/end rows). */
+  classPeriods: ClassPeriods;
   sessions: SessionLogEntry[];
   plan: PlanItem[];
   doneUids: Set<string>;
@@ -65,6 +68,8 @@ interface AppState {
   moveClassPeriod(id: string, delta: MoveDelta): boolean;
   /** Cancel (remove) a period. Re-solves the derived plan same frame. */
   cancelClassPeriod(id: string): void;
+  /** c5 L5: replace the onboarding-authored per-weekday periods wholesale. */
+  setClassPeriods(periods: ClassPeriods): void;
   advanceDay(): { carried: number; droppedRevisions: number; droppedForward: number; broke: boolean };
   /** P2 parent link: mint a shareable invite (signed code + deep link), persisted. */
   createGuardianInvite(): GuardianInvite;
@@ -103,6 +108,10 @@ const resolveCurrentPlan = (
 };
 
 // --- injectable persistence seam (#8 prep) ---------------------------------
+
+/** c5 L5: plan-tab sessions + onboarding-authored periods = full busy-time list. */
+const timetableFor = (s: { classSessions: ClassSession[]; classPeriods: ClassPeriods }): ClassSession[] =>
+  mergedClassSessions(s.classSessions, s.classPeriods);
 let adapter: PersistenceAdapter | null = null;
 
 /** Wire (or unwire, with `null`) a persistence backend. Default: none — memory only. */
@@ -121,6 +130,7 @@ const toSnapshot = (s: AppState): Snapshot => ({
   examSeasonDial: s.examSeasonDial,
   pendingGuardianInvites: s.pendingGuardianInvites,
   classSessions: s.classSessions,
+  classPeriods: s.classPeriods,
   subjectMeta: s.subjectMeta,
   dailyHours: s.dailyHours,
   timeFormat: s.timeFormat,
@@ -150,7 +160,7 @@ export async function hydrate(): Promise<boolean> {
   const plan = resolveCurrentPlan(
     snap.topics,
     snap.exams,
-    snap.classSessions ?? [],
+    mergedClassSessions(snap.classSessions ?? [], snap.classPeriods ?? {}),
     [],
     snap.dayIndex,
     snap.dailyHours ?? DAILY_HOURS_DEFAULT,
@@ -165,6 +175,7 @@ export async function hydrate(): Promise<boolean> {
     streak: snap.streak,
     examSeasonDial: snap.examSeasonDial ?? 1,
     classSessions: snap.classSessions ?? [],
+    classPeriods: snap.classPeriods ?? {},
     pendingGuardianInvites: snap.pendingGuardianInvites ?? [],
     subjectMeta: snap.subjectMeta ?? {},
     dailyHours: snap.dailyHours ?? DAILY_HOURS_DEFAULT,
@@ -178,6 +189,7 @@ export const useApp = create<AppState>((set, get) => ({
   topics: [],
   exams: [],
   classSessions: [],
+  classPeriods: {},
   sessions: [],
   plan: [],
   doneUids: new Set(),
@@ -280,7 +292,7 @@ export const useApp = create<AppState>((set, get) => ({
       : [...list, session];
     set({
       classSessions: next,
-      plan: resolveCurrentPlan(topics, exams, next, get().plan, get().dayIndex, get().dailyHours),
+      plan: resolveCurrentPlan(topics, exams, timetableFor({ ...get(), classSessions: next }), get().plan, get().dayIndex, get().dailyHours),
     });
     persist();
   },
@@ -291,7 +303,7 @@ export const useApp = create<AppState>((set, get) => ({
     const { topics, exams } = get();
     set({
       classSessions: r.sessions,
-      plan: resolveCurrentPlan(topics, exams, r.sessions, get().plan, get().dayIndex, get().dailyHours),
+      plan: resolveCurrentPlan(topics, exams, timetableFor({ ...get(), classSessions: r.sessions }), get().plan, get().dayIndex, get().dailyHours),
     });
     persist();
     return true;
@@ -302,6 +314,16 @@ export const useApp = create<AppState>((set, get) => ({
     const next = cancelPeriod(get().classSessions, id);
     set({
       classSessions: next,
+      plan: resolveCurrentPlan(topics, exams, timetableFor({ ...get(), classSessions: next }), get().plan, get().dayIndex, get().dailyHours),
+    });
+    persist();
+  },
+
+  setClassPeriods(periods) {
+    const { topics, exams } = get();
+    const next = timetableFor({ ...get(), classPeriods: periods });
+    set({
+      classPeriods: periods,
       plan: resolveCurrentPlan(topics, exams, next, get().plan, get().dayIndex, get().dailyHours),
     });
     persist();
@@ -314,13 +336,13 @@ export const useApp = create<AppState>((set, get) => ({
     const r = rollover(streak, activity);
 
     // rebuild tomorrow's plan from updated topics (SRS already rescheduled by rateTopic)
-    const { topics, exams, examSeasonDial, dailyHours, classSessions } = get();
+    const { topics, exams, examSeasonDial, dailyHours, classSessions, classPeriods } = get();
     const carriedNames = new Set(carry.carried.map(c => c.topic.id));
     // #9 Exam Season: shift weights toward exam subjects; gap days get boosted capacity
     const season = applyExamSeason(topics, exams, dateForDayIndex(get().dayIndex + 1), examSeasonDial);
     const tomorrowPlan = buildDayPlan(season.topics, exams, 1, {
       excludeTopicIds: [...carriedNames],
-      slots: slotsForWeekday(classSessions, weekdayFor(get().dayIndex + 1), {
+      slots: slotsForWeekday(mergedClassSessions(classSessions, classPeriods), weekdayFor(get().dayIndex + 1), {
         window: studyWindowFor(dailyHours),
       }),
     });
@@ -359,7 +381,7 @@ export const useApp = create<AppState>((set, get) => ({
     set({
       dailyHours: clamped,
       // same-frame re-solve so the plan reflects the new capacity immediately
-      plan: resolveCurrentPlan(topics, exams, get().classSessions, get().plan, get().dayIndex, clamped),
+      plan: resolveCurrentPlan(topics, exams, timetableFor(get()), get().plan, get().dayIndex, clamped),
     });
     persist();
   },

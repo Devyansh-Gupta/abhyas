@@ -10,6 +10,7 @@ import {
   initOnboarding, reduce, canAdvance, stepCount, screenFor, recalibrate,
   buildDayPlan,
   type OnboardingState, type ScreenRole, type SubjectPick,
+  type ClassPeriods, slotsForWeekday, weekdayFor, studyWindowFor, mergedClassSessions,
 } from '@abhyas/engine';
 import { presetsFor, topicsFromPreset } from '@abhyas/presets';
 import { useApp, persist } from '../src/store';
@@ -33,9 +34,28 @@ const COVERAGE_CHIPS: Array<{ label: string; frac: number }> = [
   { label: 'Finished — full revision mode', frac: 1 },
 ];
 
+/* c5 L5: class-timetable step — manual per-day period editor (photo import later). */
+const TIMETABLE_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+/** '9' | '9.30' | '9:30' | '0930' → minutes-of-day, or null when not a real time. */
+export function parseHM(text: string): number | null {
+  const m = text.trim().match(/^(\d{1,2})(?:[:.]?(\d{2}))?$/);
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2] ?? 0);
+  if (h > 23 || min > 59) return null;
+  return h * 60 + min;
+}
+/** minutes-of-day → 'HH:MM'. */
+export function fmtHM(min: number): string {
+  return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+}
+
 export default function Onboarding() {
   const [s, dispatch] = useReducer(reduce, undefined, initOnboarding) as [OnboardingState, React.Dispatch<any>];
   const [customName, setCustomName] = useState('');
+  // c5 L5: class-timetable step — local draft until finish() commits to the store
+  const [classPeriods, setClassPeriods] = useState<ClassPeriods>({});
+  const [ttDay, setTtDay] = useState(0); // index into TIMETABLE_DAYS; engine weekday = idx+1 (Mon=1)
   const setState = useApp.setState;
 
   // cycle-3 lane B: step-transition motion — fade + slide-in on every step change
@@ -120,7 +140,15 @@ export default function Onboarding() {
       // F29 (#4): seed TODAY's plan too — store.plan starts [] and only
       // advanceDay() rebuilds it, so finishing onboarding previously landed
       // on an empty Today ("0 blocks") despite topics being in the store.
-      plan: buildDayPlan(seeded as any, useApp.getState().exams, 0),
+      // c5 L5: seed against real class-free slots (onboarding periods + Plan-tab sessions).
+      plan: buildDayPlan(seeded as any, useApp.getState().exams, 0, {
+        slots: slotsForWeekday(
+          mergedClassSessions(useApp.getState().classSessions, classPeriods),
+          weekdayFor(0),
+          { window: studyWindowFor(useApp.getState().dailyHours) },
+        ),
+      }),
+      classPeriods,
       learningStyle: s.learningStyle,
       exams: useApp.getState().exams,
     });
@@ -290,6 +318,53 @@ export default function Onboarding() {
         </>
       )}
 
+      {/* class timetable (c5 L5) — manual grid editor, skippable */}
+      {role === 'timetable' && (() => {
+        const wd = ttDay + 1; // Mon=1 … Sun=6/0
+        const list = classPeriods[wd] ?? [];
+        const setList = (next: Array<{ startMin: number; endMin: number; label?: string }>) => {
+          const all: ClassPeriods = { ...classPeriods };
+          if (next.length > 0) all[wd] = next;
+          else delete all[wd];
+          setClassPeriods(all);
+        };
+        return (
+          <>
+            <H>When are you in class?</H>
+            <Text className="-mt-3 mb-4 text-xs text-dim">
+              Your plan studies around lectures, not through them. Skip if your timetable varies.
+            </Text>
+            <Row>
+              {TIMETABLE_DAYS.map((d, i) => (
+                <SelectableChip key={d} small label={d} on={ttDay === i} onPress={() => setTtDay(i)} />
+              ))}
+            </Row>
+            {(list as Array<{ startMin: number; endMin: number }>).map((p, i) => (
+              <PeriodRow
+                key={i}
+                period={p}
+                onChange={(startMin, endMin) =>
+                  setList(list.map((x, j) => (j === i ? { ...x, startMin, endMin } : x)) as any)
+                }
+                onRemove={() => setList(list.filter((_, j) => j !== i) as any)}
+              />
+            ))}
+            <Pressable
+              onPress={() => setList([...list, { startMin: 10 * 60, endMin: 10 * 60 + 50 }] as any)}
+              accessibilityLabel={`Add a class period on ${TIMETABLE_DAYS[ttDay]}`}
+              className="mt-2 items-center rounded-2xl border border-line bg-surface py-3"
+            >
+              <Text className="text-sm font-bold text-dim">+ Add period</Text>
+            </Pressable>
+            <Text className="mt-3 text-xs text-dim">
+              {list.length === 0
+                ? `No periods on ${TIMETABLE_DAYS[ttDay]} yet — that day stays fully free for study.`
+                : `${list.length} period${list.length > 1 ? 's' : ''} on ${TIMETABLE_DAYS[ttDay]}. You can add the rest later from the Plan tab.`}
+            </Text>
+          </>
+        );
+      })()}
+
       {/* learning style dial (E2) */}
       {role === 'style' && (
         <>
@@ -405,8 +480,65 @@ function SubjToggle({ pick, removed, dispatch }: { pick: SubjectPick; removed: b
     </Pressable>
   );
 }
-function RatePick({ label, v, cur, set }: { label: string; v: string; cur: string; set: (v: any) => void }) {
+/* c5 L5: one start/end row in the class-timetable editor. Owns its raw text
+   state so typing '9:' mid-edit never fights the formatter; commits only
+   valid, ordered times back to the day's list. */
+function PeriodRow({
+  period,
+  onChange,
+  onRemove,
+}: {
+  period: { startMin: number; endMin: number };
+  onChange: (startMin: number, endMin: number) => void;
+  onRemove: () => void;
+}) {
+  const [startText, setStartText] = useState(fmtHM(period.startMin));
+  const [endText, setEndText] = useState(fmtHM(period.endMin));
+  const commit = (sTxt: string, eTxt: string) => {
+    const s = parseHM(sTxt);
+    const e = parseHM(eTxt);
+    if (s !== null && e !== null && s < e) onChange(s, e);
+  };
+  const inputStyle = {
+    width: 88,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#1C232D',
+    backgroundColor: '#1B2330',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    textAlign: 'center' as const,
+    color: '#E7EBF2',
+  };
   return (
+    <View className="mb-2 flex-row items-center justify-between rounded-2xl border border-line bg-surface px-3 py-2.5">
+      <TextInput
+        value={startText}
+        keyboardType="numbers-and-punctuation"
+        maxLength={5}
+        placeholder="10:00"
+        placeholderTextColor="#5A6473"
+        onChangeText={t => { setStartText(t); commit(t, endText); }}
+        style={inputStyle}
+      />
+      <Text className="text-dim">–</Text>
+      <TextInput
+        value={endText}
+        keyboardType="numbers-and-punctuation"
+        maxLength={5}
+        placeholder="10:50"
+        placeholderTextColor="#5A6473"
+        onChangeText={t => { setEndText(t); commit(startText, t); }}
+        style={inputStyle}
+      />
+      <Pressable onPress={onRemove} accessibilityLabel="Remove period" hitSlop={8} className="px-2">
+        <Text className="text-lg text-dim">✕</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+function RatePick({ label, v, cur, set }: { label: string; v: string; cur: string; set: (v: any) => void }) {  return (
     <Pressable onPress={() => set(v)} className={`mb-2 rounded-2xl border p-4 ${cur === v ? 'border-accent bg-accent/15' : 'border-line bg-surface'}`}>
       <Text className="text-text">{label}</Text>
     </Pressable>

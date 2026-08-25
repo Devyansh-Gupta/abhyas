@@ -16,7 +16,7 @@ import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import { initialStreak } from '@abhyas/engine';
+import { initialStreak, countClassPeriods } from '@abhyas/engine';
 import { useApp, persist } from '../src/store';
 import type { TimeFormat } from '../src/persistence';
 
@@ -35,6 +35,9 @@ export default function SettingsScreen() {
   const classSessions = useApp(s => s.classSessions);
 
   const subjectCount = new Set(topics.map(t => t.subjectId)).size;
+  // c5 L5: Plan-tab sessions + onboarding-authored periods, one count
+  const classPeriods = useApp(s => s.classPeriods);
+  const periodCount = classSessions.length + countClassPeriods(classPeriods);
 
   const confirmReset = () => {
     Alert.alert(
@@ -142,7 +145,7 @@ export default function SettingsScreen() {
         <SummaryRow label='Exams' value={exams.length === 0 ? '—' : `${exams.length}`} />
         <SummaryRow
           label='Class periods'
-          value={classSessions.length === 0 ? '—' : `${classSessions.length}`}
+          value={periodCount === 0 ? '—' : `${periodCount}`}
         />
       </Card>
 

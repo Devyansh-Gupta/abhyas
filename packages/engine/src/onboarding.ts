@@ -59,9 +59,11 @@ export type ObAction =
 
 /** Which steps apply for this student — stream only for 11–12.
  *  Screen sequence for 9–10: 0 persona, 1 board/class, 2 subjects, 3 coverage,
- *  4 baseline, 5 exams, 6 style. For 11–12 a stream screen inserts at 2. */
+ *  4 baseline, 5 exams, 6 class timetable (c5 L5), 7 style. For 11–12 a stream
+ *  screen inserts at 2.
+ */
 export function stepCount(s: OnboardingState): number {
-  return s.cls !== null && s.cls >= 11 ? 8 : 7;
+  return s.cls !== null && s.cls >= 11 ? 9 : 8;
 }
 
 /** True when this state's step-2 screen is the (skipped) stream step. */
@@ -70,17 +72,17 @@ export function isStreamStep(s: OnboardingState): boolean {
 }
 
 /** What the current step SHOWS — single source of truth for the wizard UI.
- *  9–10:  persona, board, subjects, coverage, baseline, exams, style
- *  11–12: persona, board, stream, subjects, coverage, baseline, exams, style */
+ *  9–10:  persona, board, subjects, coverage, baseline, exams, timetable, style
+ *  11–12: persona, board, stream, subjects, coverage, baseline, exams, timetable, style */
 export type ScreenRole =
   | 'persona' | 'board' | 'stream' | 'subjects'
-  | 'coverage' | 'baseline' | 'exams' | 'style';
+  | 'coverage' | 'baseline' | 'exams' | 'timetable' | 'style';
 
 export function screenFor(s: OnboardingState): ScreenRole {
   const senior = s.cls !== null && s.cls >= 11;
   const seq: ScreenRole[] = senior
-    ? ['persona', 'board', 'stream', 'subjects', 'coverage', 'baseline', 'exams', 'style']
-    : ['persona', 'board', 'subjects', 'coverage', 'baseline', 'exams', 'style'];
+    ? ['persona', 'board', 'stream', 'subjects', 'coverage', 'baseline', 'exams', 'timetable', 'style']
+    : ['persona', 'board', 'subjects', 'coverage', 'baseline', 'exams', 'timetable', 'style'];
   return seq[Math.min(s.step, seq.length - 1)]!;
 }
 
