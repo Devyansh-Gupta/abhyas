@@ -34,6 +34,8 @@ interface AppState {
   pendingGuardianInvites: GuardianInvite[];
   /** Cycle-4 lane A: subject display identity (name/color) by subjectId. */
   subjectMeta: Record<string, SubjectMeta>;
+  /** c5 L1b: message of the last failed persistence save (degraded SQLite), or null. */
+  lastSaveError: string | null;
 
   // actions
   checkItem(uid: string): void;
@@ -111,6 +113,11 @@ export function persist(): void {
   adapter.save(toSnapshot(useApp.getState()));
 }
 
+/** c5 L1b: surface a degraded-SQLite save failure for later UI display. */
+export function setLastSaveError(msg: string | null): void {
+  useApp.setState({ lastSaveError: msg });
+}
+
 /**
  * Load the persisted snapshot (if any) into the store.
  * Resolves false when no adapter is configured or nothing was persisted.
@@ -158,6 +165,7 @@ export const useApp = create<AppState>((set, get) => ({
   examSeasonDial: 1,
   pendingGuardianInvites: [],
   subjectMeta: {},
+  lastSaveError: null,
 
   checkItem(uid) {
     const { plan, doneUids } = get();

@@ -180,4 +180,53 @@ describe('sqlite adapter (#8 slice 1)', () => {
     expect(errSpy).toHaveBeenCalledTimes(1);
     expect(String(errSpy.mock.calls[0]?.[0])).toContain('[sqlite-repo] save failed');
   });
+
+  // ── c5 L1b: NPE guard — degraded adapter, queued snapshot, one re-init ────
+  it('save() failure keeps the snapshot queued and a later healthy save flushes the newer one', async () => {
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    let healthy = false;
+    let written: RawState[] = [];
+    const flaky: SqliteRepoClient = {
+      read: () => Promise.resolve(emptyState),
+      write: raw => {
+        if (!healthy) return Promise.reject(new Error('NativeDatabase.initSync rejected'));
+        written.push(raw);
+        return Promise.resolve();
+      },
+    };
+    const adapter = createSqliteAdapter(flaky);
+
+    adapter.save(snapshot); // fails → degraded, queued in memory
+    await new Promise<void>(resolve => setTimeout(resolve, 0));
+    expect(written).toHaveLength(0);
+    expect(errSpy.mock.calls.some(c => String(c[0]).includes('kept in memory'))).toBe(true);
+
+    const next = { ...snapshot, dayIndex: 7 }; // newer state arrives while degraded
+    healthy = true;
+    adapter.save(next); // triggers ONE re-init; succeeds and supersedes
+    await new Promise<void>(resolve => setTimeout(resolve, 0));
+    expect(written).toHaveLength(1);
+    expect(written[0]!.kvRows.find(r => r.key === 'dayIndex')!.value).toBe('7');
+  });
+
+  it('degraded state recovers: a write that failed once succeeds on the next save attempt', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    let fail = true;
+    let writes = 0;
+    const flaky: SqliteRepoClient = {
+      read: () => Promise.resolve(emptyState),
+      write: raw => {
+        writes += 1;
+        return fail ? Promise.reject(new Error('NPE')) : Promise.resolve();
+      },
+    };
+    const adapter = createSqliteAdapter(flaky);
+    adapter.save(snapshot);
+    await new Promise<void>(resolve => setTimeout(resolve, 0)); // save #1 fails
+    expect(writes).toBe(1);
+    fail = false;
+    adapter.save({ ...snapshot, dayIndex: 3 }); // degraded → fresh attempt
+    await new Promise<void>(resolve => setTimeout(resolve, 0));
+    expect(writes).toBe(2);
+  });
 });

@@ -214,9 +214,28 @@ export function fromRows(raw: RawState): Snapshot | null {
  */
 export function createSqliteAdapter(client?: SqliteRepoClient): PersistenceAdapter {
   let resolvedClient: Promise<SqliteRepoClient> | null = null;
+  // ── c5 L1b: NPE guard ─────────────────────────────────────────────────────
+  // After a dev-client reload / force-stop race, expo-sqlite's native handle
+  // can be stale — initSync/write rejects with "NativeDatabase.initSync has
+  // been rejected → NullPointerException". Policy:
+  //   • a failed save marks the adapter DEGRADED and keeps the snapshot queued
+  //     in memory (never lose data silently);
+  //   • the NEXT save drops the cached client promise and retries ONE re-init;
+  //   • if that still fails, the error surfaces via console.error (F21/F24)
+  //     plus the store's lastSaveError flag for later UI display.
+  let degraded = false;
+  let queued: Snapshot | null = null;
+
   const getClient = (): Promise<SqliteRepoClient> => {
     if (client) return Promise.resolve(client);
-    resolvedClient ??= buildExpoClient();
+    if (degraded) {
+      resolvedClient = null; // stale handle — force ONE fresh re-init
+      degraded = false;
+    }
+    resolvedClient ??= buildExpoClient().catch((err: unknown) => {
+      resolvedClient = null; // never cache a failed init
+      throw err;
+    });
     return resolvedClient;
   };
 
@@ -233,10 +252,20 @@ export function createSqliteAdapter(client?: SqliteRepoClient): PersistenceAdapt
     },
 
     save(snapshot: Snapshot): void {
-      // Fire-and-forget per the seam contract; errors surface via console.error.
+      queued = snapshot; // latest-wins: a newer successful save supersedes
       void getClient()
         .then(c => c.write(toRows(snapshot)))
-        .catch((err: unknown) => console.error('[sqlite-repo] save failed:', err));
+        .then(() => {
+          if (queued === snapshot) queued = null; // flushed to disk
+        })
+        .catch((err: unknown) => {
+          degraded = true; // next save re-inits once before giving up again
+          console.error('[sqlite-repo] save failed — snapshot kept in memory for retry:', err);
+          // Visible-error path: store flag the UI can show later (c5 L1b).
+          void import('../store').then(m =>
+            m.setLastSaveError(err instanceof Error ? err.message : String(err)),
+          );
+        });
     },
   };
 }

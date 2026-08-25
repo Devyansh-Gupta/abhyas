@@ -27,11 +27,10 @@ const ELECTIVES: SubjectPick[] = [
   { emoji: '📊', name: 'Economics', kind: 'elective' },
 ];
 const COVERAGE_CHIPS: Array<{ label: string; frac: number }> = [
-  { label: 'Not started', frac: 0 },
-  { label: '¼ done', frac: 0.25 },
-  { label: 'Half', frac: 0.5 },
-  { label: '¾ done', frac: 0.75 },
-  { label: 'Finished', frac: 1 },
+  { label: 'Just getting started', frac: 0 },
+  { label: 'About halfway through', frac: 0.5 },
+  { label: 'Mostly done — revising', frac: 0.75 },
+  { label: 'Finished — full revision mode', frac: 1 },
 ];
 
 export default function Onboarding() {
@@ -63,13 +62,31 @@ export default function Onboarding() {
   };
 
   const finish = () => {
-    const topics = [];
+    const topics: import('@abhyas/engine').Topic[] = [];
+    // ── c5 L1a: unique subject ids at seeding ────────────────────────────────
+    // v1 used the emoji AS the subjectId, but glyphs collide (every custom
+    // subject seeds as 📖, next to core English 📖) → duplicate React keys and
+    // merged subject groups. The emoji stays the DISPLAY glyph; each picked
+    // subject gets a minted-once id ('📖', '📖-2', …). Reducer state
+    // (coverage/baseline) stays keyed by emoji — only seeded ids change, so
+    // plan-item uids (t_<topicId>) stay stable.
+    const usedIds = new Set<string>();
+    const idOf = new Map<SubjectPick, string>();
+    const uidFor = (sub: SubjectPick): string => {
+      let id = sub.emoji;
+      let n = 1;
+      while (usedIds.has(id)) id = `${sub.emoji}-${++n}`;
+      usedIds.add(id);
+      return id;
+    };
     // cycle-4 lane A: keep subject display identity (name; presets carry no
     // color today → undefined lets the UI hash-fallback palette apply)
     const subjectMeta: Record<string, { name: string; color?: string }> = {};
     for (const sub of active) {
+      const sid = uidFor(sub);
+      idOf.set(sub, sid);
       const preset = presetForPick(sub);
-      subjectMeta[sub.emoji] = { name: preset?.subject ?? sub.name };
+      subjectMeta[sid] = { name: preset?.subject ?? sub.name };
       if (preset) {
         const cov = s.coverage[sub.emoji] ?? 0;
         topics.push(...topicsFromPreset(preset, cov === 0 ? 'unstarted' : cov >= 0.75 ? 'covered' : 'in_progress').topics);
@@ -78,7 +95,7 @@ export default function Onboarding() {
       else {
         topics.push({
           id: `custom-${sub.name.toLowerCase().replace(/\W+/g, '-')}`,
-          subjectId: sub.emoji,
+          subjectId: sid,
           name: sub.name,
           box: 0,
           dueIn: -1,
@@ -90,9 +107,12 @@ export default function Onboarding() {
     }
     // baseline marks seed the ladder through the same engine path as tests
     let seeded = topics;
-    for (const [emoji, pct] of Object.entries(s.baseline)) {
+    // Baseline marks seed through the same engine path as tests — but keyed by
+    // each subject's MINTED id (c5 L1a), since seeded topic.subjectId is that.
+    for (const sub of active) {
+      const pct = s.baseline[sub.emoji];
       if (!pct) continue;
-      seeded = recalibrate(seeded as any, emoji, pct, s.learningStyle);
+      seeded = recalibrate(seeded as any, idOf.get(sub)!, pct, s.learningStyle);
     }
     setState({
       topics: seeded as any,
@@ -151,10 +171,10 @@ export default function Onboarding() {
           <H>Your subjects</H>
           <Text className="-mt-3 mb-3 text-xs text-dim">Pre-ticked from your board — remove what you don't have, add what you do.</Text>
           {active.map((p: SubjectPick) => (
-            <SubjToggle key={p.emoji} pick={p} removed={false} dispatch={dispatch} />
+            <SubjToggle key={p.name} pick={p} removed={false} dispatch={dispatch} />
           ))}
           {s.subjects.filter((x: SubjectPick) => x.removed).map((p: SubjectPick) => (
-            <SubjToggle key={`rm-${p.emoji}`} pick={p} removed dispatch={dispatch} />
+            <SubjToggle key={`rm-${p.name}`} pick={p} removed dispatch={dispatch} />
           ))}
           <Text className="mb-2 mt-4 text-[13px] font-extrabold uppercase tracking-wider text-text">Electives & others</Text>
           <Row>
@@ -198,10 +218,12 @@ export default function Onboarding() {
       {/* mid-year calibration (M1b) */}
       {role === 'coverage' && (
         <>
-          <H>How far has school reached?</H>
-          <Text className="-mt-3 mb-4 text-xs text-dim">One tap each — so plans match reality, not September.</Text>
+          {/* c5 L2: concrete copy — what the answer decides for the plan */}
+          <H>Where are your classes right now?</H>
+          <Text className="-mt-3 mb-4 text-xs text-dim">This decides how much new learning vs revision your plan schedules.</Text>
+          {/* c5 L1a: key by NAME — two picks can share a glyph (customs seed as 📖) */}
           {active.map((sub: SubjectPick) => (
-            <View key={sub.emoji} className="mb-4 rounded-2xl border border-line bg-surface p-3">
+            <View key={sub.name} className="mb-4 rounded-2xl border border-line bg-surface p-3">
               <Text className="mb-2 font-bold text-text">{sub.emoji} {sub.name}</Text>
               <Row>
                 {COVERAGE_CHIPS.map(c => (
@@ -225,7 +247,7 @@ export default function Onboarding() {
           <H>Any recent scores? <Text className="text-sm font-normal text-dim">(optional)</Text></H>
           <Text className="-mt-3 mb-4 text-xs text-dim">Enter last exam's % to calibrate where revision starts. Skip freely.</Text>
           {active.map((sub: SubjectPick) => (
-            <View key={sub.emoji} className="mb-3 flex-row items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3">
+            <View key={sub.name} className="mb-3 flex-row items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3">
               <Text className="font-bold text-text">{sub.emoji} {sub.name}</Text>
               <TextInput
                 keyboardType="number-pad"
