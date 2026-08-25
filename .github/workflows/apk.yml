@@ -92,5 +92,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: abhyas-apk
-          path: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+          path: apps/mobile/android/app/build/outputs/${{ inputs.build_type == 'debug' && 'debug' || 'release' }}/app-${{ inputs.build_type == 'debug' && 'debug' || 'release' }}.apk
           retention-days: 30
