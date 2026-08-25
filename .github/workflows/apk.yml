@@ -5,6 +5,15 @@ name: APK Build
 # Not on push: full RN native builds take ~40 min uncached; CI covers every push.
 on:
   workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type: release (standalone APK) or debug (dev client for Metro hot-reload)'
+        required: false
+        default: release
+        type: choice
+        options:
+          - release
+          - debug
 
 jobs:
   apk:
@@ -58,17 +67,26 @@ jobs:
           cd apps/mobile
           pnpm exec expo prebuild --platform android --no-install
 
-      - name: Assemble release APK (self-contained JS bundle)
+      - name: Assemble APK (self-contained JS bundle)
         # assembleDebug would produce a dev APK that requires a Metro server
         # ("Unable to load script" on device). Release embeds the JS bundle and
         # is signed with the debug keystore by the RN template's default
         # signingConfig, so it installs standalone.
+        # build_type input: 'release' (default, standalone) or 'debug' (one-time
+        # dev-client build for the Metro hot-reload loop).
         env:
-          GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.workers.max=2
+          BUILD_TYPE: ${{ inputs.build_type == 'debug' && 'Debug' || 'Release' }}
+          # ubuntu-latest has 4 cores / 16 GB — use them (was self-throttled to
+          # 2 workers / 3 GB, costing ~40% of build speed).
+          GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.workers.max=4
         run: |
           cd apps/mobile/android
+          # Enable Gradle build caching + parallel execution (RN template doesn't
+          # guarantee these; with ~/.gradle/caches persisted above, unchanged
+          # native modules skip recompilation on repeat builds).
+          printf '\norg.gradle.caching=true\norg.gradle.parallel=true\n' >> gradle.properties
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assemble$BUILD_TYPE --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
