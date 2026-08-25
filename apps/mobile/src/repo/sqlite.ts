@@ -120,7 +120,9 @@ export function toRows(s: Snapshot): RawState {
     // (SessionLogEntry carries no real timestamp — see header note).
     id: `${STUDENT_ID}_s${String(i).padStart(6, '0')}`,
     studentId: STUDENT_ID,
-    topicId: null,
+    // c5 L6: multi-topic sessions store all bound ids comma-joined in the
+    // existing nullable column — single-topic/unbound rows are unchanged.
+    topicId: entry.topicIds && entry.topicIds.length > 1 ? entry.topicIds.join(',') : null,
     startedAt: i,
     minutes: entry.min,
     confidenceSelf: null,
@@ -188,7 +190,11 @@ export function fromRows(raw: RawState): Snapshot | null {
 
   // Sort by ordinal-encoded id so the original sessions array order survives.
   const sorted = [...raw.sessionRows].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  const sessions = sorted.map(r => ({ day: r.dayIndex, min: r.minutes }));
+  const sessions = sorted.map(r => {
+    // c5 L6: comma-joined topicIds round-trip back onto the optional field.
+    if (r.topicId && r.topicId.includes(',')) return { day: r.dayIndex, min: r.minutes, topicIds: r.topicId.split(',') };
+    return { day: r.dayIndex, min: r.minutes };
+  });
 
   let streak: StreakState = initialStreak();
   const streakRaw = kv.get(KV_KEYS.streak);

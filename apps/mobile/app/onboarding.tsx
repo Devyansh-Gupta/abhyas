@@ -14,6 +14,7 @@ import {
 } from '@abhyas/engine';
 import { presetsFor, topicsFromPreset } from '@abhyas/presets';
 import { useApp, persist } from '../src/store';
+import { importedTopics, importedMeta, mergeWizardTopics } from '../src/lib/onboarding-merge';
 
 const BOARDS = ['CBSE', 'ICSE', 'State board'];
 const CLASSES = [9, 10, 11, 12];
@@ -134,14 +135,21 @@ export default function Onboarding() {
       if (!pct) continue;
       seeded = recalibrate(seeded as any, idOf.get(sub)!, pct, s.learningStyle);
     }
+    // c5 L6 (F8): topics imported mid-wizard via /import live in the store
+    // already — keep them, dedupe by id so nothing double-seeds. Wizard-seeded
+    // topics win collisions; the derived plan is built over the merged set.
+    const finalTopics = mergeWizardTopics(seeded, importedTopics(useApp.getState().topics));
     setState({
-      topics: seeded as any,
-      subjectMeta,
+      topics: finalTopics,
+      subjectMeta: {
+        ...(importedMeta(useApp.getState().subjectMeta) as Record<string, { name: string; color?: string }>),
+        ...subjectMeta,
+      },
       // F29 (#4): seed TODAY's plan too — store.plan starts [] and only
       // advanceDay() rebuilds it, so finishing onboarding previously landed
       // on an empty Today ("0 blocks") despite topics being in the store.
       // c5 L5: seed against real class-free slots (onboarding periods + Plan-tab sessions).
-      plan: buildDayPlan(seeded as any, useApp.getState().exams, 0, {
+      plan: buildDayPlan(finalTopics as any, useApp.getState().exams, 0, {
         slots: slotsForWeekday(
           mergedClassSessions(useApp.getState().classSessions, classPeriods),
           weekdayFor(0),
@@ -199,7 +207,21 @@ export default function Onboarding() {
           <H>Your subjects</H>
           <Text className="-mt-3 mb-3 text-xs text-dim">Pre-ticked from your board — remove what you don't have, add what you do.</Text>
           {active.map((p: SubjectPick) => (
-            <SubjToggle key={p.name} pick={p} removed={false} dispatch={dispatch} />
+            <View key={p.name}>
+              <SubjToggle pick={p} removed={false} dispatch={dispatch} />
+              {/* c5 L6 (F8): optional per-subject syllabus upload — reuses the
+                  existing /import screen (it merges into the store and returns);
+                  wizard finish() reconciles imported topics. No extra step. */}
+              <Pressable
+                onPress={() => router.push(`/import?return=onboarding`)}
+                accessibilityLabel={`Add syllabus photo for ${p.name}`}
+                className="mb-2 ml-3 self-start active:opacity-60"
+              >
+                <Text className="text-xs font-bold" style={{ color: '#8B7CF6' }}>
+                  📄 Add syllabus for {p.name} · optional
+                </Text>
+              </Pressable>
+            </View>
           ))}
           {s.subjects.filter((x: SubjectPick) => x.removed).map((p: SubjectPick) => (
             <SubjToggle key={`rm-${p.name}`} pick={p} removed dispatch={dispatch} />

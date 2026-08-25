@@ -3,6 +3,7 @@ import { View, Text, Pressable, Modal, Pressable as RNPressable } from 'react-na
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useApp } from '../../src/store';
+import { toggleTopicId } from '../../src/lib/focus-session';
 import { tNumStrong } from '../../src/ui/typography';
 
 const PRESETS = [25, 50, 90] as const;
@@ -36,10 +37,12 @@ export default function FocusScreen() {
   const { topicId: topicParam } = useLocalSearchParams<{ topicId?: string }>();
 
   const [preset, setPreset] = useState<number>(25);
-  const [topicId, setTopicId] = useState<string | null>(null);
+  // c5 L6 (F9): multi-topic sessions — ordered selection, deep link pre-selects one
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [running, setRunning] = useState(false);
   const [left, setLeft] = useState(25 * 60);
-  const [ratingFor, setRatingFor] = useState<string | null>(null); // topic id awaiting post-session rating
+  // c5 L6: rating queue — each bound topic is rated sequentially after Finish
+  const [ratingQueue, setRatingQueue] = useState<string[]>([]);
   const [warn, setWarn] = useState<string | null>(null);           // deep-link target missing
   const [postRateNote, setPostRateNote] = useState<string | null>(null); // visible no-op feedback
   const elapsedRef = useRef(0);
@@ -51,7 +54,7 @@ export default function FocusScreen() {
     if (!paramTopicId) return;
     const t = topics.find(x => x.id === paramTopicId);
     if (t) {
-      setTopicId(paramTopicId);
+      setSelectedIds([paramTopicId]);
       setWarn(null);
     } else if (topics.length > 0) {
       setWarn(`Deep-linked topic "${paramTopicId}" not found — starting unbound. Pick a topic below.`);
@@ -80,18 +83,28 @@ export default function FocusScreen() {
   const pause = () => setRunning(false);
   const reset = () => { setRunning(false); setLeft(preset * 60); elapsedRef.current = 0; };
 
+  // c5 L6: primary = first selected (deep-link target keeps priority); minutes are
+  // attributed to ALL bound topics via the session entry's topicIds list.
+  const topicId = selectedIds[0] ?? null;
+  const picked = topics.find(t => t.id === topicId);
+
   const finish = () => {
     const minutes = Math.max(1, Math.round(elapsedRef.current / 60));
     setRunning(false);
-    finishFocus({ topicId, minutes });
+    finishFocus({
+      topicId,
+      minutes,
+      ...(selectedIds.length > 1 ? { topicIds: [...selectedIds] } : {}),
+    });
     reset();
-    // post-session confidence rating surfaces immediately (defect #14) — only when a topic is bound
-    if (topicId && minutes > 0) setRatingFor(topicId);
+    // post-session confidence rating surfaces immediately (defect #14) — one sheet
+    // per bound topic, sequential; skipped topics advance the queue without rating
+    if (selectedIds.length > 0 && minutes > 0) setRatingQueue([...selectedIds]);
   };
 
   const rate = (r: 1 | 2 | 3) => {
-    const tid = ratingFor;
-    setRatingFor(null);
+    const tid = ratingQueue[0];
+    setRatingQueue(q => q.slice(1)); // advance to the next bound topic
     void successHaptic();
     if (!tid) return;
     // same canonical path as subjects.tsx: plan revision first, ladder fallback otherwise
@@ -107,17 +120,14 @@ export default function FocusScreen() {
     }
   };
 
-  const picked = topics.find(t => t.id === topicId);
-
-  // chips show at most 8, but a bound/deep-linked topic is always kept visible
+  // chips show at most 8; every bound topic stays visible
   const visibleTopics = useMemo(() => {
     const base = topics.slice(0, 8);
-    if (topicId && !base.some(t => t.id === topicId)) {
-      const sel = topics.find(t => t.id === topicId);
-      if (sel) return [...base, sel];
-    }
-    return base;
-  }, [topics, topicId]);
+    const missing = selectedIds.filter(id => !base.some(t => t.id === id));
+    if (missing.length === 0) return base;
+    const extra = missing.map(id => topics.find(t => t.id === id)).filter((t): t is NonNullable<typeof t> => !!t);
+    return [...base, ...extra];
+  }, [topics, selectedIds]);
 
   const todayMin = sessions.reduce((a, s) => a + s.min, 0);
 
@@ -156,18 +166,22 @@ export default function FocusScreen() {
       )}
       <View className="flex-row flex-wrap gap-2">
         {topics.length === 0 && <Text className="text-sm text-dim">No topics yet — complete onboarding.</Text>}
-        {visibleTopics.map(t => (
-          <Pressable
-            key={t.id}
-            onPress={() => { setTopicId(t.id); setWarn(null); }}
-            className={`rounded-full border px-3 py-2 ${topicId === t.id ? 'border-accent' : 'border-line bg-surface'}`}
-            style={topicId === t.id ? { backgroundColor: 'rgba(139,124,246,0.16)' } : undefined}
-          >
-            <Text style={{ color: topicId === t.id ? '#C9BFFF' : '#E7EBF2' }} className="text-xs">
-              {t.subjectId} {t.name}
-            </Text>
-          </Pressable>
-        ))}
+        {visibleTopics.map(t => {
+          const on = selectedIds.includes(t.id);
+          return (
+            <Pressable
+              key={t.id}
+              onPress={() => { setSelectedIds(ids => toggleTopicId(ids, t.id)); setWarn(null); }}
+              className={`rounded-full border px-3 py-2 ${on ? 'border-accent' : 'border-line bg-surface'}`}
+              style={on ? { backgroundColor: 'rgba(139,124,246,0.16)' } : undefined}
+              accessibilityLabel={`${on ? 'Unbind' : 'Bind'} topic ${t.subjectId} ${t.name}`}
+            >
+              <Text style={{ color: on ? '#C9BFFF' : '#E7EBF2' }} className="text-xs">
+                {t.subjectId} {t.name}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       {/* timer */}
@@ -182,7 +196,13 @@ export default function FocusScreen() {
             style={{ width: `${elapsedFrac * 100}%`, backgroundColor: '#8B7CF6' }}
           />
         </View>
-        <Text className="mt-1 text-xs text-dim">{picked ? `${picked.subjectId} ${picked.name}` : 'no topic bound — session still logs'}</Text>
+        <Text className="mt-1 text-xs text-dim">
+          {selectedIds.length === 0
+            ? 'no topic bound — session still logs'
+            : selectedIds.length === 1 && picked
+              ? `${picked.subjectId} ${picked.name}`
+              : `${selectedIds.length} topics bound — minutes split evenly`}
+        </Text>
         <View className="mt-6 flex-row gap-3">
           {!running
             ? <Btn label={left < preset * 60 ? '▶ Resume' : '▶ Start'} onPress={start} primary />
@@ -195,16 +215,29 @@ export default function FocusScreen() {
         )}
       </View>
 
-      {/* post-session confidence sheet — only for bound sessions */}
-      <Modal visible={ratingFor !== null} transparent animationType="slide" onRequestClose={() => setRatingFor(null)}>
+      {/* post-session confidence sheet — one per bound topic, sequential (c5 L6) */}
+      <Modal visible={ratingQueue.length > 0} transparent animationType="slide" onRequestClose={() => setRatingQueue([])}>
         <View className="flex-1 justify-end bg-black/60">
           <View className="rounded-t-3xl border-t border-line bg-surface p-6 pb-10">
             {/* grab handle */}
             <View className="mb-4 h-1 w-9 self-center rounded-full bg-line" />
-            <Text className="text-center text-lg font-extrabold text-text">
-              How confident do you feel about{'\n'}{picked ? `${picked.subjectId} ${picked.name}` : 'this topic'}?
-            </Text>
-            <Text className="mt-1 text-center text-xs text-dim">drives your revision schedule</Text>
+            {(() => {
+              const current = topics.find(t => t.id === ratingQueue[0]);
+              return (
+                <>
+                  <Text className="text-center text-lg font-extrabold text-text">
+                    How confident do you feel about{'\n'}
+                    {current ? `${current.subjectId} ${current.name}` : 'this topic'}?
+                  </Text>
+                  {ratingQueue.length > 1 && (
+                    <Text className="mt-1 text-center text-xs text-dim">
+                      {ratingQueue.length} topics to rate · Skip moves to the next
+                    </Text>
+                  )}
+                </>
+              );
+            })()}
+            <Text className={`mt-1 text-center text-xs text-dim ${ratingQueue.length > 1 ? 'hidden' : ''}`}>drives your revision schedule</Text>
             <View className="mt-5 gap-2">
               {RATINGS.map(({ r, emoji, label, sub }) => (
                 <RNPressable
@@ -223,7 +256,7 @@ export default function FocusScreen() {
                 </RNPressable>
               ))}
             </View>
-            <Pressable onPress={() => setRatingFor(null)} className="mt-4 items-center py-2 active:opacity-60">
+            <Pressable onPress={() => setRatingQueue(q => q.slice(1))} className="mt-4 items-center py-2 active:opacity-60">
               <Text className="text-sm font-bold text-dim">Skip</Text>
             </Pressable>
           </View>

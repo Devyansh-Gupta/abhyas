@@ -21,7 +21,8 @@ export const DAILY_HOURS_MIN = 1;
 export const DAILY_HOURS_MAX = 12;
 export const DAILY_HOURS_DEFAULT = 2;
 
-export interface SessionLogEntry { day: number; min: number }
+/** c5 L6: multi-topic sessions attribute their minutes — topicIds lists every bound topic. */
+export interface SessionLogEntry { day: number; min: number; topicIds?: string[] }
 
 interface AppState {
   // core data
@@ -57,8 +58,10 @@ interface AppState {
    *  Returns false when nothing applied (unknown or graduated topic) — UI must surface it. */
   rateByTopic(topicId: string, rating: 1 | 2 | 3): boolean;
   logSession(topicId: string, minutes: number): void;
-  /** Focus-timer finish path: log minutes + optional confidence rating on any topic. */
-  finishFocus(opts: { topicId: string | null; minutes: number; rating?: 1 | 2 | 3 }): void;
+  /** Focus-timer finish path: log minutes + optional confidence rating on any topic.
+   *  c5 L6: `topicIds` (multi-topic session) is stored on the log entry so minutes
+   *  are attributable to each bound topic; single-topic calls omit it. */
+  finishFocus(opts: { topicId: string | null; minutes: number; rating?: 1 | 2 | 3; topicIds?: string[] }): void;
   addExam(exam: Exam): void;
   /** Exam Season capacity dial (#9): clamped to [0.5, 2]; applies at next plan build. */
   setExamSeasonDial(dial: number): void;
@@ -251,13 +254,15 @@ export const useApp = create<AppState>((set, get) => ({
     return true;
   },
 
-  finishFocus({ topicId, minutes, rating }) {
+  finishFocus({ topicId, minutes, rating, topicIds }) {
     const { topics, learningStyle } = get();
     // minutes > 0 → log a session + streak bump; rating-only calls (min 0)
     // apply the SRS move without polluting focus-minute totals
     const logged = minutes > 0;
     set({
-      sessions: logged ? [...get().sessions, { day: get().dayIndex, min: minutes }] : get().sessions,
+      sessions: logged
+        ? [...get().sessions, { day: get().dayIndex, min: minutes, ...(topicIds && topicIds.length > 1 ? { topicIds } : {}) }]
+        : get().sessions,
       streak: logged
         ? bumpToday(get().streak, {
             blocksDone: 0,
