@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { type Topic } from '@abhyas/engine';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useApp } from '../../src/store';
 import { tNum } from '../../src/ui/typography';
 
@@ -90,7 +91,18 @@ export default function SubjectsScreen() {
 
   return (
     <ScrollView className="flex-1 bg-bg px-5 pt-14">
-      <Text className="text-text text-2xl font-extrabold tracking-tight">Subjects</Text>
+      {/* P3 OCR import entry point — single button, nothing else touched */}
+      <View className='flex-row items-center justify-between'>
+        <Text className="text-text text-2xl font-extrabold tracking-tight">Subjects</Text>
+        <Pressable
+          onPress={() => router.push('/import')}
+          accessibilityLabel='Import syllabus'
+          className='flex-row items-center gap-1 rounded-full border border-line bg-surface px-3.5 py-2'
+        >
+          <Ionicons name='cloud-download-outline' size={14} color='#8B7CF6' />
+          <Text className='text-xs font-bold' style={{ color: '#8B7CF6' }}>Import</Text>
+        </Pressable>
+      </View>
       <Text className="mt-1 text-[13px] text-dim">
         {topics.length} topics · rate confidence to move the mastery ladder
       </Text>
