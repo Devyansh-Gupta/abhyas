@@ -2,8 +2,9 @@
  * Onboarding wizard (issue #4) — UI is a thin renderer over engine screenFor().
  * All gates/sequence live in the engine (golden-tested); this file only draws.
  */
-import { useState, useReducer } from 'react';
-import { View, Text, Pressable, ScrollView, TextInput } from 'react-native';
+import { useState, useReducer, useEffect, useRef } from 'react';
+import { View, Text, Pressable, ScrollView, TextInput, Animated } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import {
   initOnboarding, reduce, canAdvance, stepCount, screenFor, recalibrate,
@@ -37,6 +38,14 @@ export default function Onboarding() {
   const [s, dispatch] = useReducer(reduce, undefined, initOnboarding) as [OnboardingState, React.Dispatch<any>];
   const [customName, setCustomName] = useState('');
   const setState = useApp.setState;
+
+  // cycle-3 lane B: step-transition motion — fade + slide-in on every step change
+  const enter = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    enter.setValue(0);
+    Animated.timing(enter, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+  }, [s.step, enter]);
+  const enterX = enter.interpolate({ inputRange: [0, 1], outputRange: [24, 0] });
 
   const total = stepCount(s);
   const role: ScreenRole = screenFor(s);
@@ -101,6 +110,9 @@ export default function Onboarding() {
       <Text className="text-dim text-xs font-bold tracking-widest">STEP {Math.min(s.step + 1, total)} / {total}</Text>
       <Bar n={s.step} total={total} />
 
+      {/* cycle-3 lane B: one motion wrapper for all step content */}
+      <Animated.View style={{ opacity: enter, transform: [{ translateX: enterX }] }}>
+
       {/* persona */}
       {role === 'persona' && (
         <>
@@ -115,8 +127,8 @@ export default function Onboarding() {
       {role === 'board' && (
         <>
           <H>Your board & class</H>
-          <Row>{BOARDS.map(b => <Chip key={b} label={b} on={s.board === b} onPress={() => dispatch({ t: 'setBoard', board: b })} />)}</Row>
-          <Row>{CLASSES.map(c => <Chip key={c} label={`Class ${c}`} on={s.cls === c} onPress={() => dispatch({ t: 'setClass', cls: c })} />)}</Row>
+          <Row>{BOARDS.map(b => <SelectableChip key={b} label={b} on={s.board === b} onPress={() => dispatch({ t: 'setBoard', board: b })} />)}</Row>
+          <Row>{CLASSES.map(c => <SelectableChip key={c} label={`Class ${c}`} on={s.cls === c} onPress={() => dispatch({ t: 'setClass', cls: c })} />)}</Row>
         </>
       )}
 
@@ -124,7 +136,7 @@ export default function Onboarding() {
       {role === 'stream' && (
         <>
           <H>Your stream</H>
-          <Row>{STREAMS.map(st => <Chip key={st} label={st} on={s.stream === st} onPress={() => dispatch({ t: 'setStream', s: st })} />)}</Row>
+          <Row>{STREAMS.map(st => <SelectableChip key={st} label={st} on={s.stream === st} onPress={() => dispatch({ t: 'setStream', s: st })} />)}</Row>
         </>
       )}
 
@@ -143,7 +155,7 @@ export default function Onboarding() {
           <Row>
             {ELECTIVES.map(p => {
               const inList = s.subjects.some((x: SubjectPick) => x.emoji === p.emoji && !(x as SubjectPick).removed);
-              return <Chip key={p.name} label={`${p.emoji} ${p.name}`} on={inList} onPress={() => dispatch({ t: 'toggleSubject', pick: p })} />;
+              return <SelectableChip key={p.name} label={`${p.emoji} ${p.name}`} on={inList} onPress={() => dispatch({ t: 'toggleSubject', pick: p })} />;
             })}
           </Row>
           <Text className="mb-1 mt-4 text-[13px] font-extrabold uppercase tracking-wider text-text">Subject not listed?</Text>
@@ -188,7 +200,7 @@ export default function Onboarding() {
               <Text className="mb-2 font-bold text-text">{sub.emoji} {sub.name}</Text>
               <Row>
                 {COVERAGE_CHIPS.map(c => (
-                  <Chip
+                  <SelectableChip
                     key={c.label}
                     small
                     label={c.label}
@@ -245,12 +257,18 @@ export default function Onboarding() {
       {/* learning style dial (E2) */}
       {role === 'style' && (
         <>
+          {/* cycle-3 lane B: final-step icon — same treatment as Today's empty state */}
+          <View className="mb-5 h-24 w-24 items-center justify-center self-center rounded-3xl bg-surface-2">
+            <Ionicons name='school' size={48} color='#8B7CF6' />
+          </View>
           <H>How well do you remember what you study?</H>
           <RatePick label='😵‍💫 I forget fast — remind me sooner' v='fast_forget' cur={s.learningStyle} set={v => dispatch({ t: 'setStyle', style: v })} />
           <RatePick label='🚶 About average' v='average' cur={s.learningStyle} set={v => dispatch({ t: 'setStyle', style: v })} />
           <RatePick label='💪 I remember well — less repetition' v='strong_memory' cur={s.learningStyle} set={v => dispatch({ t: 'setStyle', style: v })} />
         </>
       )}
+
+      </Animated.View>
 
       {/* NAV */}
       <View className="mb-16 mt-8 flex-row items-center justify-between">
@@ -278,22 +296,56 @@ function Bar({ n, total }: { n: number; total: number }) {
   return (
     <View className="mb-6 mt-2 h-1 flex-row gap-1">
       {Array.from({ length: total }).map((_, i) => (
-        <View key={i} className={`h-1 flex-1 rounded-full ${i <= n ? 'bg-accent' : 'bg-surface-2'}`} />
+        <BarSegment key={i} done={i < n} current={i === n} />
       ))}
     </View>
   );
 }
+
+/* cycle-3 lane B: completed = accent, current = pulsing accent, future = line */
+function BarSegment({ done, current }: { done: boolean; current: boolean }) {
+  const opacity = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (!current) {
+      opacity.setValue(1);
+      return;
+    }
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.45, duration: 500, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [current, opacity]);
+  if (done) return <View className="h-1 flex-1 rounded-full bg-accent" />;
+  if (current)
+    return <Animated.View style={{ opacity }} className="h-1 flex-1 rounded-full bg-accent" />;
+  return <View className="h-1 flex-1 rounded-full bg-surface-2" />;
+}
 function Row({ children }: { children: React.ReactNode }) {
   return <View className="mb-4 flex-row flex-wrap gap-2">{children}</View>;
 }
-function Chip({ label, on, onPress, small }: { label: string; on: boolean; onPress: () => void; small?: boolean }) {
+/* cycle-3 lane B: shared selectable chip with a spring scale pulse on tap */
+function SelectableChip({ label, on, onPress, small }: { label: string; on: boolean; onPress: () => void; small?: boolean }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.spring(scale, { toValue: 1.05, speed: 40, bounciness: 4, useNativeDriver: true }),
+      Animated.spring(scale, { toValue: 1, speed: 28, bounciness: 6, useNativeDriver: true }),
+    ]).start();
+    onPress();
+  };
   return (
-    <Pressable
-      onPress={onPress}
-      className={`rounded-full border ${small ? 'px-3 py-1.5' : 'px-4 py-2'} ${on ? 'border-accent bg-accent/20' : 'border-line bg-surface'}`}
-    >
-      <Text style={{ color: on ? '#C9BFFF' : '#E7EBF2' }} className={`${small ? 'text-[11px]' : 'text-xs'} font-bold`}>{label}</Text>
-    </Pressable>
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        onPress={handlePress}
+        className={`rounded-full border ${small ? 'px-3 py-1.5' : 'px-4 py-2'} ${on ? 'border-accent bg-accent/20' : 'border-line bg-surface'}`}
+      >
+        <Text style={{ color: on ? '#C9BFFF' : '#E7EBF2' }} className={`${small ? 'text-[11px]' : 'text-xs'} font-bold`}>{label}</Text>
+      </Pressable>
+    </Animated.View>
   );
 }
 function Card({ children, selected }: { children: React.ReactNode; selected?: boolean }) {
