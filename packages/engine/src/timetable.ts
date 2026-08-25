@@ -12,7 +12,7 @@
  *    real slots for that weekday. Pure ⇒ same-frame re-solve on any edit.
  */
 import { type Topic, type Exam, type PlanItem, type Slot } from './types';
-import { freeSlots, slotMinutes, buildDayPlan } from './planner';
+import { freeSlots, slotMinutes, buildDayPlan, STUDY_WINDOW } from './planner';
 
 /** Mirrors packages/db/src/schema.ts classSessions shape. */
 export interface ClassSession {
@@ -46,13 +46,31 @@ export function busyPeriods(sessions: readonly ClassSession[], weekday: number):
 }
 
 /** Free study slots for a weekday = full window minus that day's classes. Pure. */
-export function slotsForWeekday(sessions: readonly ClassSession[], weekday: number): Slot[] {
-  return freeSlots(busyPeriods(sessions, weekday));
+export function slotsForWeekday(
+  sessions: readonly ClassSession[],
+  weekday: number,
+  opts: { window?: { start: number; end: number } } = {},
+): Slot[] {
+  return freeSlots(busyPeriods(sessions, weekday), opts.window);
+}
+
+/**
+ * Study window trimmed to the user's daily-hours preference (c5 F6): keeps the
+ * evening END fixed (22:30) and starts later so total capacity ≈ dailyHours·60.
+ * Clamped to 1–12h; >6.5h falls back to the full window (no midnight spillover). Pure.
+ */
+export function studyWindowFor(dailyHours: number): { start: number; end: number } {
+  const span = Math.round(Math.min(12, Math.max(1, dailyHours)) * 60);
+  return { start: Math.max(STUDY_WINDOW.start, STUDY_WINDOW.end - span), end: STUDY_WINDOW.end };
 }
 
 /** Free study minutes available on a weekday after classes. Pure. */
-export function capacityMinutes(sessions: readonly ClassSession[], weekday: number): number {
-  return slotMinutes(slotsForWeekday(sessions, weekday));
+export function capacityMinutes(
+  sessions: readonly ClassSession[],
+  weekday: number,
+  opts: { window?: { start: number; end: number } } = {},
+): number {
+  return slotMinutes(slotsForWeekday(sessions, weekday, opts));
 }
 
 /** Fields a move may change: weekday (0..6) and/or start/end minutes-of-day. */
@@ -111,6 +129,8 @@ export interface BuildWeekPlanOpts {
   /** days in the strip (default 7) */
   days?: number;
   maxItemsPerDay?: number;
+  /** c5 F6: trim each day's capacity to this many hours (optional; default = full window). */
+  dailyHours?: number;
 }
 
 /**
@@ -126,9 +146,10 @@ export function buildWeekPlan(
   opts: BuildWeekPlanOpts = {},
 ): PlanItem[][] {
   const days = opts.days ?? 7;
+  const win = opts.dailyHours !== undefined ? studyWindowFor(opts.dailyHours) : undefined;
   return Array.from({ length: days }, (_, d) =>
     buildDayPlan(topics, exams, d, {
-      slots: slotsForWeekday(sessions, weekdayFor(d)),
+      slots: slotsForWeekday(sessions, weekdayFor(d), win ? { window: win } : {}),
       ...(opts.maxItemsPerDay !== undefined ? { maxItems: opts.maxItemsPerDay } : {}),
     })
   );

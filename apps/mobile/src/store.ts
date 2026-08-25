@@ -8,11 +8,17 @@ import {
   initialStreak, bumpToday, rollover, type StreakState, type DayActivity,
   applyExamSeason, dateForDayIndex, clampCapacity,
   type ClassSession, type MoveDelta,
-  movePeriod, cancelPeriod, slotsForWeekday, weekdayFor,
+  movePeriod, cancelPeriod, slotsForWeekday, weekdayFor, studyWindowFor,
   createGuardianInvite, type GuardianInvite,
 } from '@abhyas/engine';
 import { create } from 'zustand';
-import { type PersistenceAdapter, type Snapshot, type SubjectMeta } from './persistence';
+import { type PersistenceAdapter, type Snapshot, type SubjectMeta, type TimeFormat } from './persistence';
+
+export type { TimeFormat };
+/** c5 F6: daily-hours knob bounds. */
+export const DAILY_HOURS_MIN = 1;
+export const DAILY_HOURS_MAX = 12;
+export const DAILY_HOURS_DEFAULT = 2;
 
 export interface SessionLogEntry { day: number; min: number }
 
@@ -34,6 +40,10 @@ interface AppState {
   pendingGuardianInvites: GuardianInvite[];
   /** Cycle-4 lane A: subject display identity (name/color) by subjectId. */
   subjectMeta: Record<string, SubjectMeta>;
+  /** c5 F6: daily study goal in hours (1–12); trims planner capacity. */
+  dailyHours: number;
+  /** c5 F7: user-facing clock format for plan/today time renders (timer stays mm:ss). */
+  timeFormat: TimeFormat;
   /** c5 L1b: message of the last failed persistence save (degraded SQLite), or null. */
   lastSaveError: string | null;
 
@@ -58,6 +68,10 @@ interface AppState {
   advanceDay(): { carried: number; droppedRevisions: number; droppedForward: number; broke: boolean };
   /** P2 parent link: mint a shareable invite (signed code + deep link), persisted. */
   createGuardianInvite(): GuardianInvite;
+  /** c5 F6: set the daily study goal (clamped 1–12h). Re-solves the derived plan same frame. */
+  setDailyHours(hours: number): void;
+  /** c5 F7: switch user-facing clock rendering between 12h and 24h. */
+  setTimeFormat(fmt: TimeFormat): void;
 }
 
 const todayActivity = (sessions: SessionLogEntry[], plan: PlanItem[], doneUids: Set<string>): DayActivity => ({
@@ -76,11 +90,14 @@ const resolveCurrentPlan = (
   classSessions: ClassSession[],
   plan: PlanItem[],
   dayIndex: number,
+  dailyHours: number,
 ): PlanItem[] => {
   const carried = plan.filter(p => p.carried);
   const rest = buildDayPlan(topics, exams, 0, {
     excludeTopicIds: carried.map(c => c.topic.id),
-    slots: slotsForWeekday(classSessions, weekdayFor(dayIndex)),
+    slots: slotsForWeekday(classSessions, weekdayFor(dayIndex), {
+      window: studyWindowFor(dailyHours),
+    }),
   });
   return [...carried, ...rest];
 };
@@ -105,6 +122,8 @@ const toSnapshot = (s: AppState): Snapshot => ({
   pendingGuardianInvites: s.pendingGuardianInvites,
   classSessions: s.classSessions,
   subjectMeta: s.subjectMeta,
+  dailyHours: s.dailyHours,
+  timeFormat: s.timeFormat,
 });
 
 /** Fire-and-forget save of the current state; no-op without a configured adapter. */
@@ -133,7 +152,8 @@ export async function hydrate(): Promise<boolean> {
     snap.exams,
     snap.classSessions ?? [],
     [],
-    snap.dayIndex
+    snap.dayIndex,
+    snap.dailyHours ?? DAILY_HOURS_DEFAULT,
   );
   useApp.setState({
     topics: snap.topics,
@@ -147,6 +167,8 @@ export async function hydrate(): Promise<boolean> {
     classSessions: snap.classSessions ?? [],
     pendingGuardianInvites: snap.pendingGuardianInvites ?? [],
     subjectMeta: snap.subjectMeta ?? {},
+    dailyHours: snap.dailyHours ?? DAILY_HOURS_DEFAULT,
+    timeFormat: snap.timeFormat ?? '24',
     plan,
   });
   return true;
@@ -165,6 +187,8 @@ export const useApp = create<AppState>((set, get) => ({
   examSeasonDial: 1,
   pendingGuardianInvites: [],
   subjectMeta: {},
+  dailyHours: DAILY_HOURS_DEFAULT,
+  timeFormat: '24',
   lastSaveError: null,
 
   checkItem(uid) {
@@ -256,7 +280,7 @@ export const useApp = create<AppState>((set, get) => ({
       : [...list, session];
     set({
       classSessions: next,
-      plan: resolveCurrentPlan(topics, exams, next, get().plan, get().dayIndex),
+      plan: resolveCurrentPlan(topics, exams, next, get().plan, get().dayIndex, get().dailyHours),
     });
     persist();
   },
@@ -267,7 +291,7 @@ export const useApp = create<AppState>((set, get) => ({
     const { topics, exams } = get();
     set({
       classSessions: r.sessions,
-      plan: resolveCurrentPlan(topics, exams, r.sessions, get().plan, get().dayIndex),
+      plan: resolveCurrentPlan(topics, exams, r.sessions, get().plan, get().dayIndex, get().dailyHours),
     });
     persist();
     return true;
@@ -278,7 +302,7 @@ export const useApp = create<AppState>((set, get) => ({
     const next = cancelPeriod(get().classSessions, id);
     set({
       classSessions: next,
-      plan: resolveCurrentPlan(topics, exams, next, get().plan, get().dayIndex),
+      plan: resolveCurrentPlan(topics, exams, next, get().plan, get().dayIndex, get().dailyHours),
     });
     persist();
   },
@@ -290,13 +314,15 @@ export const useApp = create<AppState>((set, get) => ({
     const r = rollover(streak, activity);
 
     // rebuild tomorrow's plan from updated topics (SRS already rescheduled by rateTopic)
-    const { topics, exams, examSeasonDial } = get();
+    const { topics, exams, examSeasonDial, dailyHours, classSessions } = get();
     const carriedNames = new Set(carry.carried.map(c => c.topic.id));
     // #9 Exam Season: shift weights toward exam subjects; gap days get boosted capacity
     const season = applyExamSeason(topics, exams, dateForDayIndex(get().dayIndex + 1), examSeasonDial);
     const tomorrowPlan = buildDayPlan(season.topics, exams, 1, {
       excludeTopicIds: [...carriedNames],
-      slots: slotsForWeekday(get().classSessions, weekdayFor(get().dayIndex + 1)),
+      slots: slotsForWeekday(classSessions, weekdayFor(get().dayIndex + 1), {
+        window: studyWindowFor(dailyHours),
+      }),
     });
 
     set({
@@ -325,5 +351,21 @@ export const useApp = create<AppState>((set, get) => ({
     set({ pendingGuardianInvites: [...get().pendingGuardianInvites, invite] });
     persist();
     return invite;
+  },
+
+  setDailyHours(hours) {
+    const clamped = Math.min(DAILY_HOURS_MAX, Math.max(DAILY_HOURS_MIN, Math.round(hours)));
+    const { topics, exams } = get();
+    set({
+      dailyHours: clamped,
+      // same-frame re-solve so the plan reflects the new capacity immediately
+      plan: resolveCurrentPlan(topics, exams, get().classSessions, get().plan, get().dayIndex, clamped),
+    });
+    persist();
+  },
+
+  setTimeFormat(fmt) {
+    set({ timeFormat: fmt === '12' ? '12' : '24' });
+    persist();
   },
 }));

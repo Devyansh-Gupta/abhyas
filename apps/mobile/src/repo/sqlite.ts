@@ -82,6 +82,8 @@ const KV_KEYS = {
   streak: 'streak',
   doneUids: 'doneUids',
   subjectMeta: 'subjectMeta',
+  dailyHours: 'dailyHours',
+  timeFormat: 'timeFormat',
 } as const;
 
 // ─── Pure mappers ───────────────────────────────────────────────────────────────
@@ -134,6 +136,14 @@ export function toRows(s: Snapshot): RawState {
     // Only persisted when present — snapshots without it round-trip without it.
     ...(s.subjectMeta
       ? [{ key: KV_KEYS.subjectMeta, value: JSON.stringify(s.subjectMeta) }]
+      : []),
+    // c5 F6/F7 settings preferences — written only when present, so pre-c5
+    // snapshots round-trip without them (same contract as subjectMeta).
+    ...(s.dailyHours !== undefined
+      ? [{ key: KV_KEYS.dailyHours, value: String(s.dailyHours) }]
+      : []),
+    ...(s.timeFormat !== undefined
+      ? [{ key: KV_KEYS.timeFormat, value: s.timeFormat }]
       : []),
   ];
 
@@ -192,6 +202,14 @@ export function fromRows(raw: RawState): Snapshot | null {
   const metaRaw = kv.get(KV_KEYS.subjectMeta);
   if (metaRaw !== undefined) subjectMeta = JSON.parse(metaRaw) as NonNullable<Snapshot['subjectMeta']>;
 
+  // c5 F6/F7: optional settings prefs — absent on pre-c5 kv storage → defaults.
+  const dailyHoursRaw = kv.get(KV_KEYS.dailyHours);
+  const timeFormatRaw = kv.get(KV_KEYS.timeFormat);
+  const prefs = {
+    ...(dailyHoursRaw !== undefined ? { dailyHours: Number(dailyHoursRaw) } : {}),
+    ...(timeFormatRaw !== undefined ? { timeFormat: timeFormatRaw as Snapshot['timeFormat'] } : {}),
+  };
+
   const base = {
     topics,
     exams,
@@ -203,7 +221,7 @@ export function fromRows(raw: RawState): Snapshot | null {
   };
   // subjectMeta stays ABSENT (not {}) when never saved — keeps round-trip
   // deep-equality with snapshots from before this field existed.
-  return metaRaw !== undefined ? { ...base, subjectMeta } : base;
+  return { ...base, ...prefs, ...(metaRaw !== undefined ? { subjectMeta } : {}) };
 }
 
 // ─── Adapter ─────────────────────────────────────────────────────────────────────

@@ -27,7 +27,14 @@ export interface Snapshot {
   pendingGuardianInvites?: GuardianInvite[];
   /** Cycle-4 lane A: subject display names/colors (optional for older snapshots). */
   subjectMeta?: Record<string, SubjectMeta>;
+  /** c5 F6: daily study goal in hours (optional for pre-c5 snapshots). */
+  dailyHours?: number;
+  /** c5 F7: user-facing clock format (optional for pre-c5 snapshots). */
+  timeFormat?: TimeFormat;
 }
+
+/** c5 F7: clock rendering preference — defined here so store + UI share the type. */
+export type TimeFormat = '12' | '24';
 
 /** Cycle-4 lane A: display identity for a subject id (v1 ids are emoji keys). */
 export interface SubjectMeta {

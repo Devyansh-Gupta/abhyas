@@ -3,19 +3,17 @@ import { View, Text, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   type ClassSession,
-  buildWeekPlan, capacityMinutes, slotsForWeekday, busyPeriods,
+  buildWeekPlan, capacityMinutes, slotsForWeekday, busyPeriods, studyWindowFor,
   DAY_NAMES, DAY_SHORT, WEEKDAY_TODAY, weekdayFor,
 } from '@abhyas/engine';
 import { useApp } from '../../src/store';
+import { fmtClock } from '../../src/ui/time';
 import { tNum } from '../../src/ui/typography';
 
 /** Prototype calendar anchor: Thu 2026-08-21 (engine's WEEKDAY_TODAY). */
 const WEEK_ANCHOR = new Date('2026-08-21T00:00:00Z');
 const ACCENT = '#8B7CF6';
 const RED = '#F87171';
-
-const fmt = (m: number) =>
-  `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
 const hrs = (min: number) => `${Math.floor(min / 60)}h${min % 60 ? `${min % 60}m` : ''}`;
 
@@ -26,6 +24,9 @@ export default function PlanScreen() {
   const setClassSession = useApp(s => s.setClassSession);
   const moveClassPeriod = useApp(s => s.moveClassPeriod);
   const cancelClassPeriod = useApp(s => s.cancelClassPeriod);
+  // c5 F6/F7: capacity knob + clock format preference
+  const dailyHours = useApp(s => s.dailyHours);
+  const timeFormat = useApp(s => s.timeFormat);
 
   // selected day of the visible week strip (0..6 = anchor + i)
   const [selDay, setSelDay] = useState(0);
@@ -36,8 +37,8 @@ export default function PlanScreen() {
   // SAME-FRAME RE-SOLVE: pure derivation off store state — any timetable edit
   // (set/move/cancel) re-renders this memo synchronously, no reload, no effect.
   const weekPlan = useMemo(
-    () => buildWeekPlan(topics, exams, classSessions),
-    [topics, exams, classSessions],
+    () => buildWeekPlan(topics, exams, classSessions, { dailyHours }),
+    [topics, exams, classSessions, dailyHours],
   );
 
   const dayPeriods = useMemo(
@@ -48,8 +49,8 @@ export default function PlanScreen() {
     [classSessions, weekday],
   );
   const dayBlocks = weekPlan[selDay] ?? [];
-  const free = capacityMinutes(classSessions, weekday);
-  const slotCount = slotsForWeekday(classSessions, weekday).length;
+  const free = capacityMinutes(classSessions, weekday, { window: studyWindowFor(dailyHours) });
+  const slotCount = slotsForWeekday(classSessions, weekday, { window: studyWindowFor(dailyHours) }).length;
   const busy = busyPeriods(classSessions, weekday);
 
   const addClass = () => {
@@ -117,7 +118,7 @@ export default function PlanScreen() {
             </View>
             <View className="ml-3 flex-1">
               <Text className="font-bold" style={{ color: '#E7EBF2', ...tNum }}>
-                {fmt(p.startMin)}–{fmt(p.endMin)}
+                {fmtClock(p.startMin, timeFormat)}–{fmtClock(p.endMin, timeFormat)}
               </Text>
               <Text className="text-xs text-dim">class period{p.room ? ` · ${p.room}` : ''}</Text>
             </View>
@@ -170,7 +171,7 @@ export default function PlanScreen() {
         <View key={item.uid} className="mb-2.5 rounded-2xl border border-line bg-surface px-4 py-3">
           <View className="flex-row items-center">
             <Text className="mr-3 text-xs font-bold" style={{ color: item.kind === 'rev' ? RED : ACCENT, ...tNum }}>
-              {item.startMin == null ? 'anytime' : fmt(item.startMin)}
+              {item.startMin == null ? 'anytime' : fmtClock(item.startMin, timeFormat)}
             </Text>
             <Text className="flex-1 font-semibold" style={{ color: '#E7EBF2' }}>
               {item.topic.name} — {item.kind === 'rev' ? 'revise' : 'focus'} · {item.durationMin}m

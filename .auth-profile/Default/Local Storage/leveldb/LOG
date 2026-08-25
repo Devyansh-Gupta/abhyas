@@ -1,0 +1,8 @@
+2026/08/24-10:09:45.391 286c Creating DB C:\Users\Admin\Documents\Projects\StudySync\.auth-profile\Default\Local Storage\leveldb since it was missing.
+2026/08/24-10:09:45.401 286c Reusing MANIFEST C:\Users\Admin\Documents\Projects\StudySync\.auth-profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/08/24-10:19:54.683 45ec Level-0 table #5: started
+2026/08/24-10:19:54.687 45ec Level-0 table #5: 34256 bytes OK
+2026/08/24-10:19:54.688 45ec Delete type=0 #3
+2026/08/24-10:32:56.770 45ec Level-0 table #7: started
+2026/08/24-10:32:56.773 45ec Level-0 table #7: 35849 bytes OK
+2026/08/24-10:32:56.774 45ec Delete type=0 #4

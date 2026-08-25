@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { weekdayFor } from '@abhyas/engine';
 import { useApp } from '../../src/store';
+import { fmtClock } from '../../src/ui/time';
 import { tNum, tNumStrong } from '../../src/ui/typography';
 
 /* Cycle-1 L1+L3 polish (docs/ux-loop-cycle1.md): live date, next-up hero card,
@@ -252,6 +253,8 @@ function PlanCard({ uid, hero }: { uid: string; hero: boolean }) {
   const item = useApp(s => s.plan.find(p => p.uid === uid));
   const done = useApp(s => s.doneUids.has(uid));
   const checkItem = useApp(s => s.checkItem);
+  // c5 F7: clock format preference drives the block time range
+  const timeFormat = useApp(s => s.timeFormat);
   // cycle-3 lane A: spring pop on the check circle when the card flips to done.
   const checkScale = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -269,7 +272,7 @@ function PlanCard({ uid, hero }: { uid: string; hero: boolean }) {
 
   const time = item.startMin == null
     ? 'anytime'
-    : `${fmt(item.startMin)}–${fmt(item.startMin + item.durationMin)}`;
+    : `${fmtClock(item.startMin, timeFormat)}–${fmtClock(item.startMin + item.durationMin, timeFormat)}`;
   const tagColor = item.carried ? '#FBBF24' : item.kind === 'rev' ? '#F87171' : '#8B7CF6';
 
   const onCheck = () => {
@@ -378,5 +381,3 @@ function ProgressRing({ pct }: { pct: number }) {
     </View>
   );
 }
-
-const fmt = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;

@@ -61,8 +61,20 @@ export default function ProgressScreen() {
 
   return (
     <ScrollView className="flex-1 bg-bg px-5 pt-14">
-      <Text className="text-text text-2xl font-extrabold tracking-tight">Progress</Text>
-      <Text className="mt-1 text-[13px] text-dim">live from your session log &amp; mastery ladder</Text>
+      <View className="flex-row items-start justify-between">
+        <View>
+          <Text className="text-text text-2xl font-extrabold tracking-tight">Progress</Text>
+          <Text className="mt-1 text-[13px] text-dim">live from your session log &amp; mastery ladder</Text>
+        </View>
+        {/* c5 F7: Settings entry point */}
+        <Pressable
+          accessibilityLabel="Settings"
+          onPress={() => router.push('/settings')}
+          className='h-10 w-10 items-center justify-center rounded-full border border-line bg-surface active:bg-accent/30'
+        >
+          <Ionicons name='settings-outline' size={20} color='#8B94A3' />
+        </Pressable>
+      </View>
 
       {/* streak + focus stats — Ionicons swap (#10) */}
       <View className="mt-6 flex-row gap-3">
