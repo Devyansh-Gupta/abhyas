@@ -13,4 +13,5 @@ export * from './sync/oplog';
 export * from './sync/backfill';
 export * from './guardian';
 export * from './import/parse';
+export * from './import/exams';
 
