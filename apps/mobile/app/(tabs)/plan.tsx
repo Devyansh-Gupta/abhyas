@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import {
   type ClassSession,
   buildWeekPlan, capacityMinutes, slotsForWeekday, busyPeriods, studyWindowFor,
@@ -31,6 +32,7 @@ export default function PlanScreen() {
   // selected day of the visible week strip (0..6 = anchor + i)
   const [selDay, setSelDay] = useState(0);
   const [warn, setWarn] = useState<string | null>(null);
+  const router = useRouter();
 
   const weekday = weekdayFor(selDay);
 
@@ -156,6 +158,23 @@ export default function PlanScreen() {
         <Ionicons name="add" size={16} color={ACCENT} />
         <Text className="text-sm font-semibold" style={{ color: ACCENT }}>Add class</Text>
       </Pressable>
+
+      {/* --- exams (c5 L4): count + photo-import entry point --- */}
+      <View className="mt-6 flex-row items-baseline justify-between">
+        <Text className="text-[13px] font-extrabold uppercase tracking-wider text-text">
+          Upcoming exams{exams.length > 0 ? ` · ${exams.length}` : ''}
+        </Text>
+        <Pressable
+          onPress={() => router.push('/exam-import?return=plan')}
+          accessibilityLabel="Import exams from a photo"
+          className="px-1 py-1 active:opacity-60"
+        >
+          <Text className="text-xs font-bold" style={{ color: ACCENT }}>Import</Text>
+        </Pressable>
+      </View>
+      {exams.length === 0 && (
+        <Text className="mt-1 text-xs text-dim">None yet — photograph a datesheet to add them.</Text>
+      )}
 
       {/* --- derived plan for the selected day --- */}
       <Text className="mb-2 mt-6 text-[13px] font-extrabold uppercase tracking-wider text-text">

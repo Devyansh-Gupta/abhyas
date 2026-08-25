@@ -278,6 +278,15 @@ export default function Onboarding() {
           <H>Upcoming exams?</H>
           <Text className="-mt-3 mb-4 text-xs text-dim">Just a name + month is enough — exact dates when the datesheet lands.</Text>
           <Card><Text className="text-text">📝 Add later from the Plan tab — nothing blocks you here.</Text></Card>
+          {/* c5 L4: photo import entry point — exams land in the store via
+              addExam and survive wizard finish (finish() keeps store exams). */}
+          <Pressable
+            onPress={() => router.push('/exam-import?return=onboarding')}
+            accessibilityLabel="Import exams from a photo"
+            className="mt-2 items-center rounded-2xl border border-line bg-surface py-3.5"
+          >
+            <Text className="text-sm font-bold text-dim">📷 Import from photo</Text>
+          </Pressable>
         </>
       )}
 

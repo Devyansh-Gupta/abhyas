@@ -31,6 +31,10 @@ const WEEKDAY_TAIL = /\s*\((?:mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)[a-z]*
 /** 3 Sep 2026 / 3rd September / Sep 3 */
 const MONTH_DATE =
   /\b(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,9})(?:\s*,?\s*(\d{2,4}))?\b|\b([A-Za-z]{3,9})\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*,?\s*(\d{2,4}))?\b/;
+// global form: a single non-global pass can land an INVALID alternative-1
+// match ("Sep 7 Computer" → "7 Computer", "computer" ≠ month) and kill the
+// whole attempt before alternative 2 sees "Sep 7" — so iterate candidates.
+const MONTH_DATE_G = new RegExp(MONTH_DATE.source, 'g');
 
 /** FN / AN / morning / afternoon / Session I|II / 1|2 / "2.10 PM - 3.10 PM" */
 const SESSION_PATTERNS: Array<{ re: RegExp; label: (m: RegExpMatchArray) => string }> = [
@@ -64,35 +68,49 @@ function isoFrom(day: number, month: number, year?: number): string {
   return `${y}-${two(month)}-${two(day)}`;
 }
 
-function matchDate(line: string): string | undefined {
+function matchDate(line: string): { iso: string; matched: string } | undefined {
   const num = line.match(NUM_DATE);
   if (num) {
     const day = parseInt(num[1] ?? '', 10);
     const month = parseInt(num[2] ?? '', 10);
     if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
-      return isoFrom(day, month, num[3] ? parseInt(num[3], 10) : undefined);
+      return { iso: isoFrom(day, month, num[3] ? parseInt(num[3], 10) : undefined), matched: num[0] };
     }
   }
-  const mo = line.match(MONTH_DATE);
+  const mo = firstValidMonthMatch(line);
   if (mo) {
     // group layout: [full, day, monName, yr] | [full, monName, day, yr] (2nd alt)
-    const dayRaw = mo[1] ?? mo[4];
-    const monRaw = (mo[2] ?? mo[5] ?? '').toLowerCase().slice(0, 5);
+    const dayRaw = mo[1] ?? mo[5];
+    const monRaw = (mo[2] ?? mo[4] ?? '').toLowerCase().slice(0, 5);
     const day = dayRaw ? parseInt(dayRaw, 10) : NaN;
     const month = MONTHS[monRaw.slice(0, 3)] ?? MONTHS[monRaw];
     const yrRaw = mo[3] ?? mo[6];
     if (month !== undefined && !Number.isNaN(day) && day >= 1 && day <= 31) {
-      return isoFrom(day, month, yrRaw ? parseInt(yrRaw, 10) : undefined);
+      return { iso: isoFrom(day, month, yrRaw ? parseInt(yrRaw, 10) : undefined), matched: mo[0] };
     }
   }
   return undefined;
 }
 
-/** Subject display name: drop trailing "(25MCAIAI301)" codes, weekday tails, bullets. */
+/** First MONTH_DATE candidate that actually resolves to a known month+day. */
+function firstValidMonthMatch(line: string): RegExpMatchArray | undefined {
+  MONTH_DATE_G.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = MONTH_DATE_G.exec(line)) !== null) {
+    const monRaw = ((m[2] ?? m[4]) ?? '').toLowerCase().slice(0, 3);
+    const day = parseInt(m[1] ?? m[5] ?? '', 10);
+    if (MONTHS[monRaw] !== undefined && !Number.isNaN(day)) return m as RegExpMatchArray;
+  }
+  return undefined;
+}
+
+/** Subject display name: drop weekday parens (anywhere), code parens, session tokens, bullets. */
 function subjectName(text: string): string {
   let s = text
     .replace(WEEKDAY_TAIL, '')
-    .replace(/\s*\((?:[A-Z0-9]{5,})\)\s*$/, '') // trailing subject-code parens
+    .replace(/\s*\((?:mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)[a-z]*\)\s*/gi, ' ') // weekday parens anywhere
+    .replace(/\s*\((?:[A-Z0-9]{5,})\)\s*/g, ' ') // subject-code parens
+    .replace(/\b(?:FN|AN)\b/g, '') // standalone session tokens
     .replace(/^[•▪◦*–—-]\s+/, '')
     .replace(/\s+/g, ' ')
     .trim();
@@ -127,13 +145,14 @@ export function parseExamTimetable(lines: string[]): ParsedExamTimetable {
 
     const date = matchDate(line);
     if (date) {
-      currentDate = date;
-      const after = line.replace(NUM_DATE, ' ').replace(MONTH_DATE, ' ');
+      currentDate = date.iso;
+      // remove exactly the matched date text, not a fresh regex pass
+      const after = line.replace(date.matched, ' ');
       const text = subjectName(after);
       const session = detectSession(line);
       if (session) pendingSession = session;
       if (text) {
-        exams.push({ name: text, date, session: session ?? pendingSession });
+        exams.push({ name: text, date: date.iso, session: session ?? pendingSession });
         pendingSession = undefined;
       }
       continue;
